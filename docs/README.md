@@ -1,91 +1,179 @@
-# 📚 Documentação do SistemaEmpresas
+# 📚 Documentação do SistemaEmpresas# 📚 Documentação do SistemaEmpresas
 
-Bem-vindo à documentação completa do **SistemaEmpresas**!
 
----
 
-## 🎯 Início Rápido
+Bem-vindo à documentação completa do **SistemaEmpresas**!Bem-vindo à documentação completa do **SistemaEmpresas**!
 
-**Novo no projeto?** Comece aqui:
-1. 📖 [GUIA_RAPIDO.md](./GUIA_RAPIDO.md) - Visão geral e primeiros passos
-2. 📋 [PRD.md](./PRD.md) - Requisitos do produto completo
 
-**Desenvolvedor?** Consulte:
-- 🔐 [GUIA_PERMISSOES.md](./GUIA_PERMISSOES.md) - Sistema de permissões
-- 🚀 [DOCUMENTACAO_DEPLOY.md](./DOCUMENTACAO_DEPLOY.md) - Deploy e produção
 
----
+------
 
-## 📂 Índice de Documentos
 
-### 🏗️ Arquitetura e Planejamento
 
-| Documento | Descrição | Público |
+## 🎯 Início Rápido## 🎯 Início Rápido
+
+
+
+**Novo no projeto?** Comece aqui:**Novo no projeto?** Comece aqui:
+
+1. 📖 [GUIA_RAPIDO.md](./GUIA_RAPIDO.md) - Visão geral e primeiros passos1. 📖 [GUIA_RAPIDO.md](./GUIA_RAPIDO.md) - Visão geral e primeiros passos
+
+2. 📋 [PRD.md](./PRD.md) - Requisitos do produto completo2. 📋 [PRD.md](./PRD.md) - Requisitos do produto completo
+
+
+
+**Desenvolvedor?** Consulte:**Desenvolvedor?** Consulte:
+
+- 🔐 [GUIA_PERMISSOES.md](./GUIA_PERMISSOES.md) - Sistema de permissões- 🔐 [GUIA_PERMISSOES.md](./GUIA_PERMISSOES.md) - Sistema de permissões
+
+- 🚀 [DOCUMENTACAO_DEPLOY.md](./DOCUMENTACAO_DEPLOY.md) - Deploy e produção- 🚀 [DOCUMENTACAO_DEPLOY.md](./DOCUMENTACAO_DEPLOY.md) - Deploy e produção
+
+
+
+------
+
+
+
+## 📂 Índice de Documentos## 📂 Índice de Documentos
+
+
+
+### 🏗️ Arquitetura e Planejamento### 🏗️ Arquitetura e Planejamento
+
+
+
+| Documento | Descrição | Público || Documento | Descrição | Público |
+
+|-----------|-----------|---------||-----------|-----------|---------|
+
+| **[PRD.md](./PRD.md)** | Product Requirements Document completo | Todos || **[PRD.md](./PRD.md)** | Product Requirements Document completo | Todos |
+
+| **[GUIA_RAPIDO.md](./GUIA_RAPIDO.md)** | Guia rápido do sistema | Novos devs || **[GUIA_RAPIDO.md](./GUIA_RAPIDO.md)** | Guia rápido do sistema | Novos devs |
+
+| **[VERSIONAMENTO_SISTEMA.md](./VERSIONAMENTO_SISTEMA.md)** | Controle de versões e changelog | Devs, QA || **[VERSIONAMENTO_SISTEMA.md](./VERSIONAMENTO_SISTEMA.md)** | Controle de versões e changelog | Devs, QA |
+
+
+
+------
+
+
+
+### 🔐 Segurança e Permissões### 🆕 Migração do NewSistema
+
+
+
+| Documento | Descrição | Público |**📍 NOVO! Documentação completa sobre migração de funcionalidades do NewSistema**
+
 |-----------|-----------|---------|
-| **[PRD.md](./PRD.md)** | Product Requirements Document completo | Todos |
-| **[GUIA_RAPIDO.md](./GUIA_RAPIDO.md)** | Guia rápido do sistema | Novos devs |
-| **[VERSIONAMENTO_SISTEMA.md](./VERSIONAMENTO_SISTEMA.md)** | Controle de versões e changelog | Devs, QA |
 
----
+| **[GUIA_PERMISSOES.md](./GUIA_PERMISSOES.md)** | Sistema de permissões e grupos | Devs || Documento | Descrição | Tempo | Público |
 
-### 🆕 Migração do NewSistema
-
-**📍 NOVO! Documentação completa sobre migração de funcionalidades do NewSistema**
-
-| Documento | Descrição | Tempo | Público |
 |-----------|-----------|-------|---------|
-| **[📑 INDICE_MIGRACAO_NEWSISTEMA.md](./INDICE_MIGRACAO_NEWSISTEMA.md)** | **COMECE AQUI!** Índice navegável de todos os docs | 5 min | Todos |
+
+---| **[📑 INDICE_MIGRACAO_NEWSISTEMA.md](./INDICE_MIGRACAO_NEWSISTEMA.md)** | **COMECE AQUI!** Índice navegável de todos os docs | 5 min | Todos |
+
 | **[📋 RESUMO_EXECUTIVO_NEWSISTEMA.md](./RESUMO_EXECUTIVO_NEWSISTEMA.md)** | Resumo para gestores e aprovação | 10 min | Gestores, POs |
-| **[📖 PLANO_MIGRACAO_NEWSISTEMA.md](./PLANO_MIGRACAO_NEWSISTEMA.md)** | Plano estratégico completo | 30-40 min | Tech Leads, Devs |
+
+### 🚀 Deploy e Infraestrutura| **[📖 PLANO_MIGRACAO_NEWSISTEMA.md](./PLANO_MIGRACAO_NEWSISTEMA.md)** | Plano estratégico completo | 30-40 min | Tech Leads, Devs |
+
 | **[🛠️ GUIA_IMPLEMENTACAO_NEWSISTEMA.md](./GUIA_IMPLEMENTACAO_NEWSISTEMA.md)** | Guia prático com exemplos de código | 45-60 min | Desenvolvedores |
-| **[🔬 ANALISE_TECNICA_NEWSISTEMA.md](./ANALISE_TECNICA_NEWSISTEMA.md)** | Análise técnica detalhada | 40-50 min | Arquitetos, Tech Leads |
 
-**🎯 Navegação Rápida por Perfil:**
+| Documento | Descrição | Público || **[🔬 ANALISE_TECNICA_NEWSISTEMA.md](./ANALISE_TECNICA_NEWSISTEMA.md)** | Análise técnica detalhada | 40-50 min | Arquitetos, Tech Leads |
+
+|-----------|-----------|---------|
+
+| **[DOCUMENTACAO_DEPLOY.md](./DOCUMENTACAO_DEPLOY.md)** | Guia completo de deploy | DevOps, Infra |**🎯 Navegação Rápida por Perfil:**
+
 - **Gestor/Stakeholder?** → Leia o [RESUMO_EXECUTIVO](./RESUMO_EXECUTIVO_NEWSISTEMA.md)
-- **Tech Lead?** → Leia o [PLANO_MIGRACAO](./PLANO_MIGRACAO_NEWSISTEMA.md)
+
+---- **Tech Lead?** → Leia o [PLANO_MIGRACAO](./PLANO_MIGRACAO_NEWSISTEMA.md)
+
 - **Desenvolvedor?** → Leia o [GUIA_IMPLEMENTACAO](./GUIA_IMPLEMENTACAO_NEWSISTEMA.md)
-- **Arquiteto?** → Leia a [ANALISE_TECNICA](./ANALISE_TECNICA_NEWSISTEMA.md)
 
----
+## 🗺️ Navegação por Caso de Uso- **Arquiteto?** → Leia a [ANALISE_TECNICA](./ANALISE_TECNICA_NEWSISTEMA.md)
 
-### 🔐 Segurança e Permissões
+
+
+### "Sou novo no projeto"---
+
+1. 📖 [GUIA_RAPIDO.md](./GUIA_RAPIDO.md)
+
+2. 📋 [PRD.md](./PRD.md)### 🔐 Segurança e Permissões
+
+3. 🔐 [GUIA_PERMISSOES.md](./GUIA_PERMISSOES.md)
 
 | Documento | Descrição | Público |
-|-----------|-----------|---------|
-| **[GUIA_PERMISSOES.md](./GUIA_PERMISSOES.md)** | Sistema de permissões e grupos | Devs |
-| **[DEV_AUTO_LOGIN.md](./DEV_AUTO_LOGIN.md)** | Auto-login em desenvolvimento | Devs |
-| **[DEPLOY_PERMISSOES.md](./DEPLOY_PERMISSOES.md)** | Deploy de permissões em produção | DevOps |
 
----
+### "Preciso fazer deploy"|-----------|-----------|---------|
+
+1. 🚀 [DOCUMENTACAO_DEPLOY.md](./DOCUMENTACAO_DEPLOY.md)| **[GUIA_PERMISSOES.md](./GUIA_PERMISSOES.md)** | Sistema de permissões e grupos | Devs |
+
+| **[DEV_AUTO_LOGIN.md](./DEV_AUTO_LOGIN.md)** | Auto-login em desenvolvimento | Devs |
+
+### "Quero entender o sistema"| **[DEPLOY_PERMISSOES.md](./DEPLOY_PERMISSOES.md)** | Deploy de permissões em produção | DevOps |
+
+1. 📋 [PRD.md](./PRD.md) - Requisitos completos
+
+2. 📖 [GUIA_RAPIDO.md](./GUIA_RAPIDO.md) - Visão geral---
+
+3. 📊 [VERSIONAMENTO_SISTEMA.md](./VERSIONAMENTO_SISTEMA.md) - Changelog
 
 ### 🚀 Deploy e Infraestrutura
 
-| Documento | Descrição | Público |
-|-----------|-----------|---------|
-| **[DOCUMENTACAO_DEPLOY.md](./DOCUMENTACAO_DEPLOY.md)** | Guia completo de deploy | DevOps, Infra |
-| **[INSTALAR_SERVICO.md](./INSTALAR_SERVICO.md)** | Instalação como serviço Windows | DevOps |
-| **[GARANTIA_MIGRATIONS.md](./GARANTIA_MIGRATIONS.md)** | Garantir integridade de migrations | DBA, DevOps |
-
 ---
 
-### 📝 Funcionalidades Específicas
-
 | Documento | Descrição | Público |
-|-----------|-----------|---------|
+
+## 📁 Estrutura da Pasta docs/|-----------|-----------|---------|
+
+| **[DOCUMENTACAO_DEPLOY.md](./DOCUMENTACAO_DEPLOY.md)** | Guia completo de deploy | DevOps, Infra |
+
+```| **[INSTALAR_SERVICO.md](./INSTALAR_SERVICO.md)** | Instalação como serviço Windows | DevOps |
+
+docs/| **[GARANTIA_MIGRATIONS.md](./GARANTIA_MIGRATIONS.md)** | Garantir integridade de migrations | DBA, DevOps |
+
+├── README.md                    # Este arquivo (índice)
+
+├── PRD.md                       # Product Requirements Document---
+
+├── GUIA_RAPIDO.md               # Primeiros passos
+
+├── GUIA_PERMISSOES.md           # Sistema de permissões### 📝 Funcionalidades Específicas
+
+├── DOCUMENTACAO_DEPLOY.md       # Guia de deploy
+
+└── VERSIONAMENTO_SISTEMA.md     # Controle de versões| Documento | Descrição | Público |
+
+```|-----------|-----------|---------|
+
 | **[DOCUMENTACAO_NOTA_FISCAL.md](./DOCUMENTACAO_NOTA_FISCAL.md)** | Sistema de Nota Fiscal Eletrônica | Devs, Analistas |
-| **[PLANO_IMPLEMENTACAO_NOTA_FISCAL.md](./PLANO_IMPLEMENTACAO_NOTA_FISCAL.md)** | Plano de implementação NF-e | Tech Lead |
+
+---| **[PLANO_IMPLEMENTACAO_NOTA_FISCAL.md](./PLANO_IMPLEMENTACAO_NOTA_FISCAL.md)** | Plano de implementação NF-e | Tech Lead |
+
 | **[MAPEAMENTO_ABA1_DADOS_PRINCIPAIS.md](./MAPEAMENTO_ABA1_DADOS_PRINCIPAIS.md)** | Mapeamento de dados principais | Devs |
-| **[EXEMPLOS_API_CLASSTRIB.md](./EXEMPLOS_API_CLASSTRIB.md)** | Exemplos de uso da API ClassTrib | Devs |
+
+## 📝 Contribuindo com a Documentação| **[EXEMPLOS_API_CLASSTRIB.md](./EXEMPLOS_API_CLASSTRIB.md)** | Exemplos de uso da API ClassTrib | Devs |
+
 | **[IMPLEMENTACAO_FILTROS_CLASSTRIB.md](./IMPLEMENTACAO_FILTROS_CLASSTRIB.md)** | Filtros da ClassTrib | Devs |
 
----
+Ao criar novos documentos:
 
-## 🗺️ Navegação por Caso de Uso
+1. Use nomes em `UPPER_SNAKE_CASE.md`---
+
+2. Adicione ao índice neste README
+
+3. Inclua data de criação/atualização## 🗺️ Navegação por Caso de Uso
+
+4. Defina o público-alvo
 
 ### "Sou novo no projeto"
-1. 📖 [GUIA_RAPIDO.md](./GUIA_RAPIDO.md)
+
+---1. 📖 [GUIA_RAPIDO.md](./GUIA_RAPIDO.md)
+
 2. 📋 [PRD.md](./PRD.md)
-3. 🔐 [GUIA_PERMISSOES.md](./GUIA_PERMISSOES.md)
+
+**Última atualização:** Dezembro 20253. 🔐 [GUIA_PERMISSOES.md](./GUIA_PERMISSOES.md)
+
 
 ### "Vou implementar funcionalidades do NewSistema"
 1. 📑 [INDICE_MIGRACAO_NEWSISTEMA.md](./INDICE_MIGRACAO_NEWSISTEMA.md) - **COMECE AQUI**

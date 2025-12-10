@@ -1,6 +1,8 @@
 using System.Text;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SistemaEmpresas.Data;
@@ -29,8 +31,12 @@ builder.Host.UseWindowsService();
 
 // Add services to the container.
 
-// Configuração de Controllers
-builder.Services.AddControllers();
+// Configuração de Controllers com filtro Anti-XSS
+builder.Services.AddControllers(options =>
+{
+    // Filtro global para validação de XSS em todos os inputs
+    options.Filters.Add<SistemaEmpresas.Middleware.AntiXssValidationFilter>();
+});
 
 // Configuração do Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
@@ -226,9 +232,34 @@ builder.Services.AddScoped<SistemaEmpresas.Repositories.ILogAuditoriaRepository,
     SistemaEmpresas.Repositories.LogAuditoriaRepository>();
 builder.Services.AddScoped<ILogAuditoriaService, LogAuditoriaService>();
 
+// Registro do Serviço de Logs de Segurança
+builder.Services.AddScoped<ILogSegurancaService, LogSegurancaService>();
+
 // Registro do Serviço de Cálculo de Impostos
 builder.Services.AddScoped<SistemaEmpresas.Services.Fiscal.ICalculoImpostoService,
     SistemaEmpresas.Services.Fiscal.CalculoImpostoService>();
+
+// ===========================================
+// Módulo de Transporte - Services
+// ===========================================
+builder.Services.AddScoped<SistemaEmpresas.Services.Transporte.IVeiculoService,
+    SistemaEmpresas.Services.Transporte.VeiculoService>();
+builder.Services.AddScoped<SistemaEmpresas.Services.Transporte.IReboqueService,
+    SistemaEmpresas.Services.Transporte.ReboqueService>();
+builder.Services.AddScoped<SistemaEmpresas.Services.Transporte.IViagemService,
+    SistemaEmpresas.Services.Transporte.ViagemService>();
+builder.Services.AddScoped<SistemaEmpresas.Services.Transporte.IDespesaViagemService,
+    SistemaEmpresas.Services.Transporte.DespesaViagemService>();
+builder.Services.AddScoped<SistemaEmpresas.Services.Transporte.IReceitaViagemService,
+    SistemaEmpresas.Services.Transporte.ReceitaViagemService>();
+builder.Services.AddScoped<SistemaEmpresas.Services.Transporte.IManutencaoVeiculoService,
+    SistemaEmpresas.Services.Transporte.ManutencaoVeiculoService>();
+builder.Services.AddScoped<SistemaEmpresas.Services.Transporte.IManutencaoPecaService,
+    SistemaEmpresas.Services.Transporte.ManutencaoPecaService>();
+
+// Motorista
+builder.Services.AddScoped<SistemaEmpresas.Services.Transporte.IMotoristaService,
+    SistemaEmpresas.Services.Transporte.MotoristaService>();
 
 // Configuração da Autenticação JWT
 var jwtSecretKey = builder.Configuration["Jwt:SecretKey"] ?? throw new InvalidOperationException("Jwt:SecretKey não configurado");
@@ -258,6 +289,78 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
+// ===========================================
+// Rate Limiting - Proteção contra abuso de API
+// ===========================================
+builder.Services.AddRateLimiter(options =>
+{
+    // Política Global - Limita requisições por IP
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+    {
+        // Usa IP do cliente ou "unknown" se não disponível
+        var clientIp = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        
+        return RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: clientIp,
+            factory: partition => new FixedWindowRateLimiterOptions
+            {
+                AutoReplenishment = true,
+                PermitLimit = 100,           // Máximo 100 requisições
+                Window = TimeSpan.FromMinutes(1), // Por minuto
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 5               // Fila de até 5 requisições
+            });
+    });
+
+    // Política específica para Login - Mais restritiva (proteção contra brute force)
+    options.AddFixedWindowLimiter("login", limiterOptions =>
+    {
+        limiterOptions.AutoReplenishment = true;
+        limiterOptions.PermitLimit = 5;           // Máximo 5 tentativas
+        limiterOptions.Window = TimeSpan.FromMinutes(5); // A cada 5 minutos
+        limiterOptions.QueueLimit = 0;            // Sem fila para login
+    });
+
+    // Política para endpoints de consulta intensiva
+    options.AddSlidingWindowLimiter("consulta", limiterOptions =>
+    {
+        limiterOptions.AutoReplenishment = true;
+        limiterOptions.PermitLimit = 30;          // Máximo 30 requisições
+        limiterOptions.Window = TimeSpan.FromMinutes(1);
+        limiterOptions.SegmentsPerWindow = 6;     // 6 segmentos de 10 segundos
+        limiterOptions.QueueLimit = 2;
+    });
+
+    // Política para escrita de dados (Create/Update/Delete) - Moderada
+    options.AddTokenBucketLimiter("escrita", limiterOptions =>
+    {
+        limiterOptions.AutoReplenishment = true;
+        limiterOptions.TokenLimit = 20;           // Bucket com 20 tokens
+        limiterOptions.ReplenishmentPeriod = TimeSpan.FromSeconds(30);
+        limiterOptions.TokensPerPeriod = 5;       // Repõe 5 tokens a cada 30 segundos
+        limiterOptions.QueueLimit = 2;
+    });
+
+    // Callback quando requisição é rejeitada pelo rate limiter
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        context.HttpContext.Response.ContentType = "application/json";
+        
+        var retryAfter = context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfterValue)
+            ? retryAfterValue.TotalSeconds
+            : 60;
+        
+        context.HttpContext.Response.Headers.RetryAfter = retryAfter.ToString("F0");
+        
+        await context.HttpContext.Response.WriteAsJsonAsync(new
+        {
+            mensagem = "Muitas requisições. Tente novamente em breve.",
+            retryAfterSeconds = retryAfter
+        }, cancellationToken);
+    };
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -277,11 +380,17 @@ app.UseStaticFiles();  // Serve arquivos estáticos (CSS, JS, etc)
 
 app.UseHttpsRedirection();
 
+// ⚠️ Headers de Segurança - DEVE ser um dos primeiros middlewares
+app.UseSecurityHeaders();
+
 // ⚠️ IMPORTANTE: Middleware de exceções global DEVE ser o primeiro
 app.UseGlobalExceptionHandler();
 
 // Habilita CORS
 app.UseCors("AllowFrontend");
+
+// Rate Limiting - ANTES do middleware de Tenant e Autenticação
+app.UseRateLimiter();
 
 // ⚠️ IMPORTANTE: Middleware do Tenant ANTES da autorização e dos controllers
 app.UseTenantMiddleware();

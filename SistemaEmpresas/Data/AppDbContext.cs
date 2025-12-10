@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using SistemaEmpresas.Models;
+using SistemaEmpresas.Models.Transporte;
 
 namespace SistemaEmpresas.Data;
 
@@ -224,6 +225,11 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Motorista> Motoristas { get; set; }
 
+    // Módulo de Transporte - Manutenção
+    public virtual DbSet<ManutencaoPeca> ManutencoesPeca { get; set; }
+
+    public virtual DbSet<ManutencaoVeiculo> ManutencoesVeiculo { get; set; }
+
     public virtual DbSet<MovimentacaoDaContaCorrente> MovimentacaoDaContaCorrentes { get; set; }
 
     public virtual DbSet<MovimentoContabilNovo> MovimentoContabilNovos { get; set; }
@@ -368,6 +374,11 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<ReceitaPrimarium> ReceitaPrimaria { get; set; }
 
+    // Módulo de Transporte - Reboque e Receitas
+    public virtual DbSet<Reboque> Reboques { get; set; }
+
+    public virtual DbSet<ReceitaViagem> ReceitasViagem { get; set; }
+
     public virtual DbSet<RegiaoDoVendedore> RegiaoDosVendedores { get; set; }
 
     public virtual DbSet<RelatorioDeViagem> RelatorioDeViagems { get; set; }
@@ -439,6 +450,13 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<Vasilhame> Vasilhames { get; set; }
 
     public virtual DbSet<VeiculoDoMotoristum> VeiculosDoMotorista { get; set; }
+
+    // Módulo de Transporte - Veículos e Viagens
+    public virtual DbSet<Veiculo> Veiculos { get; set; }
+
+    public virtual DbSet<Viagem> Viagens { get; set; }
+
+    public virtual DbSet<DespesaViagem> DespesasViagem { get; set; }
 
     public virtual DbSet<VendedorBloqueio> VendedoresBloqueios { get; set; }
 

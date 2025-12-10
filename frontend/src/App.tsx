@@ -12,6 +12,13 @@ import { GeralPage, GeralFormPage } from './pages/Geral';
 import { ProdutosPage, ProdutoFormPage } from './pages/Produtos';
 import { NotaFiscalListPage, NotaFiscalFormPage } from './pages/NotaFiscal';
 import { EmitentePage } from './pages/Emitente';
+import { 
+  VeiculosPage, VeiculoFormPage,
+  ReboquesPage, ReboqueFormPage,
+  ViagensPage, ViagemFormPage,
+  ManutencoesPage, ManutencaoFormPage,
+  MotoristasPage, MotoristaFormPage
+} from './pages/Transporte';
 
 function App() {
   return (
@@ -41,6 +48,33 @@ function App() {
             <Route path="/producao" element={<div className="text-xl font-semibold text-gray-900">Produção</div>} />
             <Route path="/estoque" element={<div className="text-xl font-semibold text-gray-900">Controle de Estoque</div>} />
             <Route path="/compras" element={<div className="text-xl font-semibold text-gray-900">Pedidos de Compra</div>} />
+            
+            {/* Transporte */}
+            <Route path="/transporte/veiculos" element={<VeiculosPage />} />
+            <Route path="/transporte/veiculos/novo" element={<VeiculoFormPage />} />
+            <Route path="/transporte/veiculos/:id" element={<VeiculoFormPage />} />
+            <Route path="/transporte/veiculos/:id/editar" element={<VeiculoFormPage />} />
+            
+            <Route path="/transporte/reboques" element={<ReboquesPage />} />
+            <Route path="/transporte/reboques/novo" element={<ReboqueFormPage />} />
+            <Route path="/transporte/reboques/:id" element={<ReboqueFormPage />} />
+            <Route path="/transporte/reboques/:id/editar" element={<ReboqueFormPage />} />
+            
+            <Route path="/transporte/viagens" element={<ViagensPage />} />
+            <Route path="/transporte/viagens/nova" element={<ViagemFormPage />} />
+            <Route path="/transporte/viagens/:id" element={<ViagemFormPage />} />
+            <Route path="/transporte/viagens/:id/editar" element={<ViagemFormPage />} />
+            
+            <Route path="/transporte/manutencoes" element={<ManutencoesPage />} />
+            <Route path="/transporte/manutencoes/nova" element={<ManutencaoFormPage />} />
+            <Route path="/transporte/manutencoes/:id" element={<ManutencaoFormPage />} />
+            <Route path="/transporte/manutencoes/:id/editar" element={<ManutencaoFormPage />} />
+            
+            <Route path="/transporte/motoristas" element={<MotoristasPage />} />
+            <Route path="/transporte/motoristas/novo" element={<MotoristaFormPage />} />
+            <Route path="/transporte/motoristas/:id" element={<MotoristaFormPage />} />
+            <Route path="/transporte/motoristas/:id/editar" element={<MotoristaFormPage />} />
+            <Route path="/transporte/motoristas/:id/visualizar" element={<MotoristaFormPage />} />
             
             {/* Financeiro */}
             <Route path="/contas-pagar" element={<div className="text-xl font-semibold text-gray-900">Contas a Pagar</div>} />

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using SistemaEmpresas.Models.Transporte;
 
 namespace SistemaEmpresas.Models;
 
@@ -59,4 +60,7 @@ public partial class Motorista
     [StringLength(14)]
     [Unicode(false)]
     public string Cel { get; set; } = null!;
+
+    // Relacionamento com módulo de Transporte
+    public virtual ICollection<Viagem> Viagens { get; set; } = new List<Viagem>();
 }

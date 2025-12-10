@@ -1,2 +1,0 @@
-Sqlcmd: Erro: Microsoft ODBC Driver 17 for SQL Server : Login failed for user 'DESKTOP-CHS14C0\Ygor'..
-Sqlcmd: Erro: Microsoft ODBC Driver 17 for SQL Server : Cannot open database "IrrigacaoPenapolis" requested by the login. The login failed..

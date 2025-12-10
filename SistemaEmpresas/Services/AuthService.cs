@@ -18,6 +18,7 @@ public class AuthService : IAuthService
     private readonly IMemoryCache _cache;
     private readonly ILogger<AuthService> _logger;
     private readonly IServiceProvider _serviceProvider;
+    private readonly ILogSegurancaService _logSeguranca;
 
     public AuthService(
         TenantDbContext tenantDb,
@@ -25,7 +26,8 @@ public class AuthService : IAuthService
         IConfiguration configuration,
         IMemoryCache cache,
         ILogger<AuthService> logger,
-        IServiceProvider serviceProvider)
+        IServiceProvider serviceProvider,
+        ILogSegurancaService logSeguranca)
     {
         _tenantDb = tenantDb;
         _httpContextAccessor = httpContextAccessor;
@@ -33,7 +35,10 @@ public class AuthService : IAuthService
         _cache = cache;
         _logger = logger;
         _serviceProvider = serviceProvider;
+        _logSeguranca = logSeguranca;
     }
+
+    private string ObterEnderecoIP() => _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "";
 
     public async Task<LoginResponseDto> LoginAsync(string usuario, string senha, string dominioTenant)
     {
@@ -49,6 +54,7 @@ public class AuthService : IAuthService
             if (tenant == null)
             {
                 _logger.LogWarning("Tenant não encontrado ou inativo: {Tenant}", dominioTenant);
+                await _logSeguranca.LogTentativaLoginAsync(usuario, dominioTenant, false, "Tenant não encontrado ou inativo", ObterEnderecoIP());
                 throw new UnauthorizedAccessException("Empresa não encontrada ou inativa");
             }
 
@@ -59,6 +65,9 @@ public class AuthService : IAuthService
             if (usuario.Equals("admin", StringComparison.OrdinalIgnoreCase) && senha == "conectairrig@")
             {
                 _logger.LogInformation("Login com usuário ADMIN (hardcoded)");
+                
+                // Log de segurança - Login admin
+                await _logSeguranca.LogTentativaLoginAsync("admin", dominioTenant, true, null, ObterEnderecoIP());
                 
                 var adminToken = GerarJwtTokenAdmin(tenant);
                 var adminRefreshToken = Guid.NewGuid().ToString();
@@ -138,6 +147,7 @@ public class AuthService : IAuthService
             if (pwUsuario == null)
             {
                 _logger.LogWarning("Usuário não encontrado: {Usuario}", usuario);
+                await _logSeguranca.LogTentativaLoginAsync(usuario, dominioTenant, false, "Usuário não encontrado", ObterEnderecoIP());
                 throw new UnauthorizedAccessException("Usuário ou senha inválidos");
             }
 
@@ -147,6 +157,7 @@ public class AuthService : IAuthService
             if (!senhaValida)
             {
                 _logger.LogWarning("Senha inválida para usuário: {Usuario}", usuario);
+                await _logSeguranca.LogTentativaLoginAsync(usuario, dominioTenant, false, "Senha inválida", ObterEnderecoIP());
                 throw new UnauthorizedAccessException("Usuário ou senha inválidos");
             }
 
@@ -167,6 +178,9 @@ public class AuthService : IAuthService
 
             _logger.LogInformation("Usuário autenticado com sucesso: {Usuario} - Grupo: {Grupo}", 
                 nomeReal, grupoToken);
+
+            // Log de segurança - Login bem-sucedido
+            await _logSeguranca.LogTentativaLoginAsync(nomeReal, dominioTenant, true, null, ObterEnderecoIP());
 
             // Buscar permissões da tabela PermissoesTela (nova tabela de permissões)
             var permissoes = await appDb.PermissoesTelas

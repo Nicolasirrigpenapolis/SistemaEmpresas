@@ -11,6 +11,7 @@ import {
   Settings,
   FileText,
   X,
+  Truck,
 } from 'lucide-react';
 import { useTenantBranding } from '../../hooks/useTenantBranding';
 import { useAuth } from '../../contexts/AuthContext';
@@ -126,6 +127,18 @@ export default function Sidebar({ collapsed = false, onCollapse, mobileOpen = fa
       icon: FileText,
       children: [
         { id: 'notas-fiscais', label: 'Notas Fiscais', path: '/faturamento/notas-fiscais' },
+      ],
+    },
+    {
+      id: 'transporte',
+      label: 'Transporte',
+      icon: Truck,
+      children: [
+        { id: 'veiculos', label: 'Veículos', path: '/transporte/veiculos' },
+        { id: 'reboques', label: 'Reboques', path: '/transporte/reboques' },
+        { id: 'motoristas', label: 'Motoristas', path: '/transporte/motoristas' },
+        { id: 'viagens', label: 'Viagens', path: '/transporte/viagens' },
+        { id: 'manutencoes', label: 'Manutenções', path: '/transporte/manutencoes' },
       ],
     },
     {
