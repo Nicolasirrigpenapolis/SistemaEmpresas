@@ -16,11 +16,11 @@ import {
   AlertCircle,
   Download,
   Printer,
-  ChevronDown,
   RefreshCw,
   Copy,
   Loader2,
   Lock,
+  ChevronDown,
 } from 'lucide-react';
 import { notaFiscalService } from '../../services/notaFiscalService';
 import type {
@@ -32,9 +32,10 @@ import type {
 } from '../../types/notaFiscal';
 import { getStatusNfe, getStatusNfeColor, TIPOS_NOTA } from '../../types/notaFiscal';
 import {
-  Paginacao,
-  EstadoVazio,
-  EstadoCarregando,
+  CabecalhoPagina,
+  DataTable,
+  type ColumnConfig,
+  AlertaErro
 } from '../../components/common';
 import { usePermissaoTela } from '../../hooks/usePermissaoTela';
 
@@ -67,6 +68,9 @@ export default function NotaFiscalListPage() {
   // Paginação
   const [pageNumber, setPageNumber] = useState(1);
   const [pageSize, setPageSize] = useState(25);
+
+  // Estado para duplicação
+  const [duplicating, setDuplicating] = useState<number | null>(null);
 
   // Carregar combos
   useEffect(() => {
@@ -166,12 +170,9 @@ export default function NotaFiscalListPage() {
     navigate('/faturamento/notas-fiscais/nova');
   };
 
-  // Estado para duplicação
-  const [duplicating, setDuplicating] = useState<number | null>(null);
-
   const handleDuplicate = async (id: number) => {
     if (duplicating) return;
-    
+
     if (!confirm('Deseja duplicar esta nota fiscal? Uma nova nota será criada com os mesmos dados.')) {
       return;
     }
@@ -180,7 +181,6 @@ export default function NotaFiscalListPage() {
       setDuplicating(id);
       const novaNota = await notaFiscalService.duplicar(id);
       alert(`Nota fiscal duplicada com sucesso! Nova nota: ${novaNota.numeroDaNotaFiscal}`);
-      // Redirecionar para edição da nova nota
       navigate(`/faturamento/notas-fiscais/${novaNota.sequenciaDaNotaFiscal}/editar`);
     } catch (err: any) {
       console.error('Erro ao duplicar nota fiscal:', err);
@@ -235,14 +235,13 @@ export default function NotaFiscalListPage() {
     };
 
     return (
-      <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${bgColors[color]}`}>
+      <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium uppercase rounded-full border ${bgColors[color]}`}>
         {icons[color]}
         {status}
       </span>
     );
   };
 
-  // Verificar filtros ativos
   const hasActiveFilters = Boolean(
     filtroBusca ||
     filtroDataInicial ||
@@ -254,13 +253,104 @@ export default function NotaFiscalListPage() {
     filtroAutorizadas !== undefined
   );
 
+  // Colunas DataTable
+  const columns: ColumnConfig<NotaFiscalListDto>[] = [
+    {
+      key: 'sequenciaDaNotaFiscal',
+      header: 'Seq',
+      width: '70px',
+      align: 'center',
+      render: (item) => (
+        <span className="inline-flex items-center justify-center min-w-[32px] h-6 bg-primary/10 text-primary text-xs rounded px-1.5">
+          {item.sequenciaDaNotaFiscal}
+        </span>
+      )
+    },
+    {
+      key: 'numeroDaNotaFiscal',
+      header: 'Número / Data',
+      render: (item) => (
+        <div className="flex flex-col">
+          <span className="text-sm font-medium text-[var(--text)]">
+            {item.numeroDaNfe > 0 ? (
+              <>NFe {item.numeroDaNfe}</>
+            ) : (
+              <>Nº {item.numeroDaNotaFiscal}</>
+            )}
+          </span>
+          <span className="text-xs text-muted-foreground flex items-center gap-1">
+            <Calendar className="w-3 h-3" />
+            {formatDate(item.dataDeEmissao)}
+          </span>
+          <div className="flex gap-1 mt-1">
+            {item.nfeComplementar && (
+              <span className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium uppercase bg-purple-100 text-purple-700 rounded">
+                Comp
+              </span>
+            )}
+            {item.notaDeDevolucao && (
+              <span className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium uppercase bg-orange-100 text-orange-700 rounded">
+                Dev
+              </span>
+            )}
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'nomeDoCliente',
+      header: 'Cliente',
+      render: (item) => (
+        <div className="flex flex-col">
+          <span className="text-sm font-medium text-foreground truncate max-w-[200px]" title={item.nomeDoCliente}>
+            {item.nomeDoCliente}
+          </span>
+          <span className="text-xs text-muted-foreground font-mono">
+            {formatCpfCnpj(item.documentoCliente)}
+          </span>
+        </div>
+      )
+    },
+    {
+      key: 'descricaoNatureza',
+      header: 'Natureza',
+      render: (item) => (
+        <div className="flex flex-col">
+          <span className="text-sm text-foreground truncate max-w-[180px]" title={item.descricaoNatureza}>
+            {item.descricaoNatureza}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {(TIPOS_NOTA as Record<number, string>)[item.tipoDeNota] || 'Outro'}
+          </span>
+        </div>
+      )
+    },
+    {
+      key: 'valorTotalDaNotaFiscal',
+      header: 'Valor Total',
+      align: 'right',
+      render: (item) => (
+        <span className="text-sm font-medium text-[var(--text)]">
+          {formatCurrency(item.valorTotalDaNotaFiscal)}
+        </span>
+      )
+    },
+    {
+      key: 'status', // Virtual key
+      header: 'Status',
+      align: 'center',
+      width: '120px',
+      render: (item) => <StatusBadge nota={item} />
+    }
+  ];
+
   // Carregando permissões
   if (carregandoPermissoes) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-500">Verificando permissões...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Verificando permissões...</p>
         </div>
       </div>
     );
@@ -270,139 +360,138 @@ export default function NotaFiscalListPage() {
   if (!podeConsultar) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="text-center bg-white p-8 rounded-xl shadow-lg max-w-md">
+        <div className="text-center bg-surface p-8 rounded-xl shadow-lg max-w-md border border-border">
           <Lock className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Acesso Negado</h2>
-          <p className="text-gray-500">Você não tem permissão para acessar esta tela.</p>
-          <p className="text-sm text-gray-400 mt-2">Entre em contato com o administrador para solicitar acesso.</p>
+          <h2 className="text-xl font-bold text-foreground mb-2">Acesso Negado</h2>
+          <p className="text-muted-foreground">Você não tem permissão para acessar esta tela.</p>
+          <p className="text-sm text-muted-foreground/70 mt-2">Entre em contato com o administrador para solicitar acesso.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <FileText className="h-7 w-7 text-blue-600" />
-            Notas Fiscais
-          </h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Gerencie as notas fiscais de entrada e saída
-          </p>
-        </div>
-        {podeIncluir && (
-          <button
-            onClick={handleNew}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
-          >
-            <Plus className="h-4 w-4" />
-            Nova Nota Fiscal
-          </button>
-        )}
-      </div>
-
-      {/* Card de Filtros */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-        {/* Barra de busca principal */}
-        <div className="p-4 border-b border-gray-100">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+    <div className="space-y-6 pb-8">
+      <CabecalhoPagina
+        titulo="Notas Fiscais"
+        subtitulo="Gerencie as notas fiscais de entrada e saída"
+        icone={FileText}
+        acoes={
+          podeIncluir && (
+            <button
+              onClick={handleNew}
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 font-medium"
+            >
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">Nova Nota Fiscal</span>
+              <span className="sm:hidden">Nova</span>
+            </button>
+          )
+        }
+      >
+        {/* Filtros */}
+        <div className="flex flex-col gap-4 w-full">
+          <div className="flex flex-wrap gap-3 items-center">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type="text"
                 value={filtroBusca}
                 onChange={(e) => setFiltroBusca(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Buscar por número, cliente, chave de acesso..."
-                className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Buscar por número, cliente, chave..."
+                className="w-full pl-9 pr-3 py-2 bg-surface-muted border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
               />
             </div>
-            <div className="flex gap-2">
-              <button
-                onClick={handleSearch}
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
-              >
-                <Search className="h-4 w-4" />
-                Buscar
-              </button>
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className={`inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg border transition-colors ${
-                  showFilters || hasActiveFilters
-                    ? 'bg-blue-50 border-blue-200 text-blue-700'
-                    : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                <Filter className="h-4 w-4" />
-                Filtros
-                {hasActiveFilters && (
-                  <span className="ml-1 px-1.5 py-0.5 text-xs bg-blue-600 text-white rounded-full">
-                    !
-                  </span>
-                )}
-                <ChevronDown className={`h-4 w-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
-              </button>
-              <button
-                onClick={loadData}
-                className="p-2.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                title="Atualizar"
-              >
-                <RefreshCw className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        </div>
 
-        {/* Filtros avançados */}
-        {showFilters && (
-          <div className="p-4 bg-gray-50 border-b border-gray-100">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <button
+              onClick={handleSearch}
+              className="px-4 py-2 bg-surface-muted text-foreground border border-border hover:bg-surface-hover rounded-lg transition-colors font-medium text-sm flex items-center gap-2"
+            >
+              <Search className="w-4 h-4" />
+              Buscar
+            </button>
+
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition-all border flex items-center gap-2 ${showFilters || hasActiveFilters
+                ? 'bg-primary/10 text-primary border-primary/20'
+                : 'bg-surface-muted text-muted-foreground border-border hover:bg-surface-hover'
+                }`}
+            >
+              <Filter className="w-4 h-4" />
+              Filtros
+              {hasActiveFilters && (
+                <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+              )}
+              <ChevronDown className={`w-3 h-3 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+            </button>
+
+            <button
+              onClick={loadData}
+              className="p-2 text-muted-foreground hover:text-primary hover:bg-surface-hover rounded-lg transition-colors"
+              title="Atualizar"
+            >
+              <RefreshCw className="w-4 h-4" />
+            </button>
+
+            {hasActiveFilters && (
+              <button
+                onClick={handleClearFilters}
+                className="px-3 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors flex items-center gap-2"
+              >
+                <X className="w-4 h-4" />
+                Limpar
+              </button>
+            )}
+          </div>
+
+          {/* Filtros Expandidos */}
+          {showFilters && (
+            <div className="pt-4 border-t border-border grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-slide-down">
               {/* Data Inicial */}
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">
                   Data Inicial
                 </label>
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <input
                     type="date"
                     value={filtroDataInicial}
                     onChange={(e) => setFiltroDataInicial(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full pl-9 pr-3 py-2 bg-surface-muted border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   />
                 </div>
               </div>
 
               {/* Data Final */}
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">
                   Data Final
                 </label>
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <input
                     type="date"
                     value={filtroDataFinal}
                     onChange={(e) => setFiltroDataFinal(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full pl-9 pr-3 py-2 bg-surface-muted border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   />
                 </div>
               </div>
 
               {/* Propriedade */}
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">
                   Empresa/Filial
                 </label>
                 <div className="relative">
-                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <select
                     value={filtroPropriedade || ''}
                     onChange={(e) => setFiltroPropriedade(e.target.value ? Number(e.target.value) : undefined)}
-                    className="w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white"
+                    className="w-full pl-9 pr-3 py-2 bg-surface-muted border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary appearance-none"
                   >
                     <option value="">Todas</option>
                     {propriedades.map((p) => (
@@ -416,13 +505,13 @@ export default function NotaFiscalListPage() {
 
               {/* Natureza */}
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">
                   Natureza de Operação
                 </label>
                 <select
                   value={filtroNatureza || ''}
                   onChange={(e) => setFiltroNatureza(e.target.value ? Number(e.target.value) : undefined)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 bg-surface-muted border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 >
                   <option value="">Todas</option>
                   {naturezas.map((n) => (
@@ -435,13 +524,13 @@ export default function NotaFiscalListPage() {
 
               {/* Tipo de Nota */}
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">
                   Tipo de Nota
                 </label>
                 <select
                   value={filtroTipoNota ?? ''}
                   onChange={(e) => setFiltroTipoNota(e.target.value !== '' ? Number(e.target.value) : undefined)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 bg-surface-muted border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 >
                   <option value="">Todos</option>
                   {Object.entries(TIPOS_NOTA).map(([key, value]) => (
@@ -454,7 +543,7 @@ export default function NotaFiscalListPage() {
 
               {/* Status NFe */}
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">
                   Status NFe
                 </label>
                 <select
@@ -462,10 +551,10 @@ export default function NotaFiscalListPage() {
                     filtroCanceladas === true
                       ? 'canceladas'
                       : filtroAutorizadas === true
-                      ? 'autorizadas'
-                      : filtroAutorizadas === false
-                      ? 'pendentes'
-                      : ''
+                        ? 'autorizadas'
+                        : filtroAutorizadas === false
+                          ? 'pendentes'
+                          : ''
                   }
                   onChange={(e) => {
                     const value = e.target.value;
@@ -474,7 +563,7 @@ export default function NotaFiscalListPage() {
                       value === 'autorizadas' ? true : value === 'pendentes' ? false : undefined
                     );
                   }}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 bg-surface-muted border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 >
                   <option value="">Todos</option>
                   <option value="autorizadas">Autorizadas</option>
@@ -483,225 +572,117 @@ export default function NotaFiscalListPage() {
                 </select>
               </div>
             </div>
-
-            {/* Botão limpar filtros */}
-            {hasActiveFilters && (
-              <div className="mt-4 flex justify-end">
-                <button
-                  onClick={handleClearFilters}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <X className="h-4 w-4" />
-                  Limpar filtros
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Tabela */}
-        <div className="overflow-x-auto">
-          {loading ? (
-            <EstadoCarregando mensagem="Carregando notas fiscais..." />
-          ) : error ? (
-            <div className="p-8 text-center">
-              <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-              <p className="text-red-600 font-medium">{error}</p>
-              <button
-                onClick={loadData}
-                className="mt-4 text-blue-600 hover:text-blue-700 text-sm font-medium"
-              >
-                Tentar novamente
-              </button>
-            </div>
-          ) : !data || data.items.length === 0 ? (
-            <EstadoVazio
-              titulo="Nenhuma nota fiscal encontrada"
-              descricao={hasActiveFilters ? 'Tente ajustar os filtros de busca' : 'Comece criando uma nova nota fiscal'}
-              tipoBusca={hasActiveFilters}
-              icone={FileText}
-              acao={
-                !hasActiveFilters ? {
-                  texto: 'Nova Nota Fiscal',
-                  onClick: handleNew,
-                } : undefined
-              }
-            />
-          ) : (
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead>
-                <tr className="bg-gray-50">
-                  <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-16">
-                    Seq
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Número / Data
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider hidden md:table-cell">
-                    Cliente
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider hidden lg:table-cell">
-                    Natureza
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Valor Total
-                  </th>
-                  <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider hidden sm:table-cell">
-                    Status
-                  </th>
-                  <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Ações
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {data.items.map((nota) => (
-                  <tr
-                    key={nota.sequenciaDaNotaFiscal}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
-                    {/* Código de Sequência */}
-                    <td className="px-4 py-3 text-center">
-                      <span className="inline-flex items-center justify-center w-10 h-8 bg-blue-100 text-blue-700 text-sm font-bold rounded">
-                        {nota.sequenciaDaNotaFiscal}
-                      </span>
-                    </td>
-                    
-                    {/* Número / Data */}
-                    <td className="px-4 py-3">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-semibold text-gray-900">
-                          {nota.numeroDaNfe > 0 ? (
-                            <>NFe {nota.numeroDaNfe}</>
-                          ) : (
-                            <>Nº {nota.numeroDaNotaFiscal}</>
-                          )}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          {formatDate(nota.dataDeEmissao)}
-                        </span>
-                        {nota.nfeComplementar && (
-                          <span className="mt-1 inline-flex items-center px-1.5 py-0.5 text-xs font-medium bg-purple-100 text-purple-700 rounded">
-                            Complementar
-                          </span>
-                        )}
-                        {nota.notaDeDevolucao && (
-                          <span className="mt-1 inline-flex items-center px-1.5 py-0.5 text-xs font-medium bg-orange-100 text-orange-700 rounded">
-                            Devolução
-                          </span>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* Cliente */}
-                    <td className="px-4 py-3 hidden md:table-cell">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium text-gray-900 truncate max-w-xs">
-                          {nota.nomeDoCliente}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          {formatCpfCnpj(nota.documentoCliente)}
-                        </span>
-                      </div>
-                    </td>
-
-                    {/* Natureza */}
-                    <td className="px-4 py-3 hidden lg:table-cell">
-                      <div className="flex flex-col">
-                        <span className="text-sm text-gray-900 truncate max-w-xs">
-                          {nota.descricaoNatureza}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          {(TIPOS_NOTA as Record<number, string>)[nota.tipoDeNota] || 'Outro'}
-                        </span>
-                      </div>
-                    </td>
-
-                    {/* Valor Total */}
-                    <td className="px-4 py-3 text-right">
-                      <span className="text-sm font-semibold text-gray-900">
-                        {formatCurrency(nota.valorTotalDaNotaFiscal)}
-                      </span>
-                    </td>
-
-                    {/* Status */}
-                    <td className="px-4 py-3 text-center hidden sm:table-cell">
-                      <StatusBadge nota={nota} />
-                    </td>
-
-                    {/* Ações */}
-                    <td className="px-2 sm:px-4 py-3">
-                      <div className="flex items-center justify-center gap-0.5 sm:gap-1">
-                        <button
-                          onClick={() => handleView(nota.sequenciaDaNotaFiscal)}
-                          className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                          title="Visualizar"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </button>
-                        {podeAlterar && !nota.notaCancelada && !nota.autorizado && (
-                          <button
-                            onClick={() => handleEdit(nota.sequenciaDaNotaFiscal)}
-                            className="p-2 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                            title="Editar"
-                          >
-                            <Edit2 className="h-4 w-4" />
-                          </button>
-                        )}
-                        {/* Botão de Duplicar - disponível para notas não canceladas */}
-                        {podeIncluir && !nota.notaCancelada && (
-                          <button
-                            onClick={() => handleDuplicate(nota.sequenciaDaNotaFiscal)}
-                            disabled={duplicating === nota.sequenciaDaNotaFiscal}
-                            className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="Duplicar nota fiscal"
-                          >
-                            {duplicating === nota.sequenciaDaNotaFiscal ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <Copy className="h-4 w-4" />
-                            )}
-                          </button>
-                        )}
-                        {nota.autorizado && nota.chaveDeAcessoDaNfe && (
-                          <div className="hidden sm:flex items-center gap-0.5 sm:gap-1">
-                            <button
-                              className="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
-                              title="Download XML"
-                            >
-                              <Download className="h-4 w-4" />
-                            </button>
-                            <button
-                              className="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
-                              title="Imprimir DANFE"
-                            >
-                              <Printer className="h-4 w-4" />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           )}
         </div>
+      </CabecalhoPagina>
 
-        {/* Paginação */}
-        {data && data.totalCount > 0 && (
-          <div className="px-4 py-3 border-t border-gray-200">
-            <Paginacao
-              paginaAtual={pageNumber}
-              totalPaginas={Math.ceil(data.totalCount / pageSize)}
-              totalItens={data.totalCount}
-              itensPorPagina={pageSize}
-              onMudarPagina={setPageNumber}
-              onMudarItensPorPagina={(newSize: number) => {
-                setPageSize(newSize);
-                setPageNumber(1);
-              }}
-            />
+      <div className="px-6">
+        {/* Mensagem de Erro */}
+        {error && (
+          <AlertaErro
+            mensagem={error}
+            fechavel
+            onFechar={() => setError(null)}
+            className="mb-6"
+          />
+        )}
+
+        <DataTable
+          data={data?.items || []}
+          columns={columns}
+          getRowKey={(item) => item.sequenciaDaNotaFiscal.toString()}
+          loading={loading}
+          totalItems={data?.totalCount || 0}
+          rowActions={(item) => (
+            <>
+              <button
+                onClick={() => handleView(item.sequenciaDaNotaFiscal)}
+                className="p-2 text-muted-foreground hover:text-primary hover:bg-surface-hover rounded-lg transition-colors"
+                title="Visualizar"
+              >
+                <Eye className="h-4 w-4" />
+              </button>
+              {podeAlterar && !item.notaCancelada && !item.autorizado && (
+                <button
+                  onClick={() => handleEdit(item.sequenciaDaNotaFiscal)}
+                  className="p-2 text-muted-foreground hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                  title="Editar"
+                >
+                  <Edit2 className="h-4 w-4" />
+                </button>
+              )}
+              {podeIncluir && !item.notaCancelada && (
+                <button
+                  onClick={() => handleDuplicate(item.sequenciaDaNotaFiscal)}
+                  disabled={duplicating === item.sequenciaDaNotaFiscal}
+                  className="p-2 text-muted-foreground hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Duplicar nota fiscal"
+                >
+                  {duplicating === item.sequenciaDaNotaFiscal ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </button>
+              )}
+              {item.autorizado && item.chaveDeAcessoDaNfe && (
+                <>
+                  <button
+                    className="p-2 text-muted-foreground hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors hidden sm:inline-flex"
+                    title="Download XML"
+                  >
+                    <Download className="h-4 w-4" />
+                  </button>
+                  <button
+                    className="p-2 text-muted-foreground hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors hidden sm:inline-flex"
+                    title="Imprimir DANFE"
+                  >
+                    <Printer className="h-4 w-4" />
+                  </button>
+                </>
+              )}
+            </>
+          )}
+        />
+
+        {/* Paginação Manual (já que a API é paginada) */}
+        {!loading && data && data.totalCount > 0 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border mt-4">
+            <div className="flex items-center gap-4">
+              <div className="text-sm text-muted-foreground">
+                Página <span className="font-medium text-primary">{pageNumber}</span> de <span className="font-medium text-primary">{Math.ceil(data.totalCount / pageSize)}</span>
+              </div>
+              <select
+                value={pageSize}
+                onChange={(e) => {
+                  setPageSize(Number(e.target.value));
+                  setPageNumber(1);
+                }}
+                className="px-2 py-1 text-sm border border-border rounded-lg bg-surface text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              >
+                <option value={10}>10 por página</option>
+                <option value={25}>25 por página</option>
+                <option value={50}>50 por página</option>
+                <option value={100}>100 por página</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setPageNumber(prev => Math.max(1, prev - 1))}
+                disabled={pageNumber === 1}
+                className="px-3 py-1.5 text-sm font-medium border border-border rounded-lg hover:bg-surface-hover disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Anterior
+              </button>
+              <button
+                onClick={() => setPageNumber(prev => Math.min(Math.ceil(data.totalCount / pageSize), prev + 1))}
+                disabled={pageNumber === Math.ceil(data.totalCount / pageSize)}
+                className="px-3 py-1.5 text-sm font-medium border border-border rounded-lg hover:bg-surface-hover disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Próxima
+              </button>
+            </div>
           </div>
         )}
       </div>

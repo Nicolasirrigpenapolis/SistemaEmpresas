@@ -18,7 +18,7 @@ public class VeiculoListDto
     public string? Marca { get; set; }
     public string? Modelo { get; set; }
     public int? AnoModelo { get; set; }
-    public int Tara { get; set; }
+    public int? Tara { get; set; }
     public string TipoRodado { get; set; } = string.Empty;
     public string TipoCarroceria { get; set; } = string.Empty;
     public string Uf { get; set; } = string.Empty;
@@ -36,7 +36,7 @@ public class VeiculoDto
     public string? Modelo { get; set; }
     public int? AnoFabricacao { get; set; }
     public int? AnoModelo { get; set; }
-    public int Tara { get; set; }
+    public int? Tara { get; set; }
     public int? CapacidadeKg { get; set; }
     public string TipoRodado { get; set; } = string.Empty;
     public string TipoCarroceria { get; set; } = string.Empty;
@@ -106,6 +106,18 @@ public class VeiculoCreateUpdateDto
 
     [StringLength(1000)]
     public string? Observacoes { get; set; }
+}
+
+/// <summary>
+/// Filtros para listagem de veículos
+/// </summary>
+public class VeiculoFiltros
+{
+    public int Pagina { get; set; } = 1;
+    public int TamanhoPagina { get; set; } = 25;
+    public string? Busca { get; set; }
+    public string? TipoVeiculo { get; set; }
+    public bool? IncluirInativos { get; set; }
 }
 
 // ==========================================
@@ -505,6 +517,21 @@ public class ManutencaoVeiculoCreateUpdateDto
     public string? Observacoes { get; set; }
 
     public bool Ativo { get; set; } = true;
+}
+
+/// <summary>
+/// Filtros para listagem de manutenções
+/// </summary>
+public class ManutencaoFiltros
+{
+    public int Pagina { get; set; } = 1;
+    public int TamanhoPagina { get; set; } = 25;
+    public string? Busca { get; set; }
+    public int? VeiculoId { get; set; }
+    public string? TipoManutencao { get; set; }
+    public DateTime? DataInicio { get; set; }
+    public DateTime? DataFim { get; set; }
+    public bool? IncluirInativos { get; set; }
 }
 
 // ==========================================

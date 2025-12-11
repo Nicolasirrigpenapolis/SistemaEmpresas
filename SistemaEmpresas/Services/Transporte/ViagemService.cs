@@ -11,7 +11,7 @@ namespace SistemaEmpresas.Services.Transporte;
 // ==========================================
 public interface IViagemService
 {
-    Task<List<ViagemListDto>> ListarAsync(bool apenasAtivos = true);
+    Task<DTOs.PagedResult<ViagemListDto>> ListarAsync(ViagemFiltros? filtros = null);
     Task<List<ViagemListDto>> ListarPorVeiculoAsync(int veiculoId);
     Task<List<ViagemListDto>> ListarPorMotoristaAsync(short motoristaId);
     Task<List<ViagemListDto>> ListarPorPeriodoAsync(DateTime dataInicio, DateTime dataFim);
@@ -35,7 +35,7 @@ public class ViagemService : IViagemService
         _logger = logger;
     }
 
-    public async Task<List<ViagemListDto>> ListarAsync(bool apenasAtivos = true)
+    public async Task<DTOs.PagedResult<ViagemListDto>> ListarAsync(ViagemFiltros? filtros = null)
     {
         var query = _context.Viagens
             .Include(v => v.Veiculo)
@@ -45,13 +45,39 @@ public class ViagemService : IViagemService
             .Include(v => v.Receitas)
             .AsQueryable();
         
-        if (apenasAtivos)
-            query = query.Where(v => v.Ativo);
+        // Filtros
+        if (filtros != null)
+        {
+            if (!string.IsNullOrWhiteSpace(filtros.Busca))
+            {
+                var busca = filtros.Busca.ToUpper().Trim();
+                query = query.Where(v => 
+                    v.Origem.ToUpper().Contains(busca) || 
+                    v.Destino.ToUpper().Contains(busca) ||
+                    (v.Veiculo != null && v.Veiculo.Placa.Contains(busca)) ||
+                    (v.Motorista != null && v.Motorista.NomeDoMotorista.ToUpper().Contains(busca)));
+            }
 
-        return await query
+            if (filtros.DataInicio.HasValue)
+                query = query.Where(v => v.DataInicio >= filtros.DataInicio.Value);
+
+            if (filtros.DataFim.HasValue)
+                query = query.Where(v => v.DataFim <= filtros.DataFim.Value);
+        }
+
+        // Paginação
+        var pageNumber = filtros?.Pagina ?? 1;
+        var pageSize = filtros?.TamanhoPagina ?? 25;
+        var totalCount = await query.CountAsync();
+
+        var items = await query
             .OrderByDescending(v => v.DataInicio)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
             .Select(v => MapToListDto(v))
             .ToListAsync();
+            
+        return new DTOs.PagedResult<ViagemListDto>(items, totalCount, pageNumber, pageSize);
     }
 
     public async Task<List<ViagemListDto>> ListarPorVeiculoAsync(int veiculoId)

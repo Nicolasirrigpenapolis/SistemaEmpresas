@@ -346,25 +346,35 @@ class UsuarioManagementService {
 
   /**
    * Exclui um usuário por nome (compatível com interface antiga)
+   * O backend espera DELETE /api/usuarios/{nome}
    */
   async excluirUsuario(nome: string): Promise<OperacaoResultDto> {
-    const usuarios = await this.listarUsuarios();
-    const usuario = usuarios.find(u => u.login.toLowerCase() === nome.toLowerCase());
-    
-    if (!usuario) {
-      return { sucesso: false, mensagem: `Usuário "${nome}" não encontrado.` };
+    try {
+      // Codifica o nome para uso na URL (caracteres especiais)
+      const nomeEncoded = encodeURIComponent(nome);
+      await api.delete(`${USUARIOS_URL}/${nomeEncoded}`);
+      return { sucesso: true, mensagem: `Usuário "${nome}" excluído com sucesso!` };
+    } catch (error: any) {
+      console.error('Erro ao excluir usuário:', error);
+      const mensagem = error.response?.data?.message || error.message || 'Erro ao excluir usuário';
+      return { sucesso: false, mensagem };
     }
-    
-    await api.delete(`${USUARIOS_URL}/${usuario.id}`);
-    return { sucesso: true, mensagem: `Usuário "${nome}" excluído com sucesso!` };
   }
 
   /**
-   * Exclui um usuário por ID
+   * Exclui um usuário por ID ou Nome
+   * Para o sistema legado, usamos o nome como identificador
    */
-  async excluirUsuarioPorId(id: number): Promise<OperacaoResultDto> {
-    await api.delete(`${USUARIOS_URL}/${id}`);
-    return { sucesso: true, mensagem: 'Usuário excluído com sucesso!' };
+  async excluirUsuarioPorId(idOuNome: number | string): Promise<OperacaoResultDto> {
+    try {
+      const identificador = encodeURIComponent(String(idOuNome));
+      await api.delete(`${USUARIOS_URL}/${identificador}`);
+      return { sucesso: true, mensagem: 'Usuário excluído com sucesso!' };
+    } catch (error: any) {
+      console.error('Erro ao excluir usuário:', error);
+      const mensagem = error.response?.data?.message || error.message || 'Erro ao excluir usuário';
+      return { sucesso: false, mensagem };
+    }
   }
 
   /**

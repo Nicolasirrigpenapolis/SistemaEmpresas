@@ -12,6 +12,8 @@ import {
   FileText,
   X,
   Truck,
+  Box,
+
 } from 'lucide-react';
 import { useTenantBranding } from '../../hooks/useTenantBranding';
 import { useAuth } from '../../contexts/AuthContext';
@@ -74,7 +76,6 @@ export default function Sidebar({ collapsed = false, onCollapse, mobileOpen = fa
 
   const handleNavigate = (path: string) => {
     navigate(path);
-    // Fecha menu mobile após navegação
     if (mobileOpen) {
       onMobileClose?.();
     }
@@ -93,7 +94,6 @@ export default function Sidebar({ collapsed = false, onCollapse, mobileOpen = fa
     return false;
   };
 
-  // Menu items configuration
   const menuItems: MenuItem[] = [
     {
       id: 'dashboard',
@@ -162,92 +162,72 @@ export default function Sidebar({ collapsed = false, onCollapse, mobileOpen = fa
     },
   ];
 
-  // Filtra os menus baseado nas permissões do usuário
   const filteredMenuItems = useMemo(() => {
     return menuItems
       .map(item => {
-        // Se tem path direto, verifica permissão
         if (item.path) {
-          if (!podeVisualizarRota(user, item.path)) {
-            return null;
-          }
+          if (!podeVisualizarRota(user, item.path)) return null;
           return item;
         }
-        
-        // Se tem filhos, filtra os filhos que o usuário pode ver
         if (item.children) {
-          const filteredChildren = item.children.filter(child => 
+          const filteredChildren = item.children.filter(child =>
             podeVisualizarRota(user, child.path)
           );
-          
-          // Se não sobrou nenhum filho visível, não mostra o menu pai
-          if (filteredChildren.length === 0) {
-            return null;
-          }
-          
-          return {
-            ...item,
-            children: filteredChildren,
-          };
+          if (filteredChildren.length === 0) return null;
+          return { ...item, children: filteredChildren };
         }
-        
         return item;
       })
       .filter((item): item is MenuItem => item !== null);
   }, [user]);
 
-  const renderMenuItem = (item: MenuItem, _isBottom = false) => {
+  const renderMenuItem = (item: MenuItem) => {
     const hasChildren = item.children && item.children.length > 0;
     const isExpanded = expandedMenus.includes(item.id);
     const active = isMenuActive(item);
     const Icon = item.icon;
 
     return (
-      <div key={item.id} className="relative">
-        {/* Menu Item */}
+      <div key={item.id} className="relative mb-1">
         <button
           onClick={() => hasChildren ? toggleSubmenu(item.id) : item.path && handleNavigate(item.path)}
           onMouseEnter={() => setHoveredItem(item.id)}
           onMouseLeave={() => setHoveredItem(null)}
           className={`
-            w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group
+            w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
             ${active
-              ? 'bg-blue-50 text-blue-600'
-              : 'text-[var(--text-muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--text)]'
+              ? 'bg-secondary/10 text-secondary'
+              : 'text-muted-foreground hover:bg-surface-hover hover:text-primary'
             }
             ${isCollapsed ? 'justify-center' : ''}
           `}
         >
-          {/* Icon */}
           <div className={`
-            flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200
+            flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-300
             ${active
-              ? 'bg-blue-500 text-white shadow-sm'
-              : 'bg-[var(--surface-muted)] text-[var(--text-muted)] group-hover:bg-[var(--surface-muted)] group-hover:text-[var(--text)]'
+              ? 'bg-secondary text-white shadow-lg shadow-secondary/30'
+              : 'bg-surface-active/50 text-muted-foreground group-hover:bg-surface-active group-hover:text-primary'
             }
           `}>
-            <Icon className="w-[18px] h-[18px]" />
+            <Icon className="w-5 h-5" />
           </div>
 
-          {/* Label e Badge */}
           {!isCollapsed && (
             <>
-              <span className="flex-1 text-left font-medium text-sm">{item.label}</span>
-              
-              {/* Badge */}
+              <span className="flex-1 text-left font-medium text-sm tracking-wide">{item.label}</span>
+
               {item.badge && (
                 <span className={`
-                  px-2 py-0.5 text-xs font-semibold rounded-full text-white
-                  ${item.badgeColor || 'bg-blue-500'}
+                  px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full text-white shadow-sm
+                  ${item.badgeColor || 'bg-secondary'}
                 `}>
                   {item.badge}
                 </span>
               )}
 
-              {/* Chevron para submenus */}
               {hasChildren && (
                 <ChevronDown className={`
-                  w-4 h-4 text-gray-400 transition-transform duration-200
+                  w-4 h-4 text-muted-foreground/70 transition-transform duration-300
                   ${isExpanded ? 'rotate-180' : ''}
                 `} />
               )}
@@ -255,28 +235,26 @@ export default function Sidebar({ collapsed = false, onCollapse, mobileOpen = fa
           )}
         </button>
 
-        {/* Tooltip quando collapsed */}
         {isCollapsed && hoveredItem === item.id && (
-          <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 z-50">
-            <div className="bg-gray-800 text-white text-sm font-medium px-3 py-2 rounded-lg shadow-xl whitespace-nowrap">
+          <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 z-50 animate-fade-in">
+            <div className="bg-primary text-primary-foreground text-sm font-medium px-4 py-2.5 rounded-xl shadow-xl whitespace-nowrap">
               {item.label}
               {item.badge && (
-                <span className={`ml-2 px-1.5 py-0.5 text-xs rounded ${item.badgeColor || 'bg-blue-500'}`}>
+                <span className={`ml-2 px-1.5 py-0.5 text-xs rounded ${item.badgeColor || 'bg-secondary'}`}>
                   {item.badge}
                 </span>
               )}
-              <div className="absolute right-full top-1/2 -translate-y-1/2 border-8 border-transparent border-r-gray-800" />
+              <div className="absolute right-full top-1/2 -translate-y-1/2 border-8 border-transparent border-r-primary" />
             </div>
           </div>
         )}
 
-        {/* Submenu */}
         {hasChildren && !isCollapsed && (
           <div className={`
             overflow-hidden transition-all duration-300 ease-in-out
             ${isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}
           `}>
-            <div className="ml-6 mt-1 pl-4 border-l-2 border-[var(--border)] space-y-0.5">
+            <div className="ml-7 mt-1 pl-4 border-l border-border space-y-1">
               {item.children?.map(child => (
                 <button
                   key={child.id}
@@ -284,14 +262,14 @@ export default function Sidebar({ collapsed = false, onCollapse, mobileOpen = fa
                   className={`
                     w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-all duration-200
                     ${isActive(child.path)
-                      ? 'bg-blue-50 text-blue-600 font-medium'
-                      : 'text-[var(--text-muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--text)]'
+                      ? 'bg-secondary/5 text-secondary font-medium'
+                      : 'text-muted-foreground hover:bg-surface-hover hover:text-primary'
                     }
                   `}
                 >
                   <span>{child.label}</span>
                   {child.badge && (
-                    <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-100 text-blue-600">
+                    <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-secondary/10 text-secondary">
                       {child.badge}
                     </span>
                   )}
@@ -308,101 +286,86 @@ export default function Sidebar({ collapsed = false, onCollapse, mobileOpen = fa
     <aside
       className={`
         fixed left-0 top-0 h-screen z-50 transition-all duration-300 ease-in-out
-        ${isCollapsed ? 'w-20' : 'w-72'}
+        ${isCollapsed ? 'w-24' : 'w-72'}
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+        bg-surface border-r border-border shadow-2xl shadow-black/5
       `}
     >
-      {/* Background clean */}
-      <div className="absolute inset-0 bg-[var(--surface)] text-[var(--text)]" />
-      
-      {/* Borda direita */}
-      <div className="absolute right-0 top-0 bottom-0 w-px bg-[var(--border)]" />
-
       <div className="relative h-full flex flex-col">
         {/* Header / Logo */}
         <div className={`
-          h-20 flex items-center border-b border-[var(--border)] px-4
+          h-24 flex items-center px-6
           ${isCollapsed && !mobileOpen ? 'justify-center' : 'justify-between'}
         `}>
-          {/* Botão fechar mobile */}
           {mobileOpen && (
             <button
               onClick={onMobileClose}
-              className="md:hidden absolute right-4 top-6 p-2 rounded-lg text-[var(--text-muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--text)] transition-colors"
+              className="md:hidden absolute right-4 top-8 p-2 rounded-lg text-muted-foreground hover:bg-surface-hover transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
           )}
-          
+
           {(!isCollapsed || mobileOpen) ? (
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[var(--surface)] flex items-center justify-center shadow-md overflow-hidden">
-                <img 
-                  src={branding.logo} 
-                  alt={branding.nome}
-                  className="w-9 h-9 object-contain"
-                  onError={(e) => {
-                    // Fallback para o ícone se a imagem não carregar
-                    e.currentTarget.style.display = 'none';
-                    e.currentTarget.parentElement!.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-blue-500"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>';
-                  }}
-                />
+            <div className="flex items-center gap-4 group cursor-pointer" onClick={() => navigate('/dashboard')}>
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-secondary to-accent flex items-center justify-center shadow-lg shadow-secondary/20 group-hover:scale-105 transition-transform duration-300">
+                {branding.logo ? (
+                  <img src={branding.logo} alt={branding.nome} className="w-8 h-8 object-contain brightness-0 invert" />
+                ) : (
+                  <Box className="w-6 h-6 text-white" />
+                )}
               </div>
               <div className="flex flex-col">
-                <span className="text-[var(--text)] font-bold text-sm leading-tight">
-                  {branding.nome}
+                <span className="text-primary font-display font-bold text-lg leading-tight tracking-tight">
+                  {branding.nome || 'Sistema'}
                 </span>
+                <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Enterprise</span>
               </div>
             </div>
           ) : (
-            <div className="w-10 h-10 rounded-xl bg-[var(--surface)] flex items-center justify-center shadow-md overflow-hidden">
-              <img 
-                src={branding.logo} 
-                alt={branding.nome}
-                className="w-9 h-9 object-contain"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                  e.currentTarget.parentElement!.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-blue-500"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>';
-                }}
-              />
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-secondary to-accent flex items-center justify-center shadow-lg shadow-secondary/20 cursor-pointer hover:scale-105 transition-transform duration-300" onClick={() => navigate('/dashboard')}>
+              {branding.logo ? (
+                <img src={branding.logo} alt={branding.nome} className="w-8 h-8 object-contain brightness-0 invert" />
+              ) : (
+                <Box className="w-6 h-6 text-white" />
+              )}
             </div>
           )}
         </div>
 
-        {/* Label de seção - Mais acima */}
+        {/* Menu Label */}
         {(!isCollapsed || mobileOpen) && (
-          <div className="px-6 pt-4 pb-2">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+          <div className="px-6 pb-4">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
               Menu Principal
             </span>
           </div>
         )}
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-3 pb-6 space-y-1 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
+        <nav className="flex-1 overflow-y-auto px-4 pb-6 space-y-1 custom-scrollbar">
           {filteredMenuItems.map(item => renderMenuItem(item))}
         </nav>
 
-        {/* Botão Recolher/Expandir na parte inferior - hidden on mobile */}
-        <div className="border-t border-[var(--border)] p-3 hidden md:block">
+        {/* Footer Toggle */}
+        <div className="p-4 hidden md:block">
           <button
             onClick={handleCollapse}
             className={`
-              w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
-              text-[var(--text-muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--text)]
+              w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200
+              border border-border hover:bg-surface-hover text-muted-foreground hover:text-primary
               ${isCollapsed ? 'justify-center' : ''}
             `}
-            title={isCollapsed ? 'Expandir menu' : 'Recolher menu'}
           >
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[var(--surface-muted)] text-[var(--text-muted)]">
-              {isCollapsed ? (
-                <ChevronRight className="w-[18px] h-[18px]" />
-              ) : (
-                <ChevronLeft className="w-[18px] h-[18px]" />
-              )}
-            </div>
-            {!isCollapsed && (
-              <span className="font-medium text-sm">Recolher menu</span>
+            {isCollapsed ? (
+              <ChevronRight className="w-5 h-5" />
+            ) : (
+              <>
+                <div className="flex items-center justify-center w-6 h-6 rounded bg-surface-active/50">
+                  <ChevronLeft className="w-4 h-4" />
+                </div>
+                <span className="font-medium text-sm">Recolher Menu</span>
+              </>
             )}
           </button>
         </div>

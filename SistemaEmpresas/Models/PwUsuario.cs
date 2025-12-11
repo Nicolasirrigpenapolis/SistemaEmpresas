@@ -57,6 +57,15 @@ public partial class PwUsuario
     [Column("GrupoUsuarioId")]
     public int? GrupoUsuarioId { get; set; }
 
+    /// <summary>
+    /// Email do usuário (opcional).
+    /// Pode haver múltiplos usuários com o mesmo email.
+    /// </summary>
+    [Column("PW~Email")]
+    [StringLength(255)]
+    [Unicode(false)]
+    public string? PwEmail { get; set; }
+
     [ForeignKey("PwGrupo")]
     [InverseProperty("PwUsuarios")]
     public virtual PwGrupo? PwGrupoNavigation { get; set; }

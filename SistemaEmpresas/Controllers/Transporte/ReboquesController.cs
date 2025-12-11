@@ -27,27 +27,27 @@ public class ReboquesController : ControllerBase
     }
 
     /// <summary>
-    /// Lista todos os reboques
+    /// Lista todos os reboques com paginação e filtros
     /// </summary>
     [HttpGet]
-    public async Task<ActionResult<List<ReboqueListDto>>> Listar([FromQuery] bool apenasAtivos = true)
+    public async Task<ActionResult<DTOs.PagedResult<ReboqueListDto>>> Listar([FromQuery] ReboqueFiltros filtros)
     {
         try
         {
             var usuario = User?.Identity?.Name ?? "Desconhecido";
-            _logger.LogInformation("Listando reboques. Usuário: {Usuario}, ApenasAtivos: {ApenasAtivos}", usuario, apenasAtivos);
+            _logger.LogInformation("Listando reboques. Usuário: {Usuario}, Filtros: {@Filtros}", usuario, filtros);
 
-            var reboques = await _service.ListarAsync(apenasAtivos);
+            var resultado = await _service.ListarAsync(filtros);
             
             _logger.LogInformation("Reboques listados com sucesso. Total: {Total}, Usuário: {Usuario}", 
-                reboques?.Count ?? 0, usuario);
-            return Ok(reboques);
+                resultado.TotalCount, usuario);
+            return Ok(resultado);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Erro ao listar reboques. Usuário: {Usuario}", 
                 User?.Identity?.Name ?? "Desconhecido");
-            return StatusCode(500, new { mensagem = "Erro interno ao listar reboques" });
+            return StatusCode(500, new { mensagem = "Erro interno ao listar reboques", erro = ex.Message, stack = ex.StackTrace });
         }
     }
 

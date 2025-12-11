@@ -69,7 +69,7 @@ public class ClassTribController : ControllerBase
                     AnexoLegislacao = c.AnexoLegislacao,
                     LinkLegislacao = c.LinkLegislacao
                 }).ToList(),
-                TotalItems = total,
+                TotalCount = total,
                 PageNumber = page,
                 PageSize = pageSize,
                 TotalPages = (int)Math.Ceiling(total / (double)pageSize)
@@ -308,7 +308,7 @@ public class ClassTribController : ControllerBase
             var response = new PagedClassTribResponse
             {
                 Items = items.Select(MapToDto).ToList(),
-                TotalItems = total,
+                TotalCount = total,
                 PageNumber = page,
                 PageSize = pageSize,
                 TotalPages = (int)Math.Ceiling(total / (double)pageSize)
@@ -556,7 +556,7 @@ public class ClassTribController : ControllerBase
 public class PagedClassTribResponse
 {
     public List<ClassTribDto> Items { get; set; } = new();
-    public int TotalItems { get; set; }
+    public int TotalCount { get; set; }
     public int PageNumber { get; set; }
     public int PageSize { get; set; }
     public int TotalPages { get; set; }

@@ -110,7 +110,7 @@ public class ProdutoRepository : IProdutoRepository
         return new PagedResult<ProdutoListDto>
         {
             Items = items,
-            TotalItems = totalItems,
+            TotalCount = totalItems,
             PageNumber = filtro.PageNumber,
             PageSize = filtro.PageSize
         };
@@ -399,14 +399,4 @@ public class ProdutoRepository : IProdutoRepository
             .Where(p => !p.Inativo && p.QuantidadeNoEstoque < p.QuantidadeMinima && p.QuantidadeMinima > 0)
             .CountAsync();
     }
-}
-
-// Classe auxiliar para paginação (se não existir)
-public class PagedResult<T>
-{
-    public List<T> Items { get; set; } = new();
-    public int TotalItems { get; set; }
-    public int PageNumber { get; set; }
-    public int PageSize { get; set; }
-    public int TotalPages => (int)Math.Ceiling((double)TotalItems / PageSize);
 }

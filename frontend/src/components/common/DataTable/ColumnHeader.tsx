@@ -1,9 +1,6 @@
 import { ArrowUp, ArrowDown, Filter } from 'lucide-react';
 import type { ColumnHeaderProps } from './types';
 
-/**
- * Cabeçalho de coluna clicável para ordenação e seleção de filtro
- */
 export function ColumnHeader({
   column,
   isFilterColumn,
@@ -21,30 +18,30 @@ export function ColumnHeader({
 
   return (
     <th
-      className={`px-4 py-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider ${alignClass} ${
-        isClickable ? 'cursor-pointer select-none hover:bg-[var(--surface)] transition-colors group' : ''
-      }`}
+      className={`
+        px-4 py-4 text-xs font-bold text-muted-foreground uppercase tracking-wider ${alignClass}
+        ${isClickable ? 'cursor-pointer select-none hover:bg-surface-hover hover:text-primary transition-colors group' : ''}
+      `}
       style={{ width: column.width }}
       onClick={isClickable ? onClick : undefined}
       title={isClickable ? `Clique para ${column.filterable ? 'filtrar' : 'ordenar'} por ${column.header}` : undefined}
     >
-      <div className="flex items-center gap-2">
-        <span className={isFilterColumn ? 'text-blue-600 font-bold' : ''}>
+      <div className={`flex items-center gap-2 ${column.align === 'right' ? 'justify-end' : column.align === 'center' ? 'justify-center' : 'justify-start'}`}>
+        <span className={`transition-colors ${isFilterColumn ? 'text-secondary font-extrabold' : ''}`}>
           {column.header}
         </span>
 
         {/* Indicador de coluna de filtro selecionada */}
         {isFilterColumn && column.filterable && (
-          <span className="inline-flex items-center justify-center w-5 h-5 bg-blue-100 text-blue-600 rounded">
+          <span className="inline-flex items-center justify-center w-5 h-5 bg-secondary/10 text-secondary rounded-md shadow-sm">
             <Filter className="w-3 h-3" />
           </span>
         )}
 
         {/* Indicador de ordenação */}
         {isSortColumn && column.sortable && (
-          <span className={`inline-flex items-center justify-center w-5 h-5 rounded ${
-            isFilterColumn ? 'bg-blue-100 text-blue-600' : 'bg-[var(--surface-muted)] text-[var(--text-muted)]'
-          }`}>
+          <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md shadow-sm ${isFilterColumn ? 'bg-secondary/10 text-secondary' : 'bg-surface-active text-primary'
+            }`}>
             {sortDirection === 'asc' ? (
               <ArrowUp className="w-3 h-3" />
             ) : (
@@ -55,7 +52,7 @@ export function ColumnHeader({
 
         {/* Indicador hover para colunas clicáveis */}
         {isClickable && !isFilterColumn && !isSortColumn && (
-          <span className="opacity-0 group-hover:opacity-50 transition-opacity">
+          <span className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground/50">
             <Filter className="w-3 h-3" />
           </span>
         )}

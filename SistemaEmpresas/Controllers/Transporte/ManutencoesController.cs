@@ -45,24 +45,24 @@ public class ManutencoesController : ControllerBase
     /// Lista todas as manutenções
     /// </summary>
     [HttpGet]
-    public async Task<ActionResult<List<ManutencaoVeiculoListDto>>> Listar([FromQuery] bool apenasAtivos = true)
+    public async Task<ActionResult<PagedResult<ManutencaoVeiculoListDto>>> Listar([FromQuery] ManutencaoFiltros filtros)
     {
         try
         {
             var usuario = User?.Identity?.Name ?? "Desconhecido";
-            _logger.LogInformation("Listando manutenções. Usuário: {Usuario}, ApenasAtivos: {ApenasAtivos}", usuario, apenasAtivos);
+            _logger.LogInformation("Listando manutenções. Usuário: {Usuario}, Filtros: {@Filtros}", usuario, filtros);
 
-            var manutencoes = await _service.ListarAsync(apenasAtivos);
+            var resultado = await _service.ListarAsync(filtros);
             
             _logger.LogInformation("Manutenções listadas com sucesso. Total: {Total}, Usuário: {Usuario}", 
-                manutencoes?.Count ?? 0, usuario);
-            return Ok(manutencoes);
+                resultado.TotalCount, usuario);
+            return Ok(resultado);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Erro ao listar manutenções. Usuário: {Usuario}", 
                 User?.Identity?.Name ?? "Desconhecido");
-            return StatusCode(500, new { mensagem = "Erro interno ao listar manutenções" });
+            return StatusCode(500, new { mensagem = "Erro interno ao listar manutenções", erro = ex.Message, stack = ex.StackTrace });
         }
     }
 

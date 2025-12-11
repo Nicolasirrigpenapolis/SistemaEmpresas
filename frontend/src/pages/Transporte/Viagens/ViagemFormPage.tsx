@@ -221,7 +221,7 @@ export default function ViagemFormPage() {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <XCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-700">Acesso Negado</h2>
+          <h2 className="text-xl font-semibold text-primary/80">Acesso Negado</h2>
         </div>
       </div>
     );
@@ -231,10 +231,10 @@ export default function ViagemFormPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <button onClick={() => navigate('/transporte/viagens')} className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg">
+        <button onClick={() => navigate('/transporte/viagens')} className="p-2 text-muted-foreground hover:text-primary/80 hover:bg-surface-hover rounded-lg">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+        <h1 className="text-2xl font-bold text-primary flex items-center gap-2">
           <Route className="w-7 h-7 text-green-600" /> {titulo}
         </h1>
       </div>
@@ -244,85 +244,88 @@ export default function ViagemFormPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Dados Principais */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Dados da Viagem</h2>
+        <div className="bg-surface rounded-xl shadow-sm border border-border p-6">
+          <h2 className="text-lg font-semibold text-primary mb-4 flex items-center gap-2 pb-3 border-b border-border">
+            <Route className="w-5 h-5 text-green-500" />
+            Dados da Viagem
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Veículo <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">Veículo <span className="text-red-500">*</span></label>
               <select name="veiculoId" value={formData.veiculoId} onChange={handleChange} disabled={somenteVisualizacao}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-gray-100">
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-surface-hover">
                 <option value={0}>Selecione...</option>
                 {Array.isArray(veiculos) && veiculos.map((v) => (<option key={v.id} value={v.id}>{v.placa} - {v.marca} {v.modelo}</option>))}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Reboque</label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">Reboque</label>
               <select name="reboqueId" value={formData.reboqueId || ''} onChange={handleChange} disabled={somenteVisualizacao}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-gray-100">
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-surface-hover">
                 <option value="">Nenhum</option>
                 {Array.isArray(reboques) && reboques.map((r) => (<option key={r.id} value={r.id}>{r.placa}</option>))}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Motorista <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">Motorista <span className="text-red-500">*</span></label>
               <select name="motoristaId" value={formData.motoristaId || 0} onChange={handleChange} disabled={somenteVisualizacao}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-gray-100">
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-surface-hover">
                 <option value={0}>Selecione...</option>
                 {Array.isArray(motoristas) && motoristas.map((m) => (<option key={m.codigoDoMotorista} value={m.codigoDoMotorista}>{m.nomeDoMotorista}</option>))}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">Status</label>
               <select name="status" value={formData.status} onChange={handleChange} disabled={somenteVisualizacao}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-gray-100">
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-surface-hover">
                 {STATUS_VIAGEM.map((s) => (<option key={s} value={s}>{s}</option>))}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Data Partida</label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">Data Partida</label>
               <input type="date" name="dataPartida" value={formData.dataPartida} onChange={handleChange} disabled={somenteVisualizacao}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-gray-100" />
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-surface-hover" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Data Chegada</label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">Data Chegada</label>
               <input type="date" name="dataChegada" value={formData.dataChegada || ''} onChange={handleChange} disabled={somenteVisualizacao}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-gray-100" />
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-surface-hover" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">KM Saída</label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">KM Saída</label>
               <input type="number" name="kmSaida" value={formData.kmSaida || ''} onChange={handleChange} disabled={somenteVisualizacao}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-gray-100" />
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-surface-hover" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">KM Chegada</label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">KM Chegada</label>
               <input type="number" name="kmChegada" value={formData.kmChegada || ''} onChange={handleChange} disabled={somenteVisualizacao}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-gray-100" />
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-surface-hover" />
             </div>
           </div>
 
           {/* Origem/Destino */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Cidade Origem</label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">Cidade Origem</label>
               <input type="text" name="origemCidade" value={formData.origemCidade} onChange={handleChange} disabled={somenteVisualizacao}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-gray-100" />
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-surface-hover" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">UF Origem</label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">UF Origem</label>
               <select name="origemUf" value={formData.origemUf} onChange={handleChange} disabled={somenteVisualizacao}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-gray-100">
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-surface-hover">
                 {UFS_BRASIL.map((uf) => (<option key={uf} value={uf}>{uf}</option>))}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Cidade Destino</label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">Cidade Destino</label>
               <input type="text" name="destinoCidade" value={formData.destinoCidade} onChange={handleChange} disabled={somenteVisualizacao}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-gray-100" />
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-surface-hover" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">UF Destino</label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">UF Destino</label>
               <select name="destinoUf" value={formData.destinoUf} onChange={handleChange} disabled={somenteVisualizacao}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-gray-100">
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-surface-hover">
                 {UFS_BRASIL.map((uf) => (<option key={uf} value={uf}>{uf}</option>))}
               </select>
             </div>
@@ -331,27 +334,27 @@ export default function ViagemFormPage() {
           {/* CT-e e Frete */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Número CT-e</label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">Número CT-e</label>
               <input type="text" name="numeroCte" value={formData.numeroCte} onChange={handleChange} disabled={somenteVisualizacao}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-gray-100" />
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-surface-hover" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Valor Frete (R$)</label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">Valor Frete (R$)</label>
               <input type="number" name="valorFrete" value={formData.valorFrete || ''} onChange={handleChange} disabled={somenteVisualizacao}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-gray-100" step="0.01" />
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-surface-hover" step="0.01" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Observações</label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">Observações</label>
               <input type="text" name="observacoes" value={formData.observacoes} onChange={handleChange} disabled={somenteVisualizacao}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-gray-100" />
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-surface-hover" />
             </div>
           </div>
         </div>
 
         {/* Despesas */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+        <div className="bg-surface rounded-xl shadow-sm border border-border p-6">
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-border">
+            <h2 className="text-lg font-semibold text-primary flex items-center gap-2">
               <TrendingDown className="w-5 h-5 text-red-500" /> Despesas
             </h2>
             {!somenteVisualizacao && (
@@ -361,23 +364,23 @@ export default function ViagemFormPage() {
             )}
           </div>
           {despesas.length === 0 ? (
-            <p className="text-gray-500 text-center py-4">Nenhuma despesa cadastrada</p>
+            <p className="text-muted-foreground text-center py-4">Nenhuma despesa cadastrada</p>
           ) : (
             <div className="space-y-3">
               {despesas.map((desp, index) => (
-                <div key={index} className="grid grid-cols-1 md:grid-cols-6 gap-3 p-3 bg-gray-50 rounded-lg">
+                <div key={index} className="grid grid-cols-1 md:grid-cols-6 gap-3 p-3 bg-surface-hover rounded-lg">
                   <select value={desp.tipoDespesa} onChange={(e) => updateDespesa(index, 'tipoDespesa', e.target.value)} disabled={somenteVisualizacao}
-                    className="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-green-500 disabled:bg-gray-100">
+                    className="px-2 py-1 border border-input rounded text-sm focus:ring-2 focus:ring-green-500 disabled:bg-surface-hover">
                     {TIPOS_DESPESA.map((t) => (<option key={t} value={t}>{t}</option>))}
                   </select>
                   <input type="text" placeholder="Descrição" value={desp.descricao || ''} onChange={(e) => updateDespesa(index, 'descricao', e.target.value)} disabled={somenteVisualizacao}
-                    className="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-green-500 disabled:bg-gray-100" />
+                    className="px-2 py-1 border border-input rounded text-sm focus:ring-2 focus:ring-green-500 disabled:bg-surface-hover" />
                   <input type="number" placeholder="Valor" value={desp.valor || ''} onChange={(e) => updateDespesa(index, 'valor', Number(e.target.value))} disabled={somenteVisualizacao}
-                    className="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-green-500 disabled:bg-gray-100" step="0.01" />
+                    className="px-2 py-1 border border-input rounded text-sm focus:ring-2 focus:ring-green-500 disabled:bg-surface-hover" step="0.01" />
                   <input type="date" value={desp.data} onChange={(e) => updateDespesa(index, 'data', e.target.value)} disabled={somenteVisualizacao}
-                    className="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-green-500 disabled:bg-gray-100" />
+                    className="px-2 py-1 border border-input rounded text-sm focus:ring-2 focus:ring-green-500 disabled:bg-surface-hover" />
                   <input type="text" placeholder="Fornecedor" value={desp.fornecedor || ''} onChange={(e) => updateDespesa(index, 'fornecedor', e.target.value)} disabled={somenteVisualizacao}
-                    className="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-green-500 disabled:bg-gray-100" />
+                    className="px-2 py-1 border border-input rounded text-sm focus:ring-2 focus:ring-green-500 disabled:bg-surface-hover" />
                   {!somenteVisualizacao && (
                     <button type="button" onClick={() => removeDespesa(index)} className="p-1 text-red-500 hover:bg-red-100 rounded">
                       <Trash2 className="w-4 h-4" />
@@ -393,9 +396,9 @@ export default function ViagemFormPage() {
         </div>
 
         {/* Receitas */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+        <div className="bg-surface rounded-xl shadow-sm border border-border p-6">
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-border">
+            <h2 className="text-lg font-semibold text-primary flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-green-500" /> Receitas
             </h2>
             {!somenteVisualizacao && (
@@ -405,23 +408,23 @@ export default function ViagemFormPage() {
             )}
           </div>
           {receitas.length === 0 ? (
-            <p className="text-gray-500 text-center py-4">Nenhuma receita cadastrada</p>
+            <p className="text-muted-foreground text-center py-4">Nenhuma receita cadastrada</p>
           ) : (
             <div className="space-y-3">
               {receitas.map((rec, index) => (
-                <div key={index} className="grid grid-cols-1 md:grid-cols-6 gap-3 p-3 bg-gray-50 rounded-lg">
+                <div key={index} className="grid grid-cols-1 md:grid-cols-6 gap-3 p-3 bg-surface-hover rounded-lg">
                   <select value={rec.tipoReceita} onChange={(e) => updateReceita(index, 'tipoReceita', e.target.value)} disabled={somenteVisualizacao}
-                    className="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-green-500 disabled:bg-gray-100">
+                    className="px-2 py-1 border border-input rounded text-sm focus:ring-2 focus:ring-green-500 disabled:bg-surface-hover">
                     {TIPOS_RECEITA.map((t) => (<option key={t} value={t}>{t}</option>))}
                   </select>
                   <input type="text" placeholder="Descrição" value={rec.descricao || ''} onChange={(e) => updateReceita(index, 'descricao', e.target.value)} disabled={somenteVisualizacao}
-                    className="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-green-500 disabled:bg-gray-100" />
+                    className="px-2 py-1 border border-input rounded text-sm focus:ring-2 focus:ring-green-500 disabled:bg-surface-hover" />
                   <input type="number" placeholder="Valor" value={rec.valor || ''} onChange={(e) => updateReceita(index, 'valor', Number(e.target.value))} disabled={somenteVisualizacao}
-                    className="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-green-500 disabled:bg-gray-100" step="0.01" />
+                    className="px-2 py-1 border border-input rounded text-sm focus:ring-2 focus:ring-green-500 disabled:bg-surface-hover" step="0.01" />
                   <input type="date" value={rec.data} onChange={(e) => updateReceita(index, 'data', e.target.value)} disabled={somenteVisualizacao}
-                    className="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-green-500 disabled:bg-gray-100" />
+                    className="px-2 py-1 border border-input rounded text-sm focus:ring-2 focus:ring-green-500 disabled:bg-surface-hover" />
                   <input type="text" placeholder="Cliente" value={rec.cliente || ''} onChange={(e) => updateReceita(index, 'cliente', e.target.value)} disabled={somenteVisualizacao}
-                    className="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-green-500 disabled:bg-gray-100" />
+                    className="px-2 py-1 border border-input rounded text-sm focus:ring-2 focus:ring-green-500 disabled:bg-surface-hover" />
                   {!somenteVisualizacao && (
                     <button type="button" onClick={() => removeReceita(index)} className="p-1 text-red-500 hover:bg-red-100 rounded">
                       <Trash2 className="w-4 h-4" />
@@ -437,21 +440,21 @@ export default function ViagemFormPage() {
         </div>
 
         {/* Resumo Financeiro */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <div className="bg-surface rounded-xl shadow-sm border border-border p-6">
+          <h2 className="text-lg font-semibold text-primary mb-4 flex items-center gap-2 pb-3 border-b border-border">
             <DollarSign className="w-5 h-5 text-blue-500" /> Resumo Financeiro
           </h2>
           <div className="grid grid-cols-3 gap-4 text-center">
             <div className="p-4 bg-green-50 rounded-lg">
-              <p className="text-sm text-gray-600">Total Receitas</p>
+              <p className="text-sm text-muted-foreground">Total Receitas</p>
               <p className="text-xl font-bold text-green-600">R$ {totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
             </div>
             <div className="p-4 bg-red-50 rounded-lg">
-              <p className="text-sm text-gray-600">Total Despesas</p>
+              <p className="text-sm text-muted-foreground">Total Despesas</p>
               <p className="text-xl font-bold text-red-600">R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
             </div>
             <div className={`p-4 rounded-lg ${saldo >= 0 ? 'bg-blue-50' : 'bg-orange-50'}`}>
-              <p className="text-sm text-gray-600">Saldo da Viagem</p>
+              <p className="text-sm text-muted-foreground">Saldo da Viagem</p>
               <p className={`text-xl font-bold ${saldo >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
                 R$ {saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </p>
@@ -462,10 +465,10 @@ export default function ViagemFormPage() {
         {/* Botões */}
         {!somenteVisualizacao && (
           <div className="flex justify-end gap-4">
-            <button type="button" onClick={() => navigate('/transporte/viagens')} className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+            <button type="button" onClick={() => navigate('/transporte/viagens')} className="px-4 py-2 text-primary/80 bg-surface-hover rounded-lg hover:bg-gray-200">
               Cancelar
             </button>
-            <button type="submit" disabled={saving} className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50">
+            <button type="submit" disabled={saving} className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-lg hover:from-emerald-600 hover:to-green-700 disabled:opacity-50">
               {saving ? (<><Loader2 className="w-5 h-5 animate-spin" />Salvando...</>) : (<><Save className="w-5 h-5" />Salvar</>)}
             </button>
           </div>

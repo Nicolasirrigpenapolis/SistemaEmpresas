@@ -9,14 +9,12 @@ export default function Layout() {
     return localStorage.getItem('sidebarCollapsed') === 'true';
   });
 
-  // Estado para controlar sidebar mobile
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('sidebarCollapsed', String(sidebarCollapsed));
   }, [sidebarCollapsed]);
 
-  // Fecha o menu mobile quando redimensiona para desktop
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
@@ -27,7 +25,6 @@ export default function Layout() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Previne scroll do body quando menu mobile está aberto
   useEffect(() => {
     if (mobileMenuOpen) {
       document.body.style.overflow = 'hidden';
@@ -40,34 +37,34 @@ export default function Layout() {
   }, [mobileMenuOpen]);
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
-      {/* Overlay para mobile */}
+    <div className="min-h-screen bg-background text-primary font-sans selection:bg-secondary selection:text-white">
+      {/* Mobile Overlay */}
       {mobileMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity duration-300"
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden transition-opacity duration-300 animate-fade-in"
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
 
-      {/* Sidebar - hidden on mobile by default, shown when mobileMenuOpen */}
-      <Sidebar 
-        collapsed={sidebarCollapsed} 
+      <Sidebar
+        collapsed={sidebarCollapsed}
         onCollapse={setSidebarCollapsed}
         mobileOpen={mobileMenuOpen}
         onMobileClose={() => setMobileMenuOpen(false)}
       />
 
-      {/* Navbar */}
-      <Navbar 
-        sidebarCollapsed={sidebarCollapsed} 
+      <Navbar
+        sidebarCollapsed={sidebarCollapsed}
         onMobileMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
       />
 
-      {/* Page Content */}
-      <main className={`pt-16 md:pt-20 min-h-screen transition-all duration-300 bg-[var(--bg)] ${
-        sidebarCollapsed ? 'md:ml-20' : 'md:ml-72'
-      }`}>
-        <div className="p-4 md:p-6">
+      <main
+        className={`
+          pt-20 pb-6 min-h-screen transition-all duration-300 ease-in-out
+          ${sidebarCollapsed ? 'md:ml-24' : 'md:ml-72'}
+        `}
+      >
+        <div className="px-3 sm:px-4 md:px-8 max-w-[1920px] mx-auto animate-fade-in">
           <Outlet />
         </div>
       </main>

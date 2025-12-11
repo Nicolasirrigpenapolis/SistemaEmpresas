@@ -13976,6 +13976,12 @@ namespace SistemaEmpresas.Migrations.AppDb
                         .HasColumnType("bit")
                         .HasColumnName("PW~Ativo");
 
+                    b.Property<string>("PwEmail")
+                        .HasMaxLength(255)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("PW~Email");
+
                     b.Property<string>("PwGrupo")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -16105,6 +16111,9 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("AnoFabricacao")
+                        .HasColumnType("int");
+
                     b.Property<bool>("Ativo")
                         .HasColumnType("bit");
 
@@ -16120,6 +16129,14 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.Property<DateTime?>("DataUltimaAlteracao")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Marca")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Modelo")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Observacoes")
                         .HasMaxLength(1000)
@@ -16279,7 +16296,8 @@ namespace SistemaEmpresas.Migrations.AppDb
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<int>("Tara")
+                    b.Property<int?>("Tara")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<string>("TipoCarroceria")

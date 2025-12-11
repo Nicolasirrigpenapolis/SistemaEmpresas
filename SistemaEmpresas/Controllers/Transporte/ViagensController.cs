@@ -33,27 +33,27 @@ public class ViagensController : ControllerBase
     }
 
     /// <summary>
-    /// Lista todas as viagens
+    /// Lista todas as viagens com paginação e filtros
     /// </summary>
     [HttpGet]
-    public async Task<ActionResult<List<ViagemListDto>>> Listar([FromQuery] bool apenasAtivos = true)
+    public async Task<ActionResult<DTOs.PagedResult<ViagemListDto>>> Listar([FromQuery] ViagemFiltros filtros)
     {
         try
         {
             var usuario = User?.Identity?.Name ?? "Desconhecido";
-            _logger.LogInformation("Listando viagens. Usuário: {Usuario}, ApenasAtivos: {ApenasAtivos}", usuario, apenasAtivos);
+            _logger.LogInformation("Listando viagens. Usuário: {Usuario}, Filtros: {@Filtros}", usuario, filtros);
 
-            var viagens = await _service.ListarAsync(apenasAtivos);
+            var resultado = await _service.ListarAsync(filtros);
             
             _logger.LogInformation("Viagens listadas com sucesso. Total: {Total}, Usuário: {Usuario}", 
-                viagens?.Count ?? 0, usuario);
-            return Ok(viagens);
+                resultado.TotalCount, usuario);
+            return Ok(resultado);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Erro ao listar viagens. Usuário: {Usuario}", 
                 User?.Identity?.Name ?? "Desconhecido");
-            return StatusCode(500, new { mensagem = "Erro interno ao listar viagens" });
+            return StatusCode(500, new { mensagem = "Erro interno ao listar viagens", erro = ex.Message, stack = ex.StackTrace });
         }
     }
 

@@ -22,8 +22,9 @@ import {
   Settings,
   ClipboardList,
   Send,
-  Check,
+  Check
 } from 'lucide-react';
+
 import { notaFiscalService } from '../../services/notaFiscalService';
 import { emitenteService } from '../../services/emitenteService';
 import type {
@@ -152,10 +153,10 @@ export default function NotaFiscalFormPage() {
   // Se tem Peça ou Conjunto, não pode ter Produto
   const temProdutos = produtosLista.length > 0;
   const temPecasOuConjuntos = pecasLista.length > 0 || conjuntosLista.length > 0;
-  
+
   // Nota fiscal já autorizada/emitida - bloqueia edição
   const isReadOnly = notaOriginal?.autorizado === true;
-  
+
   // Função para verificar se uma aba está desabilitada pela regra de exclusividade
   const isTabDisabled = (tabId: TabId): boolean => {
     if (tabId === 'produtos') {
@@ -187,7 +188,7 @@ export default function NotaFiscalFormPage() {
           notaFiscalService.listarNaturezas(),
           notaFiscalService.listarTiposCobranca(),
         ]);
-        
+
         // Define o emitente (usado em validações)
         setEmitente(emitenteData);
         setNaturezas(natData);
@@ -206,7 +207,7 @@ export default function NotaFiscalFormPage() {
         try {
           const props = await notaFiscalService.listarPropriedadesPorCliente(clienteSelecionado.sequenciaDoGeral);
           setPropriedades(props);
-          
+
           // Se só tem uma propriedade, seleciona automaticamente
           if (props.length === 1 && !isEditing) {
             setFormData(prev => ({
@@ -565,14 +566,14 @@ export default function NotaFiscalFormPage() {
     setShowProdutoDropdown(false);
     setDropdownPosition(null);
     setBuscaProduto(prod.descricao);
-    
+
     // Atualiza dados básicos
     setNovoProduto(prev => ({
       ...prev,
       sequenciaDoProduto: prod.sequenciaDoProduto,
       valorUnitario: prod.precoVenda,
     }));
-    
+
     // Chama API para calcular impostos
     if (id) {
       try {
@@ -584,7 +585,7 @@ export default function NotaFiscalFormPage() {
           desconto: 0,
           valorFrete: 0
         });
-        
+
         // Atualiza o novoProduto com os impostos calculados
         // Mapeia nomes do result (maiúsculas) para nomes do DTO (minúsculas)
         setNovoProduto(prev => ({
@@ -613,7 +614,7 @@ export default function NotaFiscalFormPage() {
 
   const handleSaveProduto = async () => {
     if (!novoProduto?.sequenciaDoProduto || !id) return;
-    
+
     try {
       setSalvandoProduto(true);
       const produtoDto: ProdutoDaNotaFiscalCreateDto = {
@@ -640,14 +641,14 @@ export default function NotaFiscalFormPage() {
         aliquotaCofins: novoProduto.aliquotaCofins || 0,
         valorCofins: novoProduto.valorCofins || 0,
       };
-      
+
       const novoProd = await notaFiscalService.adicionarProduto(Number(id), produtoDto);
       setProdutosLista(prev => [...prev, novoProd]);
-      
+
       // Recarregar nota para atualizar totais
       const nota = await notaFiscalService.obterPorId(Number(id));
       setNotaOriginal(nota);
-      
+
       // Automaticamente abre nova linha de inserção para continuar adicionando
       setNovoProduto({
         sequenciaDoProduto: 0,
@@ -667,11 +668,11 @@ export default function NotaFiscalFormPage() {
 
   const handleRemoveProduto = async (produtoId: number) => {
     if (!id || !confirm('Confirma a exclusão do produto?')) return;
-    
+
     try {
       await notaFiscalService.removerProduto(Number(id), produtoId);
       setProdutosLista(prev => prev.filter(p => p.sequenciaDoProdutoDaNotaFiscal !== produtoId));
-      
+
       // Recarregar nota para atualizar totais
       const nota = await notaFiscalService.obterPorId(Number(id));
       setNotaOriginal(nota);
@@ -732,14 +733,14 @@ export default function NotaFiscalFormPage() {
     // Primeiro fecha dropdown
     setShowConjuntoDropdown(false);
     setBuscaConjunto(conj.descricao);
-    
+
     // Atualiza dados básicos
     setNovoConjunto(prev => ({
       ...prev,
       sequenciaDoConjunto: conj.sequenciaDoConjunto,
       valorUnitario: conj.precoVenda,
     }));
-    
+
     // Chama API para calcular impostos
     if (id) {
       try {
@@ -751,7 +752,7 @@ export default function NotaFiscalFormPage() {
           desconto: 0,
           valorFrete: 0
         });
-        
+
         // Atualiza o novoConjunto com os impostos calculados
         // Mapeia nomes do result (maiúsculas) para nomes do DTO (minúsculas)
         setNovoConjunto(prev => ({
@@ -780,7 +781,7 @@ export default function NotaFiscalFormPage() {
 
   const handleSaveConjunto = async () => {
     if (!novoConjunto?.sequenciaDoConjunto || !id) return;
-    
+
     try {
       setSalvandoConjunto(true);
       const conjuntoDto: ConjuntoDaNotaFiscalCreateDto = {
@@ -807,10 +808,10 @@ export default function NotaFiscalFormPage() {
         aliquotaCofins: novoConjunto.aliquotaCofins || 0,
         valorCofins: novoConjunto.valorCofins || 0,
       };
-      
+
       const novoConj = await notaFiscalService.adicionarConjunto(Number(id), conjuntoDto);
       setConjuntosLista(prev => [...prev, novoConj]);
-      
+
       const nota = await notaFiscalService.obterPorId(Number(id));
       setNotaOriginal(nota);
 
@@ -832,11 +833,11 @@ export default function NotaFiscalFormPage() {
 
   const handleRemoveConjunto = async (conjuntoId: number) => {
     if (!id || !confirm('Confirma a exclusão do conjunto?')) return;
-    
+
     try {
       await notaFiscalService.removerConjunto(Number(id), conjuntoId);
       setConjuntosLista(prev => prev.filter(c => c.sequenciaDoConjuntoDaNotaFiscal !== conjuntoId));
-      
+
       const nota = await notaFiscalService.obterPorId(Number(id));
       setNotaOriginal(nota);
     } catch (err: any) {
@@ -896,14 +897,14 @@ export default function NotaFiscalFormPage() {
     // Primeiro fecha dropdown
     setShowPecaDropdown(false);
     setBuscaPeca(peca.descricao);
-    
+
     // Atualiza dados básicos
     setNovaPeca(prev => ({
       ...prev,
       sequenciaDaPeca: peca.sequenciaDaPeca,
       valorUnitario: peca.precoVenda,
     }));
-    
+
     // Chama API para calcular impostos
     if (id) {
       try {
@@ -915,7 +916,7 @@ export default function NotaFiscalFormPage() {
           desconto: 0,
           valorFrete: 0
         });
-        
+
         // Atualiza a novaPeca com os impostos calculados
         // Mapeia nomes do result (maiúsculas) para nomes do DTO (minúsculas)
         setNovaPeca(prev => ({
@@ -944,7 +945,7 @@ export default function NotaFiscalFormPage() {
 
   const handleSavePeca = async () => {
     if (!novaPeca?.sequenciaDaPeca || !id) return;
-    
+
     try {
       setSalvandoPeca(true);
       const pecaDto: PecaDaNotaFiscalCreateDto = {
@@ -971,10 +972,10 @@ export default function NotaFiscalFormPage() {
         aliquotaCofins: novaPeca.aliquotaCofins || 0,
         valorCofins: novaPeca.valorCofins || 0,
       };
-      
+
       const novaPc = await notaFiscalService.adicionarPeca(Number(id), pecaDto);
       setPecasLista(prev => [...prev, novaPc]);
-      
+
       const nota = await notaFiscalService.obterPorId(Number(id));
       setNotaOriginal(nota);
 
@@ -996,11 +997,11 @@ export default function NotaFiscalFormPage() {
 
   const handleRemovePeca = async (pecaId: number) => {
     if (!id || !confirm('Confirma a exclusão da peça?')) return;
-    
+
     try {
       await notaFiscalService.removerPeca(Number(id), pecaId);
       setPecasLista(prev => prev.filter(p => p.sequenciaDaPecaDaNotaFiscal !== pecaId));
-      
+
       const nota = await notaFiscalService.obterPorId(Number(id));
       setNotaOriginal(nota);
     } catch (err: any) {
@@ -1026,7 +1027,7 @@ export default function NotaFiscalFormPage() {
 
   const handleSaveParcela = async () => {
     if (!novaParcela?.valor || !id) return;
-    
+
     try {
       setSalvandoParcela(true);
       const parcelaDto: ParcelaNotaFiscalCreateDto = {
@@ -1034,7 +1035,7 @@ export default function NotaFiscalFormPage() {
         valor: novaParcela.valor,
         dataDeVencimento: novaParcela.dataDeVencimento || null,
       };
-      
+
       const novaPc = await notaFiscalService.adicionarParcela(Number(id), parcelaDto);
       setParcelasLista(prev => [...prev, novaPc]);
       handleCancelParcela();
@@ -1047,7 +1048,7 @@ export default function NotaFiscalFormPage() {
 
   const handleRemoveParcela = async (parcelaId: number) => {
     if (!id || !confirm('Confirma a exclusão da parcela?')) return;
-    
+
     try {
       await notaFiscalService.removerParcela(Number(id), parcelaId);
       setParcelasLista(prev => prev.filter(p => p.sequenciaDaParcela !== parcelaId));
@@ -1096,13 +1097,12 @@ export default function NotaFiscalFormPage() {
               </h1>
               {/* Badge de Status */}
               {notaOriginal && (
-                <span className={`px-2 sm:px-2.5 py-1 text-xs font-semibold rounded-full ${
-                  notaOriginal.notaCancelada 
-                    ? 'bg-red-100 text-red-700' 
-                    : notaOriginal.autorizado 
-                      ? 'bg-green-100 text-green-700' 
-                      : 'bg-gray-100 text-gray-600'
-                }`}>
+                <span className={`px-2 sm:px-2.5 py-1 text-xs font-semibold rounded-full ${notaOriginal.notaCancelada
+                  ? 'bg-red-100 text-red-700'
+                  : notaOriginal.autorizado
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-gray-100 text-gray-600'
+                  }`}>
                   {notaOriginal.notaCancelada ? 'Cancelada' : notaOriginal.autorizado ? 'Autorizada' : 'Não Enviada'}
                 </span>
               )}
@@ -1203,20 +1203,19 @@ export default function NotaFiscalFormPage() {
             {TABS.map((tab) => {
               const disabled = isTabDisabled(tab.id);
               const disabledMessage = getTabDisabledMessage(tab.id);
-              
+
               return (
                 <button
                   key={tab.id}
                   onClick={() => !disabled && setActiveTab(tab.id)}
                   disabled={disabled}
                   title={disabledMessage || undefined}
-                  className={`flex-shrink-0 flex items-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
-                    disabled
-                      ? 'border-transparent text-gray-300 cursor-not-allowed'
-                      : activeTab === tab.id
-                        ? 'border-blue-600 text-blue-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                  className={`flex-shrink-0 flex items-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${disabled
+                    ? 'border-transparent text-gray-300 cursor-not-allowed'
+                    : activeTab === tab.id
+                      ? 'border-blue-600 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
                 >
                   {tab.icon}
                   <span className="hidden sm:inline">{tab.label}</span>
@@ -1242,7 +1241,7 @@ export default function NotaFiscalFormPage() {
                   <FileText className="h-5 w-5 text-blue-600" />
                   Identificação
                 </h3>
-                
+
                 {/* Destaque para Número da NFE - Campo principal */}
                 {isEditing && notaOriginal && (
                   <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl">
@@ -1320,392 +1319,282 @@ export default function NotaFiscalFormPage() {
                 </div>
               </div>
 
-              {/* Seção: Cliente */}
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  <User className="h-5 w-5 text-blue-600" />
-                  Cliente/Destinatário
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Busca de Cliente */}
+              {/* Cliente e Propriedade */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Cliente */}
+                <div className="relative">
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    Cliente <span className="text-red-500">*</span>
+                  </label>
                   <div className="relative">
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                      Cliente <span className="text-red-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                      <input
-                        type="text"
-                        value={buscaCliente}
-                        onChange={(e) => {
-                          setBuscaCliente(e.target.value);
-                          if (!clienteSelecionado) setShowClienteDropdown(true);
-                        }}
-                        onFocus={() => !clienteSelecionado && setShowClienteDropdown(true)}
-                        placeholder="Digite para buscar cliente..."
-                        className="w-full pl-10 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      />
-                      {clienteSelecionado && (
-                        <button
-                          onClick={handleClearCliente}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      )}
-                      {buscandoClientes && (
-                        <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 animate-spin" />
-                      )}
-                    </div>
-
-                    {/* Dropdown de clientes */}
-                    {showClienteDropdown && clientesEncontrados.length > 0 && (
-                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                        {clientesEncontrados.map((cliente) => (
-                          <button
-                            key={cliente.sequenciaDoGeral}
-                            onClick={() => handleSelectCliente(cliente)}
-                            className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-0"
-                          >
-                            <div className="font-medium text-gray-900">{cliente.nome}</div>
-                            <div className="text-sm text-gray-500">
-                              {formatCpfCnpj(cliente.documento)} • {cliente.cidade}/{cliente.uf}
-                            </div>
-                          </button>
-                        ))}
-                      </div>
+                    {buscandoClientes ? (
+                      <Loader2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-500 animate-spin" />
+                    ) : (
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    )}
+                    <input
+                      type="text"
+                      value={buscaCliente}
+                      onChange={(e) => {
+                        setBuscaCliente(e.target.value);
+                        if (!clienteSelecionado) setShowClienteDropdown(true);
+                      }}
+                      onFocus={() => !clienteSelecionado && setShowClienteDropdown(true)}
+                      placeholder="Buscar cliente..."
+                      className="w-full pl-10 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    {clienteSelecionado && (
+                      <button
+                        onClick={handleClearCliente}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
                     )}
                   </div>
+                  {/* Dropdown Cliente */}
+                  {showClienteDropdown && clientesEncontrados.length > 0 && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                      {clientesEncontrados.map((c) => (
+                        <button
+                          key={c.sequenciaDoGeral}
+                          onClick={() => handleSelectCliente(c)}
+                          className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-0"
+                        >
+                          <div className="font-medium text-gray-900">{c.nome}</div>
+                          <div className="text-sm text-gray-500">{c.cidade}/{c.uf}</div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
 
-                  {/* Dados do cliente selecionado - Card melhorado */}
-                  {clienteSelecionado && (
-                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
-                            {clienteSelecionado.nome.charAt(0).toUpperCase()}
-                          </div>
-                          <div>
-                            <p className="font-semibold text-gray-900">{clienteSelecionado.nome}</p>
-                            <p className="text-sm text-gray-600">{formatCpfCnpj(clienteSelecionado.documento)}</p>
-                            <p className="text-sm text-gray-500">{clienteSelecionado.cidade}/{clienteSelecionado.uf}</p>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Propriedade do Cliente */}
-                      <div className="mt-4 pt-4 border-t border-blue-200">
-                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                          Propriedade {propriedades.length > 0 && <span className="text-red-500">*</span>}
-                        </label>
-                        {propriedades.length > 0 ? (
-                          <select
-                            value={formData.sequenciaDaPropriedade || ''}
-                            onChange={(e) => handleInputChange('sequenciaDaPropriedade', Number(e.target.value))}
-                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-                          >
-                            <option value="">Selecione a propriedade...</option>
-                            {propriedades.map((p) => (
-                              <option key={p.sequenciaDaPropriedade} value={p.sequenciaDaPropriedade}>
-                                {p.nome}
-                              </option>
-                            ))}
-                          </select>
-                        ) : (
-                          <p className="text-sm text-amber-600 bg-amber-50 px-3 py-2 rounded-lg">
-                            Este cliente não possui propriedades cadastradas
-                          </p>
-                        )}
-                      </div>
+                {/* Propriedade */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    Propriedade
+                  </label>
+                  <select
+                    value={formData.sequenciaDaPropriedade || 0}
+                    onChange={(e) => handleInputChange('sequenciaDaPropriedade', Number(e.target.value))}
+                    disabled={propriedades.length === 0}
+                    className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:text-gray-500"
+                  >
+                    <option value={0}>Selecione...</option>
+                    {propriedades.map((p) => (
+                      <option key={p.sequenciaDaPropriedade} value={p.sequenciaDaPropriedade}>
+                        {p.nome}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Natureza e Cobrança */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Natureza */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    Natureza de Operação <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={formData.sequenciaDaNatureza || 0}
+                    onChange={(e) => handleInputChange('sequenciaDaNatureza', Number(e.target.value))}
+                    className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value={0}>Selecione...</option>
+                    {naturezas.map((n) => (
+                      <option key={n.sequenciaDaNatureza} value={n.sequenciaDaNatureza}>
+                        {n.descricao}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Tipo de Cobrança */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    Tipo de Cobrança
+                  </label>
+                  <select
+                    value={formData.sequenciaDaCobranca || 0}
+                    onChange={(e) => handleInputChange('sequenciaDaCobranca', Number(e.target.value))}
+                    className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value={0}>Selecione...</option>
+                    {tiposCobranca.map((t) => (
+                      <option key={t.sequenciaDaCobranca} value={t.sequenciaDaCobranca}>
+                        {t.descricao}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Vendedor */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="relative">
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    Vendedor
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <input
+                      type="text"
+                      value={buscaVendedor}
+                      onChange={(e) => {
+                        setBuscaVendedor(e.target.value);
+                        if (!vendedorSelecionado) setShowVendedorDropdown(true);
+                      }}
+                      onFocus={() => !vendedorSelecionado && setShowVendedorDropdown(true)}
+                      placeholder="Buscar vendedor..."
+                      className="w-full pl-10 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    {vendedorSelecionado && (
+                      <button
+                        onClick={handleClearVendedor}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
+                  {showVendedorDropdown && vendedoresEncontrados.length > 0 && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                      {vendedoresEncontrados.map((v) => (
+                        <button
+                          key={v.sequenciaDoGeral}
+                          onClick={() => handleSelectVendedor(v)}
+                          className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-0"
+                        >
+                          <div className="font-medium text-gray-900">{v.nome}</div>
+                        </button>
+                      ))}
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Seção: Natureza de Operação */}
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  <Settings className="h-5 w-5 text-blue-600" />
-                  Operação
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* Natureza de Operação */}
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                      Natureza de Operação <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      value={formData.sequenciaDaNatureza || ''}
-                      onChange={(e) => handleInputChange('sequenciaDaNatureza', Number(e.target.value))}
-                      className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      <option value="">Selecione...</option>
-                      {naturezas.map((n) => (
-                        <option key={n.sequenciaDaNatureza} value={n.sequenciaDaNatureza}>
-                          {n.cfop} - {n.descricao}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Tipo de Cobrança */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                      Tipo de Cobrança
-                    </label>
-                    <select
-                      value={formData.sequenciaDaCobranca || ''}
-                      onChange={(e) => handleInputChange('sequenciaDaCobranca', Number(e.target.value))}
-                      className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      <option value="">Selecione...</option>
-                      {tiposCobranca.map((t) => (
-                        <option key={t.sequenciaDaCobranca} value={t.sequenciaDaCobranca}>
-                          {t.descricao}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              {/* Seção: Vendedor */}
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  <User className="h-5 w-5 text-blue-600" />
-                  Vendedor
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="relative">
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                      Vendedor
-                    </label>
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                      <input
-                        type="text"
-                        value={buscaVendedor}
-                        onChange={(e) => {
-                          setBuscaVendedor(e.target.value);
-                          if (!vendedorSelecionado) setShowVendedorDropdown(true);
-                        }}
-                        onFocus={() => !vendedorSelecionado && setShowVendedorDropdown(true)}
-                        placeholder="Digite para buscar vendedor..."
-                        className="w-full pl-10 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      />
-                      {vendedorSelecionado && (
-                        <button
-                          onClick={handleClearVendedor}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      )}
-                    </div>
-
-                    {showVendedorDropdown && vendedoresEncontrados.length > 0 && (
-                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                        {vendedoresEncontrados.map((v) => (
-                          <button
-                            key={v.sequenciaDoGeral}
-                            onClick={() => handleSelectVendedor(v)}
-                            className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-0"
-                          >
-                            <div className="font-medium text-gray-900">{v.nome}</div>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Seção: Observações */}
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  <ClipboardList className="h-5 w-5 text-blue-600" />
-                  Observações
-                </h3>
-                <div className="grid grid-cols-1 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                      Histórico / Informações Adicionais
-                    </label>
-                    <textarea
-                      value={formData.historico || ''}
-                      onChange={(e) => handleInputChange('historico', e.target.value)}
-                      rows={4}
-                      placeholder="Informações que aparecerão na nota fiscal..."
-                      className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                      Observação Interna
-                    </label>
-                    <textarea
-                      value={formData.observacao || ''}
-                      onChange={(e) => handleInputChange('observacao', e.target.value)}
-                      rows={2}
-                      placeholder="Observações internas (não aparece na nota)..."
-                      className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-                    />
-                  </div>
-                </div>
-              </div>
             </div>
           )}
 
           {/* Aba 2 - Transportadora */}
           {activeTab === 'transportadora' && (
             <div className={`space-y-6 ${isReadOnly ? 'pointer-events-none opacity-60' : ''}`}>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  <Truck className="h-5 w-5 text-blue-600" />
-                  Dados da Transportadora
-                </h3>
-
-                {/* Toggle: Transportadora cadastrada vs avulsa */}
-                <div className="mb-6">
-                  <div className="flex items-center gap-4">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="tipoTransportadora"
-                        checked={!formData.transportadoraAvulsa}
-                        onChange={() => handleInputChange('transportadoraAvulsa', false)}
-                        className="text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="text-sm text-gray-700">Transportadora Cadastrada</span>
+              {!formData.transportadoraAvulsa ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Busca de Transportadora */}
+                  <div className="relative">
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                      Transportadora
                     </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="tipoTransportadora"
-                        checked={formData.transportadoraAvulsa}
-                        onChange={() => handleInputChange('transportadoraAvulsa', true)}
-                        className="text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="text-sm text-gray-700">Transportadora Avulsa</span>
-                    </label>
-                  </div>
-                </div>
-
-                {!formData.transportadoraAvulsa ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Busca de Transportadora */}
                     <div className="relative">
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                        Transportadora
-                      </label>
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                        <input
-                          type="text"
-                          value={buscaTransportadora}
-                          onChange={(e) => {
-                            setBuscaTransportadora(e.target.value);
-                            if (!transportadoraSelecionada) setShowTransportadoraDropdown(true);
-                          }}
-                          onFocus={() => !transportadoraSelecionada && setShowTransportadoraDropdown(true)}
-                          placeholder="Digite para buscar transportadora..."
-                          className="w-full pl-10 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                        {transportadoraSelecionada && (
-                          <button
-                            onClick={handleClearTransportadora}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
-                        )}
-                      </div>
-
-                      {showTransportadoraDropdown && transportadorasEncontradas.length > 0 && (
-                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                          {transportadorasEncontradas.map((t) => (
-                            <button
-                              key={t.sequenciaDoGeral}
-                              onClick={() => handleSelectTransportadora(t)}
-                              className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-0"
-                            >
-                              <div className="font-medium text-gray-900">{t.nome}</div>
-                              <div className="text-sm text-gray-500">
-                                {formatCpfCnpj(t.documento)} • {t.cidade}/{t.uf}
-                              </div>
-                            </button>
-                          ))}
-                        </div>
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <input
+                        type="text"
+                        value={buscaTransportadora}
+                        onChange={(e) => {
+                          setBuscaTransportadora(e.target.value);
+                          if (!transportadoraSelecionada) setShowTransportadoraDropdown(true);
+                        }}
+                        onFocus={() => !transportadoraSelecionada && setShowTransportadoraDropdown(true)}
+                        placeholder="Digite para buscar transportadora..."
+                        className="w-full pl-10 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                      {transportadoraSelecionada && (
+                        <button
+                          onClick={handleClearTransportadora}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
                       )}
                     </div>
 
-                    {/* Card da Transportadora selecionada */}
-                    {transportadoraSelecionada && (
-                      <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl p-4">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center text-white">
-                              <Truck className="h-5 w-5" />
+                    {showTransportadoraDropdown && transportadorasEncontradas.length > 0 && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                        {transportadorasEncontradas.map((t) => (
+                          <button
+                            key={t.sequenciaDoGeral}
+                            onClick={() => handleSelectTransportadora(t)}
+                            className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-0"
+                          >
+                            <div className="font-medium text-gray-900">{t.nome}</div>
+                            <div className="text-sm text-gray-500">
+                              {formatCpfCnpj(t.documento)} • {t.cidade}/{t.uf}
                             </div>
-                            <div>
-                              <p className="font-semibold text-gray-900">{transportadoraSelecionada.nome}</p>
-                              <p className="text-sm text-gray-600">{formatCpfCnpj(transportadoraSelecionada.documento)}</p>
-                              <p className="text-sm text-gray-500">{transportadoraSelecionada.cidade}/{transportadoraSelecionada.uf}</p>
-                            </div>
-                          </div>
-                        </div>
+                          </button>
+                        ))}
                       </div>
                     )}
                   </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                        Nome da Transportadora
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.nomeDaTransportadoraAvulsa || ''}
-                        onChange={(e) => handleInputChange('nomeDaTransportadoraAvulsa', e.target.value)}
-                        className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      />
+
+                  {/* Card da Transportadora selecionada */}
+                  {transportadoraSelecionada && (
+                    <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center text-white">
+                            <Truck className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-900">{transportadoraSelecionada.nome}</p>
+                            <p className="text-sm text-gray-600">{formatCpfCnpj(transportadoraSelecionada.documento)}</p>
+                            <p className="text-sm text-gray-500">{transportadoraSelecionada.cidade}/{transportadoraSelecionada.uf}</p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                        CNPJ/CPF
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.documentoDaTransportadora || ''}
-                        onChange={(e) => handleInputChange('documentoDaTransportadora', e.target.value)}
-                        className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                        Inscrição Estadual
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.ieDaTransportadora || ''}
-                        onChange={(e) => handleInputChange('ieDaTransportadora', e.target.value)}
-                        className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                        Endereço
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.enderecoDaTransportadora || ''}
-                        onChange={(e) => handleInputChange('enderecoDaTransportadora', e.target.value)}
-                        className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                      Nome da Transportadora
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.nomeDaTransportadoraAvulsa || ''}
+                      onChange={(e) => handleInputChange('nomeDaTransportadoraAvulsa', e.target.value)}
+                      className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
                   </div>
-                )}
-              </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                      CNPJ/CPF
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.documentoDaTransportadora || ''}
+                      onChange={(e) => handleInputChange('documentoDaTransportadora', e.target.value)}
+                      className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                      Inscrição Estadual
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.ieDaTransportadora || ''}
+                      onChange={(e) => handleInputChange('ieDaTransportadora', e.target.value)}
+                      className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                      Endereço
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.enderecoDaTransportadora || ''}
+                      onChange={(e) => handleInputChange('enderecoDaTransportadora', e.target.value)}
+                      className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Veículo */}
               <div>
@@ -1880,7 +1769,7 @@ export default function NotaFiscalFormPage() {
                   </p>
                 </div>
               )}
-              
+
               {/* Header */}
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
@@ -1903,8 +1792,8 @@ export default function NotaFiscalFormPage() {
                   <span className="text-xs opacity-80">← Deslize horizontalmente para ver todos os campos →</span>
                 </div>
                 {/* Container com scroll horizontal e vertical */}
-                <div 
-                  className="overflow-auto scrollbar-thin scrollbar-thumb-slate-400 scrollbar-track-slate-100" 
+                <div
+                  className="overflow-auto scrollbar-thin scrollbar-thumb-slate-400 scrollbar-track-slate-100"
                   style={{ maxHeight: '500px', minHeight: '300px' }}
                 >
                   <table className="min-w-[2200px] w-full text-xs border-collapse">
@@ -2010,8 +1899,8 @@ export default function NotaFiscalFormPage() {
                               ref={produtoInputRef}
                               type="text"
                               value={buscaProduto}
-                              onChange={(e) => { 
-                                setBuscaProduto(e.target.value); 
+                              onChange={(e) => {
+                                setBuscaProduto(e.target.value);
                                 setShowProdutoDropdown(true);
                                 updateDropdownPosition();
                               }}
@@ -2177,7 +2066,7 @@ export default function NotaFiscalFormPage() {
                   </p>
                 </div>
               )}
-              
+
               {/* Header */}
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
@@ -2193,177 +2082,177 @@ export default function NotaFiscalFormPage() {
               <div className="border border-gray-200 rounded-lg">
                 <div className="overflow-x-auto" style={{ maxHeight: '400px' }}>
                   <table className="min-w-[900px] w-full divide-y divide-gray-200 text-xs">
-                  <thead className="bg-gray-50 sticky top-0 z-10">
-                    <tr>
-                      <th className="px-2 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-14">Seq</th>
-                      <th className="px-2 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider min-w-[200px]">Conjunto</th>
-                      <th className="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-20">Qtde</th>
-                      <th className="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">Vl.Unit</th>
-                      <th className="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">Vl.Total</th>
-                      <th className="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-16">%IPI</th>
-                      <th className="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">Vl.IPI</th>
-                      <th className="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">Vl.IBS</th>
-                      <th className="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">Vl.CBS</th>
-                      <th className="px-2 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-16">Usado</th>
-                      <th className="px-2 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-16">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {/* Linhas de conjuntos existentes PRIMEIRO */}
-                    {conjuntosLista.map((conj, index) => (
-                      <tr key={conj.sequenciaDoConjuntoDaNotaFiscal || index} className="hover:bg-gray-50">
-                        <td className="px-2 py-1.5 text-center">
-                          <span className="inline-flex items-center justify-center w-8 h-6 bg-indigo-100 text-indigo-700 text-xs font-bold rounded">
-                            {conj.sequenciaDoConjuntoDaNotaFiscal}
-                          </span>
-                        </td>
-                        <td className="px-2 py-1.5">
-                          <div className="text-xs font-medium text-gray-900 truncate max-w-[200px]" title={conj.descricaoConjunto}>{conj.descricaoConjunto}</div>
-                        </td>
-                        <td className="px-2 py-1.5 text-xs text-gray-900 text-right">{conj.quantidade.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                        <td className="px-2 py-1.5 text-xs text-gray-900 text-right">{conj.valorUnitario.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                        <td className="px-2 py-1.5 text-xs text-gray-900 text-right font-medium">{conj.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                        <td className="px-2 py-1.5 text-xs text-gray-600 text-right">{conj.valorTotal > 0 ? ((conj.valorIpi / conj.valorTotal) * 100).toFixed(2) : '0.00'}</td>
-                        <td className="px-2 py-1.5 text-xs text-gray-600 text-right">{conj.valorIpi.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                        <td className="px-2 py-1.5 text-xs text-gray-600 text-right">{(conj.valorIbs || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                        <td className="px-2 py-1.5 text-xs text-gray-600 text-right">{(conj.valorCbs || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                        <td className="px-2 py-1.5 text-center">
-                          <span className={`px-1.5 py-0.5 text-xs font-medium rounded-full ${conj.usado ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                            {conj.usado ? 'S' : 'N'}
-                          </span>
-                        </td>
-                        <td className="px-2 py-1.5 text-center">
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveConjunto(conj.sequenciaDoConjuntoDaNotaFiscal)}
-                            disabled={!isEditing}
-                            className="p-1 text-red-600 hover:bg-red-100 rounded transition-colors disabled:opacity-50"
-                            title="Excluir"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-
-                    {/* Linha de inserção SEMPRE NO FINAL */}
-                    {novoConjunto && !temProdutos && (
-                      <tr className="bg-indigo-50 border-t-2 border-indigo-200">
-                        <td className="px-2 py-1.5 text-center text-xs text-gray-400">
-                          <span className="inline-flex items-center justify-center w-8 h-6 bg-indigo-200 text-indigo-700 text-xs font-bold rounded">
-                            +
-                          </span>
-                        </td>
-                        <td className="px-2 py-1.5">
-                          <div className="relative">
-                            <input
-                              type="text"
-                              value={buscaConjunto}
-                              onChange={(e) => { setBuscaConjunto(e.target.value); setShowConjuntoDropdown(true); }}
-                              onFocus={() => setShowConjuntoDropdown(true)}
-                              placeholder="Buscar conjunto..."
-                              className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                            />
-                            {showConjuntoDropdown && conjuntosCombo.length > 0 && (
-                              <div className="absolute z-20 w-80 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                                {conjuntosCombo.map((c) => (
-                                  <button
-                                    key={c.sequenciaDoConjunto}
-                                    type="button"
-                                    onClick={() => handleSelectConjuntoCombo(c)}
-                                    className="w-full px-3 py-2 text-left hover:bg-indigo-50 border-b border-gray-100 last:border-0"
-                                  >
-                                    <div className="text-sm font-medium text-gray-900">{c.descricao}</div>
-                                    <div className="text-xs text-gray-500">R$ {c.precoVenda.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                                  </button>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-2 py-1.5">
-                          <input
-                            type="number"
-                            step="0.01"
-                            min="0.01"
-                            value={novoConjunto.quantidade || ''}
-                            onChange={(e) => setNovoConjunto(prev => ({ ...prev, quantidade: parseFloat(e.target.value) || 0 }))}
-                            className="w-full px-1 py-1 text-xs text-right border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500"
-                          />
-                        </td>
-                        <td className="px-2 py-1.5">
-                          <input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={novoConjunto.valorUnitario || ''}
-                            onChange={(e) => setNovoConjunto(prev => ({ ...prev, valorUnitario: parseFloat(e.target.value) || 0 }))}
-                            className="w-full px-1 py-1 text-xs text-right border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500"
-                          />
-                        </td>
-                        <td className="px-2 py-1.5 text-right text-xs font-medium text-gray-900">
-                          {((novoConjunto.quantidade || 0) * (novoConjunto.valorUnitario || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                        </td>
-                        <td className="px-2 py-1.5">
-                          <input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            max="100"
-                            value={novoConjunto.aliquotaIpi || ''}
-                            onChange={(e) => setNovoConjunto(prev => ({ ...prev, aliquotaIpi: parseFloat(e.target.value) || 0 }))}
-                            className="w-full px-1 py-1 text-xs text-right border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500"
-                          />
-                        </td>
-                        <td className="px-2 py-1.5 text-right text-xs text-gray-600">
-                          {(((novoConjunto.quantidade || 0) * (novoConjunto.valorUnitario || 0)) * ((novoConjunto.aliquotaIpi || 0) / 100)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                        </td>
-                        <td className="px-2 py-1.5 text-center text-xs text-gray-400">-</td>
-                        <td className="px-2 py-1.5 text-center text-xs text-gray-400">-</td>
-                        <td className="px-2 py-1.5 text-center">
-                          <input
-                            type="checkbox"
-                            checked={novoConjunto.usado || false}
-                            onChange={(e) => setNovoConjunto(prev => ({ ...prev, usado: e.target.checked }))}
-                            className="w-3.5 h-3.5 text-indigo-600 rounded"
-                          />
-                        </td>
-                        <td className="px-2 py-1.5 text-center">
-                          <div className="flex items-center justify-center gap-1">
-                            <button
-                              type="button"
-                              onClick={handleSaveConjunto}
-                              disabled={salvandoConjunto || !novoConjunto.sequenciaDoConjunto}
-                              className="px-1.5 py-0.5 text-xs font-medium text-white bg-indigo-600 rounded hover:bg-indigo-700 disabled:opacity-50"
-                              title="Confirmar"
-                            >
-                              {salvandoConjunto ? '...' : '✓'}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={handleCancelConjunto}
-                              className="px-1.5 py-0.5 text-xs font-medium text-gray-600 bg-gray-200 rounded hover:bg-gray-300"
-                              title="Cancelar"
-                            >
-                              ✕
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-
-                    {/* Mensagem quando não há conjuntos e nem linha de inserção */}
-                    {conjuntosLista.length === 0 && !novoConjunto && (
+                    <thead className="bg-gray-50 sticky top-0 z-10">
                       <tr>
-                        <td colSpan={11} className="px-4 py-12 text-center text-gray-500">
-                          <Boxes className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                          <p className="font-medium">Nenhum conjunto adicionado</p>
-                          <p className="text-sm mt-1">Salve a nota fiscal para começar a adicionar conjuntos</p>
-                        </td>
+                        <th className="px-2 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-14">Seq</th>
+                        <th className="px-2 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider min-w-[200px]">Conjunto</th>
+                        <th className="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-20">Qtde</th>
+                        <th className="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">Vl.Unit</th>
+                        <th className="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">Vl.Total</th>
+                        <th className="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-16">%IPI</th>
+                        <th className="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">Vl.IPI</th>
+                        <th className="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">Vl.IBS</th>
+                        <th className="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">Vl.CBS</th>
+                        <th className="px-2 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-16">Usado</th>
+                        <th className="px-2 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-16">Ações</th>
                       </tr>
-                    )}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {/* Linhas de conjuntos existentes PRIMEIRO */}
+                      {conjuntosLista.map((conj, index) => (
+                        <tr key={conj.sequenciaDoConjuntoDaNotaFiscal || index} className="hover:bg-gray-50">
+                          <td className="px-2 py-1.5 text-center">
+                            <span className="inline-flex items-center justify-center w-8 h-6 bg-indigo-100 text-indigo-700 text-xs font-bold rounded">
+                              {conj.sequenciaDoConjuntoDaNotaFiscal}
+                            </span>
+                          </td>
+                          <td className="px-2 py-1.5">
+                            <div className="text-xs font-medium text-gray-900 truncate max-w-[200px]" title={conj.descricaoConjunto}>{conj.descricaoConjunto}</div>
+                          </td>
+                          <td className="px-2 py-1.5 text-xs text-gray-900 text-right">{conj.quantidade.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                          <td className="px-2 py-1.5 text-xs text-gray-900 text-right">{conj.valorUnitario.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                          <td className="px-2 py-1.5 text-xs text-gray-900 text-right font-medium">{conj.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                          <td className="px-2 py-1.5 text-xs text-gray-600 text-right">{conj.valorTotal > 0 ? ((conj.valorIpi / conj.valorTotal) * 100).toFixed(2) : '0.00'}</td>
+                          <td className="px-2 py-1.5 text-xs text-gray-600 text-right">{conj.valorIpi.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                          <td className="px-2 py-1.5 text-xs text-gray-600 text-right">{(conj.valorIbs || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                          <td className="px-2 py-1.5 text-xs text-gray-600 text-right">{(conj.valorCbs || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                          <td className="px-2 py-1.5 text-center">
+                            <span className={`px-1.5 py-0.5 text-xs font-medium rounded-full ${conj.usado ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                              {conj.usado ? 'S' : 'N'}
+                            </span>
+                          </td>
+                          <td className="px-2 py-1.5 text-center">
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveConjunto(conj.sequenciaDoConjuntoDaNotaFiscal)}
+                              disabled={!isEditing}
+                              className="p-1 text-red-600 hover:bg-red-100 rounded transition-colors disabled:opacity-50"
+                              title="Excluir"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+
+                      {/* Linha de inserção SEMPRE NO FINAL */}
+                      {novoConjunto && !temProdutos && (
+                        <tr className="bg-indigo-50 border-t-2 border-indigo-200">
+                          <td className="px-2 py-1.5 text-center text-xs text-gray-400">
+                            <span className="inline-flex items-center justify-center w-8 h-6 bg-indigo-200 text-indigo-700 text-xs font-bold rounded">
+                              +
+                            </span>
+                          </td>
+                          <td className="px-2 py-1.5">
+                            <div className="relative">
+                              <input
+                                type="text"
+                                value={buscaConjunto}
+                                onChange={(e) => { setBuscaConjunto(e.target.value); setShowConjuntoDropdown(true); }}
+                                onFocus={() => setShowConjuntoDropdown(true)}
+                                placeholder="Buscar conjunto..."
+                                className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                              />
+                              {showConjuntoDropdown && conjuntosCombo.length > 0 && (
+                                <div className="absolute z-20 w-80 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                  {conjuntosCombo.map((c) => (
+                                    <button
+                                      key={c.sequenciaDoConjunto}
+                                      type="button"
+                                      onClick={() => handleSelectConjuntoCombo(c)}
+                                      className="w-full px-3 py-2 text-left hover:bg-indigo-50 border-b border-gray-100 last:border-0"
+                                    >
+                                      <div className="text-sm font-medium text-gray-900">{c.descricao}</div>
+                                      <div className="text-xs text-gray-500">R$ {c.precoVenda.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-2 py-1.5">
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0.01"
+                              value={novoConjunto.quantidade || ''}
+                              onChange={(e) => setNovoConjunto(prev => ({ ...prev, quantidade: parseFloat(e.target.value) || 0 }))}
+                              className="w-full px-1 py-1 text-xs text-right border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500"
+                            />
+                          </td>
+                          <td className="px-2 py-1.5">
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={novoConjunto.valorUnitario || ''}
+                              onChange={(e) => setNovoConjunto(prev => ({ ...prev, valorUnitario: parseFloat(e.target.value) || 0 }))}
+                              className="w-full px-1 py-1 text-xs text-right border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500"
+                            />
+                          </td>
+                          <td className="px-2 py-1.5 text-right text-xs font-medium text-gray-900">
+                            {((novoConjunto.quantidade || 0) * (novoConjunto.valorUnitario || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </td>
+                          <td className="px-2 py-1.5">
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              max="100"
+                              value={novoConjunto.aliquotaIpi || ''}
+                              onChange={(e) => setNovoConjunto(prev => ({ ...prev, aliquotaIpi: parseFloat(e.target.value) || 0 }))}
+                              className="w-full px-1 py-1 text-xs text-right border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500"
+                            />
+                          </td>
+                          <td className="px-2 py-1.5 text-right text-xs text-gray-600">
+                            {(((novoConjunto.quantidade || 0) * (novoConjunto.valorUnitario || 0)) * ((novoConjunto.aliquotaIpi || 0) / 100)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </td>
+                          <td className="px-2 py-1.5 text-center text-xs text-gray-400">-</td>
+                          <td className="px-2 py-1.5 text-center text-xs text-gray-400">-</td>
+                          <td className="px-2 py-1.5 text-center">
+                            <input
+                              type="checkbox"
+                              checked={novoConjunto.usado || false}
+                              onChange={(e) => setNovoConjunto(prev => ({ ...prev, usado: e.target.checked }))}
+                              className="w-3.5 h-3.5 text-indigo-600 rounded"
+                            />
+                          </td>
+                          <td className="px-2 py-1.5 text-center">
+                            <div className="flex items-center justify-center gap-1">
+                              <button
+                                type="button"
+                                onClick={handleSaveConjunto}
+                                disabled={salvandoConjunto || !novoConjunto.sequenciaDoConjunto}
+                                className="px-1.5 py-0.5 text-xs font-medium text-white bg-indigo-600 rounded hover:bg-indigo-700 disabled:opacity-50"
+                                title="Confirmar"
+                              >
+                                {salvandoConjunto ? '...' : '✓'}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleCancelConjunto}
+                                className="px-1.5 py-0.5 text-xs font-medium text-gray-600 bg-gray-200 rounded hover:bg-gray-300"
+                                title="Cancelar"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+
+                      {/* Mensagem quando não há conjuntos e nem linha de inserção */}
+                      {conjuntosLista.length === 0 && !novoConjunto && (
+                        <tr>
+                          <td colSpan={11} className="px-4 py-12 text-center text-gray-500">
+                            <Boxes className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                            <p className="font-medium">Nenhum conjunto adicionado</p>
+                            <p className="text-sm mt-1">Salve a nota fiscal para começar a adicionar conjuntos</p>
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               </div>
 
@@ -2424,7 +2313,7 @@ export default function NotaFiscalFormPage() {
                   </p>
                 </div>
               )}
-              
+
               {/* Header */}
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
@@ -2440,177 +2329,177 @@ export default function NotaFiscalFormPage() {
               <div className="border border-gray-200 rounded-lg">
                 <div className="overflow-x-auto" style={{ maxHeight: '400px' }}>
                   <table className="min-w-[900px] w-full divide-y divide-gray-200 text-xs">
-                  <thead className="bg-gray-50 sticky top-0 z-10">
-                    <tr>
-                      <th className="px-2 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-14">Seq</th>
-                      <th className="px-2 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider min-w-[200px]">Peça</th>
-                      <th className="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-20">Qtde</th>
-                      <th className="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">Vl.Unit</th>
-                      <th className="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">Vl.Total</th>
-                      <th className="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-16">%IPI</th>
-                      <th className="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">Vl.IPI</th>
-                      <th className="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">Vl.IBS</th>
-                      <th className="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">Vl.CBS</th>
-                      <th className="px-2 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-16">Usado</th>
-                      <th className="px-2 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-16">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {/* Linhas de peças existentes PRIMEIRO */}
-                    {pecasLista.map((peca, index) => (
-                      <tr key={peca.sequenciaDaPecaDaNotaFiscal || index} className="hover:bg-gray-50">
-                        <td className="px-2 py-1.5 text-center">
-                          <span className="inline-flex items-center justify-center w-8 h-6 bg-orange-100 text-orange-700 text-xs font-bold rounded">
-                            {peca.sequenciaDaPecaDaNotaFiscal}
-                          </span>
-                        </td>
-                        <td className="px-2 py-1.5">
-                          <div className="text-xs font-medium text-gray-900 truncate max-w-[200px]" title={peca.descricaoPeca}>{peca.descricaoPeca}</div>
-                        </td>
-                        <td className="px-2 py-1.5 text-xs text-gray-900 text-right">{peca.quantidade.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                        <td className="px-2 py-1.5 text-xs text-gray-900 text-right">{peca.valorUnitario.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                        <td className="px-2 py-1.5 text-xs text-gray-900 text-right font-medium">{peca.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                        <td className="px-2 py-1.5 text-xs text-gray-600 text-right">{peca.valorTotal > 0 ? ((peca.valorIpi / peca.valorTotal) * 100).toFixed(2) : '0.00'}</td>
-                        <td className="px-2 py-1.5 text-xs text-gray-600 text-right">{peca.valorIpi.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                        <td className="px-2 py-1.5 text-xs text-gray-600 text-right">{(peca.valorIbs || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                        <td className="px-2 py-1.5 text-xs text-gray-600 text-right">{(peca.valorCbs || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                        <td className="px-2 py-1.5 text-center">
-                          <span className={`px-1.5 py-0.5 text-xs font-medium rounded-full ${peca.usado ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                            {peca.usado ? 'S' : 'N'}
-                          </span>
-                        </td>
-                        <td className="px-2 py-1.5 text-center">
-                          <button
-                            type="button"
-                            onClick={() => handleRemovePeca(peca.sequenciaDaPecaDaNotaFiscal)}
-                            disabled={!isEditing}
-                            className="p-1 text-red-600 hover:bg-red-100 rounded transition-colors disabled:opacity-50"
-                            title="Excluir"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-
-                    {/* Linha de inserção NO FINAL */}
-                    {novaPeca && !temProdutos && (
-                      <tr className="bg-orange-50 border-t-2 border-orange-200">
-                        <td className="px-2 py-1.5 text-center text-xs text-gray-400">
-                          <span className="inline-flex items-center justify-center w-8 h-6 bg-orange-200 text-orange-700 text-xs font-bold rounded">
-                            +
-                          </span>
-                        </td>
-                        <td className="px-2 py-1.5">
-                          <div className="relative">
-                            <input
-                              type="text"
-                              value={buscaPeca}
-                              onChange={(e) => { setBuscaPeca(e.target.value); setShowPecaDropdown(true); }}
-                              onFocus={() => setShowPecaDropdown(true)}
-                              placeholder="Buscar peça..."
-                              className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                            />
-                            {showPecaDropdown && pecasCombo.length > 0 && (
-                              <div className="absolute z-20 w-80 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                                {pecasCombo.map((p) => (
-                                  <button
-                                    key={p.sequenciaDaPeca}
-                                    type="button"
-                                    onClick={() => handleSelectPecaCombo(p)}
-                                    className="w-full px-3 py-2 text-left hover:bg-orange-50 border-b border-gray-100 last:border-0"
-                                  >
-                                    <div className="text-sm font-medium text-gray-900">{p.descricao}</div>
-                                    <div className="text-xs text-gray-500">R$ {p.precoVenda.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                                  </button>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-2 py-1.5">
-                          <input
-                            type="number"
-                            step="0.01"
-                            min="0.01"
-                            value={novaPeca.quantidade || ''}
-                            onChange={(e) => setNovaPeca(prev => ({ ...prev, quantidade: parseFloat(e.target.value) || 0 }))}
-                            className="w-full px-1 py-1 text-xs text-right border border-gray-300 rounded focus:ring-2 focus:ring-orange-500"
-                          />
-                        </td>
-                        <td className="px-2 py-1.5">
-                          <input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={novaPeca.valorUnitario || ''}
-                            onChange={(e) => setNovaPeca(prev => ({ ...prev, valorUnitario: parseFloat(e.target.value) || 0 }))}
-                            className="w-full px-1 py-1 text-xs text-right border border-gray-300 rounded focus:ring-2 focus:ring-orange-500"
-                          />
-                        </td>
-                        <td className="px-2 py-1.5 text-right text-xs font-medium text-gray-900">
-                          {((novaPeca.quantidade || 0) * (novaPeca.valorUnitario || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                        </td>
-                        <td className="px-2 py-1.5">
-                          <input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            max="100"
-                            value={novaPeca.aliquotaIpi || ''}
-                            onChange={(e) => setNovaPeca(prev => ({ ...prev, aliquotaIpi: parseFloat(e.target.value) || 0 }))}
-                            className="w-full px-1 py-1 text-xs text-right border border-gray-300 rounded focus:ring-2 focus:ring-orange-500"
-                          />
-                        </td>
-                        <td className="px-2 py-1.5 text-right text-xs text-gray-600">
-                          {(((novaPeca.quantidade || 0) * (novaPeca.valorUnitario || 0)) * ((novaPeca.aliquotaIpi || 0) / 100)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                        </td>
-                        <td className="px-2 py-1.5 text-center text-xs text-gray-400">-</td>
-                        <td className="px-2 py-1.5 text-center text-xs text-gray-400">-</td>
-                        <td className="px-2 py-1.5 text-center">
-                          <input
-                            type="checkbox"
-                            checked={novaPeca.usado || false}
-                            onChange={(e) => setNovaPeca(prev => ({ ...prev, usado: e.target.checked }))}
-                            className="w-3.5 h-3.5 text-orange-600 rounded"
-                          />
-                        </td>
-                        <td className="px-2 py-1.5 text-center">
-                          <div className="flex items-center justify-center gap-1">
-                            <button
-                              type="button"
-                              onClick={handleSavePeca}
-                              disabled={salvandoPeca || !novaPeca.sequenciaDaPeca}
-                              className="px-1.5 py-0.5 text-xs font-medium text-white bg-orange-600 rounded hover:bg-orange-700 disabled:opacity-50"
-                              title="Confirmar"
-                            >
-                              {salvandoPeca ? '...' : '✓'}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={handleCancelPeca}
-                              className="px-1.5 py-0.5 text-xs font-medium text-gray-600 bg-gray-200 rounded hover:bg-gray-300"
-                              title="Cancelar"
-                            >
-                              ✕
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-
-                    {/* Mensagem quando não há peças e nem linha de inserção */}
-                    {pecasLista.length === 0 && !novaPeca && (
+                    <thead className="bg-gray-50 sticky top-0 z-10">
                       <tr>
-                        <td colSpan={11} className="px-4 py-12 text-center text-gray-500">
-                          <Cog className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                          <p className="font-medium">Nenhuma peça adicionada</p>
-                          <p className="text-sm mt-1">Salve a nota fiscal para começar a adicionar peças</p>
-                        </td>
+                        <th className="px-2 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-14">Seq</th>
+                        <th className="px-2 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider min-w-[200px]">Peça</th>
+                        <th className="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-20">Qtde</th>
+                        <th className="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">Vl.Unit</th>
+                        <th className="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">Vl.Total</th>
+                        <th className="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-16">%IPI</th>
+                        <th className="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">Vl.IPI</th>
+                        <th className="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">Vl.IBS</th>
+                        <th className="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">Vl.CBS</th>
+                        <th className="px-2 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-16">Usado</th>
+                        <th className="px-2 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-16">Ações</th>
                       </tr>
-                    )}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {/* Linhas de peças existentes PRIMEIRO */}
+                      {pecasLista.map((peca, index) => (
+                        <tr key={peca.sequenciaDaPecaDaNotaFiscal || index} className="hover:bg-gray-50">
+                          <td className="px-2 py-1.5 text-center">
+                            <span className="inline-flex items-center justify-center w-8 h-6 bg-orange-100 text-orange-700 text-xs font-bold rounded">
+                              {peca.sequenciaDaPecaDaNotaFiscal}
+                            </span>
+                          </td>
+                          <td className="px-2 py-1.5">
+                            <div className="text-xs font-medium text-gray-900 truncate max-w-[200px]" title={peca.descricaoPeca}>{peca.descricaoPeca}</div>
+                          </td>
+                          <td className="px-2 py-1.5 text-xs text-gray-900 text-right">{peca.quantidade.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                          <td className="px-2 py-1.5 text-xs text-gray-900 text-right">{peca.valorUnitario.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                          <td className="px-2 py-1.5 text-xs text-gray-900 text-right font-medium">{peca.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                          <td className="px-2 py-1.5 text-xs text-gray-600 text-right">{peca.valorTotal > 0 ? ((peca.valorIpi / peca.valorTotal) * 100).toFixed(2) : '0.00'}</td>
+                          <td className="px-2 py-1.5 text-xs text-gray-600 text-right">{peca.valorIpi.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                          <td className="px-2 py-1.5 text-xs text-gray-600 text-right">{(peca.valorIbs || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                          <td className="px-2 py-1.5 text-xs text-gray-600 text-right">{(peca.valorCbs || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                          <td className="px-2 py-1.5 text-center">
+                            <span className={`px-1.5 py-0.5 text-xs font-medium rounded-full ${peca.usado ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                              {peca.usado ? 'S' : 'N'}
+                            </span>
+                          </td>
+                          <td className="px-2 py-1.5 text-center">
+                            <button
+                              type="button"
+                              onClick={() => handleRemovePeca(peca.sequenciaDaPecaDaNotaFiscal)}
+                              disabled={!isEditing}
+                              className="p-1 text-red-600 hover:bg-red-100 rounded transition-colors disabled:opacity-50"
+                              title="Excluir"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+
+                      {/* Linha de inserção NO FINAL */}
+                      {novaPeca && !temProdutos && (
+                        <tr className="bg-orange-50 border-t-2 border-orange-200">
+                          <td className="px-2 py-1.5 text-center text-xs text-gray-400">
+                            <span className="inline-flex items-center justify-center w-8 h-6 bg-orange-200 text-orange-700 text-xs font-bold rounded">
+                              +
+                            </span>
+                          </td>
+                          <td className="px-2 py-1.5">
+                            <div className="relative">
+                              <input
+                                type="text"
+                                value={buscaPeca}
+                                onChange={(e) => { setBuscaPeca(e.target.value); setShowPecaDropdown(true); }}
+                                onFocus={() => setShowPecaDropdown(true)}
+                                placeholder="Buscar peça..."
+                                className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                              />
+                              {showPecaDropdown && pecasCombo.length > 0 && (
+                                <div className="absolute z-20 w-80 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                  {pecasCombo.map((p) => (
+                                    <button
+                                      key={p.sequenciaDaPeca}
+                                      type="button"
+                                      onClick={() => handleSelectPecaCombo(p)}
+                                      className="w-full px-3 py-2 text-left hover:bg-orange-50 border-b border-gray-100 last:border-0"
+                                    >
+                                      <div className="text-sm font-medium text-gray-900">{p.descricao}</div>
+                                      <div className="text-xs text-gray-500">R$ {p.precoVenda.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-2 py-1.5">
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0.01"
+                              value={novaPeca.quantidade || ''}
+                              onChange={(e) => setNovaPeca(prev => ({ ...prev, quantidade: parseFloat(e.target.value) || 0 }))}
+                              className="w-full px-1 py-1 text-xs text-right border border-gray-300 rounded focus:ring-2 focus:ring-orange-500"
+                            />
+                          </td>
+                          <td className="px-2 py-1.5">
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={novaPeca.valorUnitario || ''}
+                              onChange={(e) => setNovaPeca(prev => ({ ...prev, valorUnitario: parseFloat(e.target.value) || 0 }))}
+                              className="w-full px-1 py-1 text-xs text-right border border-gray-300 rounded focus:ring-2 focus:ring-orange-500"
+                            />
+                          </td>
+                          <td className="px-2 py-1.5 text-right text-xs font-medium text-gray-900">
+                            {((novaPeca.quantidade || 0) * (novaPeca.valorUnitario || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </td>
+                          <td className="px-2 py-1.5">
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              max="100"
+                              value={novaPeca.aliquotaIpi || ''}
+                              onChange={(e) => setNovaPeca(prev => ({ ...prev, aliquotaIpi: parseFloat(e.target.value) || 0 }))}
+                              className="w-full px-1 py-1 text-xs text-right border border-gray-300 rounded focus:ring-2 focus:ring-orange-500"
+                            />
+                          </td>
+                          <td className="px-2 py-1.5 text-right text-xs text-gray-600">
+                            {(((novaPeca.quantidade || 0) * (novaPeca.valorUnitario || 0)) * ((novaPeca.aliquotaIpi || 0) / 100)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </td>
+                          <td className="px-2 py-1.5 text-center text-xs text-gray-400">-</td>
+                          <td className="px-2 py-1.5 text-center text-xs text-gray-400">-</td>
+                          <td className="px-2 py-1.5 text-center">
+                            <input
+                              type="checkbox"
+                              checked={novaPeca.usado || false}
+                              onChange={(e) => setNovaPeca(prev => ({ ...prev, usado: e.target.checked }))}
+                              className="w-3.5 h-3.5 text-orange-600 rounded"
+                            />
+                          </td>
+                          <td className="px-2 py-1.5 text-center">
+                            <div className="flex items-center justify-center gap-1">
+                              <button
+                                type="button"
+                                onClick={handleSavePeca}
+                                disabled={salvandoPeca || !novaPeca.sequenciaDaPeca}
+                                className="px-1.5 py-0.5 text-xs font-medium text-white bg-orange-600 rounded hover:bg-orange-700 disabled:opacity-50"
+                                title="Confirmar"
+                              >
+                                {salvandoPeca ? '...' : '✓'}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleCancelPeca}
+                                className="px-1.5 py-0.5 text-xs font-medium text-gray-600 bg-gray-200 rounded hover:bg-gray-300"
+                                title="Cancelar"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+
+                      {/* Mensagem quando não há peças e nem linha de inserção */}
+                      {pecasLista.length === 0 && !novaPeca && (
+                        <tr>
+                          <td colSpan={11} className="px-4 py-12 text-center text-gray-500">
+                            <Cog className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                            <p className="font-medium">Nenhuma peça adicionada</p>
+                            <p className="text-sm mt-1">Salve a nota fiscal para começar a adicionar peças</p>
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               </div>
 
@@ -2767,7 +2656,7 @@ export default function NotaFiscalFormPage() {
                       Adicionar
                     </button>
                   </div>
-                  
+
                   {/* Forma de Pagamento */}
                   <div className="mb-4">
                     <label className="block text-xs font-medium text-gray-600 mb-1.5">Forma de Pagamento</label>
@@ -2927,7 +2816,7 @@ export default function NotaFiscalFormPage() {
                 {/* Dados da NFe */}
                 <div className="bg-white border border-gray-200 rounded-lg p-5 space-y-4">
                   <h4 className="text-md font-semibold text-gray-900 pb-2 border-b">Identificação NFe</h4>
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1.5">Número NFe</label>
@@ -2994,7 +2883,7 @@ export default function NotaFiscalFormPage() {
                 {/* NFe Referenciada / Complementar */}
                 <div className="bg-white border border-gray-200 rounded-lg p-5 space-y-4">
                   <h4 className="text-md font-semibold text-gray-900 pb-2 border-b">NFe Referenciada / Complementar</h4>
-                  
+
                   <div className="space-y-3">
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
@@ -3099,42 +2988,44 @@ export default function NotaFiscalFormPage() {
       </div>
 
       {/* Dropdown de Produtos usando Portal - fica fora do scroll */}
-      {showProdutoDropdown && produtosCombo.length > 0 && dropdownPosition && createPortal(
-        <div 
-          className="produto-dropdown-container fixed bg-white border border-slate-300 rounded-lg shadow-2xl overflow-hidden"
-          style={{ 
-            top: dropdownPosition.top, 
-            left: dropdownPosition.left, 
-            width: dropdownPosition.width,
-            zIndex: 99999,
-            maxHeight: '320px'
-          }}
-        >
-          <div className="px-3 py-2 bg-slate-100 border-b border-slate-200 sticky top-0">
-            <span className="text-xs font-medium text-slate-600">
-              {produtosCombo.length} produto(s) encontrado(s)
-            </span>
-          </div>
-          <div className="overflow-y-auto" style={{ maxHeight: '270px' }}>
-            {produtosCombo.map((p) => (
-              <button
-                key={p.sequenciaDoProduto}
-                type="button"
-                onClick={() => handleSelectProdutoCombo(p)}
-                className="w-full px-3 py-2.5 text-left hover:bg-blue-50 border-b border-slate-100 last:border-0 transition-colors"
-              >
-                <div className="text-xs font-medium text-slate-900 truncate">{p.descricao}</div>
-                <div className="flex gap-3 mt-1 text-[10px] text-slate-500">
-                  <span className="bg-slate-100 px-1.5 py-0.5 rounded">NCM: {p.ncm}</span>
-                  <span className="bg-slate-100 px-1.5 py-0.5 rounded">CFOP: {p.cfop}</span>
-                  <span className="font-bold text-green-600">R$ {p.precoVenda.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>,
-        document.body
-      )}
-    </div>
+      {
+        showProdutoDropdown && produtosCombo.length > 0 && dropdownPosition && createPortal(
+          <div
+            className="produto-dropdown-container fixed bg-white border border-slate-300 rounded-lg shadow-2xl overflow-hidden"
+            style={{
+              top: dropdownPosition.top,
+              left: dropdownPosition.left,
+              width: dropdownPosition.width,
+              zIndex: 99999,
+              maxHeight: '320px'
+            }}
+          >
+            <div className="px-3 py-2 bg-slate-100 border-b border-slate-200 sticky top-0">
+              <span className="text-xs font-medium text-slate-600">
+                {produtosCombo.length} produto(s) encontrado(s)
+              </span>
+            </div>
+            <div className="overflow-y-auto" style={{ maxHeight: '270px' }}>
+              {produtosCombo.map((p) => (
+                <button
+                  key={p.sequenciaDoProduto}
+                  type="button"
+                  onClick={() => handleSelectProdutoCombo(p)}
+                  className="w-full px-3 py-2.5 text-left hover:bg-blue-50 border-b border-slate-100 last:border-0 transition-colors"
+                >
+                  <div className="text-xs font-medium text-slate-900 truncate">{p.descricao}</div>
+                  <div className="flex gap-3 mt-1 text-[10px] text-slate-500">
+                    <span className="bg-slate-100 px-1.5 py-0.5 rounded">NCM: {p.ncm}</span>
+                    <span className="bg-slate-100 px-1.5 py-0.5 rounded">CFOP: {p.cfop}</span>
+                    <span className="font-bold text-green-600">R$ {p.precoVenda.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>,
+          document.body
+        )
+      }
+    </div >
   );
 }

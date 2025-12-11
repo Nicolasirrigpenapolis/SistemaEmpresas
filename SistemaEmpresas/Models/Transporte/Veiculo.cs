@@ -50,7 +50,7 @@ public class Veiculo
     /// Tara do veículo em kg (peso vazio)
     /// </summary>
     [Required(ErrorMessage = "Tara é obrigatória")]
-    public int Tara { get; set; }
+    public int? Tara { get; set; }
 
     /// <summary>
     /// Capacidade máxima de carga em kg

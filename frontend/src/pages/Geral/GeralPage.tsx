@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Plus,
@@ -16,10 +16,12 @@ import {
   Eye,
   Lock,
   Loader2,
+  Search,
+  Briefcase
 } from 'lucide-react';
 import { geralService } from '../../services/geralService';
-import type { 
-  GeralListDto, 
+import type {
+  GeralListDto,
   PagedResult,
   TipoEntidade,
 } from '../../types/geral';
@@ -27,27 +29,13 @@ import { TIPO_LABELS, TIPO_CORES, TIPO_SIGLAS, getTiposAtivos } from '../../type
 import { usePermissaoTela } from '../../hooks/usePermissaoTela';
 
 // Componentes reutilizáveis
-import { 
-  ModalConfirmacao, 
-  Paginacao, 
-  EstadoVazio, 
-  EstadoCarregando,
+import {
+  ModalConfirmacao,
   AlertaErro,
-  SearchBar,
-  type SearchColumn,
-  type SortDirection,
+  CabecalhoPagina,
+  DataTable,
+  type ColumnConfig
 } from '../../components/common';
-
-// Colunas disponíveis para busca
-const SEARCH_COLUMNS: SearchColumn[] = [
-  { key: 'codigo', label: 'Código', placeholder: 'Buscar por código (ex: 123)...' },
-  { key: 'nome', label: 'Nome / Razão Social', placeholder: 'Buscar por nome ou razão social...' },
-  { key: 'fantasia', label: 'Nome Fantasia', placeholder: 'Buscar por nome fantasia...' },
-  { key: 'cpfCnpj', label: 'CPF / CNPJ', placeholder: 'Buscar por CPF ou CNPJ...' },
-  { key: 'email', label: 'E-mail', placeholder: 'Buscar por e-mail...' },
-  { key: 'cidade', label: 'Cidade', placeholder: 'Buscar por cidade...' },
-  { key: 'fone', label: 'Telefone', placeholder: 'Buscar por telefone...' },
-];
 
 // ============================================================================
 // COMPONENTE PRINCIPAL
@@ -55,10 +43,10 @@ const SEARCH_COLUMNS: SearchColumn[] = [
 export default function GeralPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
   // Permissões da tela
   const { podeConsultar, podeIncluir, podeAlterar, podeExcluir, carregando: carregandoPermissoes } = usePermissaoTela('Geral');
-  
+
   // Pega o tipo da URL (ex: /cadastros/geral?tipo=cliente)
   const tipoParam = (searchParams.get('tipo') as TipoEntidade) || 'todos';
 
@@ -66,18 +54,16 @@ export default function GeralPage() {
   const [data, setData] = useState<PagedResult<GeralListDto> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Filtros
   const [filtroTipo, setFiltroTipo] = useState<TipoEntidade>(tipoParam);
   const [filtroBusca, setFiltroBusca] = useState('');
-  const [filtroCampo, setFiltroCampo] = useState('nome');
   const [filtroIncluirInativos, setFiltroIncluirInativos] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  
-  // Paginação e Ordenação
+
+  // Paginação e Ordenação (gerenciados pelo DataTable, mas precisamos manter estado para API)
   const [pageNumber, setPageNumber] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
-  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [pageSize] = useState(20);
 
   // Modal de Exclusão
   const [deleteModal, setDeleteModal] = useState<{ open: boolean; id: number; nome: string; deleting: boolean }>({
@@ -142,14 +128,10 @@ export default function GeralPage() {
     }
   };
 
-  const handleDelete = async (id: number, nome: string) => {
-    handleDeleteClick(id, nome);
-  };
-
   const handleTipoChange = (novoTipo: TipoEntidade) => {
     setFiltroTipo(novoTipo);
     setPageNumber(1);
-    
+
     // Atualiza a URL
     if (novoTipo === 'todos') {
       searchParams.delete('tipo');
@@ -161,89 +143,9 @@ export default function GeralPage() {
 
   const handleClearFilters = () => {
     setFiltroBusca('');
-    setFiltroCampo('nome');
     setFiltroIncluirInativos(false);
-    setSortDirection('asc');
     setPageNumber(1);
   };
-
-  const handleClearAllFilters = () => {
-    handleClearFilters();
-    if (filtroTipo !== 'todos') {
-      setFiltroTipo('todos');
-      searchParams.delete('tipo');
-      setSearchParams(searchParams);
-    }
-  };
-
-  // Handler para busca do SearchBar
-  const handleSearchBar = (column: string, value: string, direction: SortDirection) => {
-    setFiltroCampo(column);
-    setFiltroBusca(value);
-    setSortDirection(direction);
-    setPageNumber(1);
-    // A busca será feita via useEffect quando esses estados mudarem
-  };
-
-  // Filtrar e ordenar items
-  const sortedItems = useMemo(() => {
-    if (!data?.items) return [];
-    let items = [...data.items];
-    const direction = sortDirection === 'asc' ? 1 : -1;
-
-    // FILTRAR pelo campo selecionado e valor digitado
-    if (filtroBusca.trim()) {
-      const searchTerm = filtroBusca.trim().toLowerCase();
-      
-      items = items.filter((item) => {
-        switch (filtroCampo) {
-          case 'codigo':
-            // Para código, busca exata ou que começa com o número digitado
-            const codigoStr = String(item.sequenciaDoGeral);
-            return codigoStr === searchTerm || codigoStr.startsWith(searchTerm);
-          case 'nome':
-            return item.razaoSocial.toLowerCase().includes(searchTerm);
-          case 'fantasia':
-            return (item.nomeFantasia || '').toLowerCase().includes(searchTerm);
-          case 'cpfCnpj':
-            return (item.cpfECnpj || '').toLowerCase().includes(searchTerm);
-          case 'email':
-            return (item.email || '').toLowerCase().includes(searchTerm);
-          case 'cidade':
-            return (`${item.cidade || ''} ${item.uf || ''}`).toLowerCase().includes(searchTerm);
-          case 'fone':
-            return (item.fone1 || '').toLowerCase().includes(searchTerm);
-          default:
-            return true;
-        }
-      });
-    }
-
-    // ORDENAR pelo campo selecionado
-    items.sort((a, b) => {
-      switch (filtroCampo) {
-        case 'codigo':
-          // Ordenação numérica para código
-          return (a.sequenciaDoGeral - b.sequenciaDoGeral) * direction;
-        case 'nome':
-          return a.razaoSocial.localeCompare(b.razaoSocial) * direction;
-        case 'fantasia':
-          return (a.nomeFantasia || '').localeCompare(b.nomeFantasia || '') * direction;
-        case 'cpfCnpj':
-          return (a.cpfECnpj || '').localeCompare(b.cpfECnpj || '') * direction;
-        case 'email':
-          return (a.email || '').localeCompare(b.email || '') * direction;
-        case 'cidade':
-          return (`${a.cidade || ''}${a.uf || ''}`).localeCompare(`${b.cidade || ''}${b.uf || ''}`) * direction;
-        case 'fone':
-          return (a.fone1 || '').localeCompare(b.fone1 || '') * direction;
-        default:
-          return (a.sequenciaDoGeral - b.sequenciaDoGeral) * direction;
-      }
-    });
-
-    return items;
-  }, [data, filtroCampo, filtroBusca, sortDirection]);
 
   const getTipoIcon = (tipo: TipoEntidade) => {
     switch (tipo) {
@@ -265,20 +167,20 @@ export default function GeralPage() {
     return `Gerenciamento de ${TIPO_LABELS[filtroTipo].toLowerCase()}`;
   };
 
-  const activeFilters = useMemo(() => {
-    const list: { label: string; clear?: () => void }[] = [];
-    if (filtroBusca) list.push({ label: `Busca: "${filtroBusca}"`, clear: () => setFiltroBusca('') });
-    if (filtroIncluirInativos) list.push({ label: 'Incluindo inativos', clear: () => setFiltroIncluirInativos(false) });
-    if (filtroTipo !== 'todos') list.push({ label: `Tipo: ${TIPO_LABELS[filtroTipo]}` });
-    return list;
-  }, [filtroBusca, filtroIncluirInativos, filtroTipo]);
-
   // ============================================================================
   // EFFECTS
   // ============================================================================
   useEffect(() => {
     loadData();
-  }, [pageNumber, pageSize, filtroTipo, filtroIncluirInativos]);
+  }, [pageNumber, pageSize, filtroTipo, filtroIncluirInativos]); // Removido filtroBusca do array de dependências para evitar busca a cada digitação se não houver debounce
+
+  // Debounce para busca
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadData();
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [filtroBusca]);
 
   useEffect(() => {
     // Sincroniza com a URL
@@ -289,6 +191,118 @@ export default function GeralPage() {
   }, [searchParams]);
 
   // ============================================================================
+  // COLUNAS DATATABLE
+  // ============================================================================
+  const columns: ColumnConfig<GeralListDto>[] = [
+    {
+      key: 'sequenciaDoGeral',
+      header: 'Código',
+      width: '80px',
+      render: (item) => (
+        <span className="text-sm font-mono text-[var(--text-muted)]">
+          {item.sequenciaDoGeral}
+        </span>
+      )
+    },
+    {
+      key: 'razaoSocial',
+      header: 'Razão Social / Nome',
+      render: (item) => (
+        <div>
+          <div className="text-sm font-medium text-[var(--text)]">
+            {item.razaoSocial}
+          </div>
+          {item.nomeFantasia && item.nomeFantasia !== item.razaoSocial && (
+            <div className="text-xs text-muted-foreground mt-0.5">
+              {item.nomeFantasia}
+            </div>
+          )}
+        </div>
+      )
+    },
+    {
+      key: 'cpfECnpj',
+      header: 'CNPJ/CPF',
+      width: '140px',
+      render: (item) => (
+        <span className="text-sm text-muted-foreground font-mono">
+          {item.cpfECnpj || '-'}
+        </span>
+      )
+    },
+    {
+      key: 'cidade',
+      header: 'Cidade/UF',
+      render: (item) => (
+        item.cidade ? (
+          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+            <MapPin className="w-3.5 h-3.5 opacity-80" />
+            <span>{item.cidade}/{item.uf}</span>
+          </div>
+        ) : (
+          <span className="text-sm text-muted-foreground">-</span>
+        )
+      )
+    },
+    {
+      key: 'fone1',
+      header: 'Contato',
+      render: (item) => (
+        <div className="space-y-1.5">
+          {item.fone1 && (
+            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <Phone className="w-3.5 h-3.5 opacity-80" />
+              <span>{item.fone1}</span>
+            </div>
+          )}
+          {item.email && (
+            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <Mail className="w-3.5 h-3.5 opacity-80" />
+              <span className="truncate max-w-[150px]" title={item.email}>{item.email}</span>
+            </div>
+          )}
+          {!item.fone1 && !item.email && (
+            <span className="text-sm text-muted-foreground">-</span>
+          )}
+        </div>
+      )
+    },
+    {
+      key: 'tipos', // Chave virtual, não existe no DTO diretamente mas usamos para render
+      header: 'Tipos',
+      render: (item) => (
+        <div className="flex flex-wrap gap-1">
+          {getTiposAtivos(item).map((tipo) => (
+            <span
+              key={tipo}
+              className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide ${TIPO_CORES[tipo as TipoEntidade]}`}
+              title={TIPO_LABELS[tipo as TipoEntidade]}
+            >
+              {TIPO_SIGLAS[tipo as TipoEntidade]}
+            </span>
+          ))}
+        </div>
+      )
+    },
+    {
+      key: 'inativo',
+      header: 'Status',
+      width: '100px',
+      render: (item) => (
+        item.inativo ? (
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+            Inativo
+          </span>
+        ) : (
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
+            Ativo
+          </span>
+        )
+      )
+    }
+  ];
+
+  // ============================================================================
   // RENDER
   // ============================================================================
 
@@ -297,8 +311,8 @@ export default function GeralPage() {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-500">Verificando permissões...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Verificando permissões...</p>
         </div>
       </div>
     );
@@ -308,360 +322,180 @@ export default function GeralPage() {
   if (!podeConsultar) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="text-center bg-white p-8 rounded-xl shadow-lg max-w-md">
+        <div className="text-center bg-surface p-8 rounded-xl shadow-lg max-w-md border border-border">
           <Lock className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Acesso Negado</h2>
-          <p className="text-gray-500">Você não tem permissão para acessar esta tela.</p>
-          <p className="text-sm text-gray-400 mt-2">Entre em contato com o administrador para solicitar acesso.</p>
+          <h2 className="text-xl font-bold text-foreground mb-2">Acesso Negado</h2>
+          <p className="text-muted-foreground">Você não tem permissão para acessar esta tela.</p>
+          <p className="text-sm text-muted-foreground/70 mt-2">Entre em contato com o administrador para solicitar acesso.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4 md:space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-4">
-        <div>
-          <h1 className="text-xl md:text-2xl font-bold text-[var(--text)]">{getPageTitle()}</h1>
-          <p className="text-xs md:text-sm text-[var(--text-muted)] hidden sm:block">{getPageSubtitle()}</p>
-        </div>
-        
-        {podeIncluir && (
-          <button
-            onClick={() => navigate('/cadastros/geral/novo')}
-            className="flex items-center justify-center gap-2 px-4 md:px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg shadow-blue-500/30 font-medium text-sm md:text-base"
-          >
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">Novo Cadastro</span>
-            <span className="sm:hidden">Novo</span>
-          </button>
-        )}
-      </div>
-
-      {/* Tabs de Tipo */}
-      <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl shadow-sm">
-        <div className="flex gap-1 overflow-x-auto p-1 scrollbar-hide -mx-1 px-1">
-          {(['todos', 'cliente', 'fornecedor', 'transportadora', 'vendedor'] as TipoEntidade[]).map((tipo) => (
+    <div className="space-y-6 pb-8">
+      <CabecalhoPagina
+        titulo={getPageTitle()}
+        subtitulo={getPageSubtitle()}
+        icone={Briefcase}
+        acoes={
+          podeIncluir && (
             <button
-              key={tipo}
-              onClick={() => handleTipoChange(tipo)}
-              className={`flex items-center gap-2 px-3 md:px-4 py-2.5 md:py-3 text-xs md:text-sm font-medium rounded-lg whitespace-nowrap transition-all ${
-                filtroTipo === tipo
-                  ? 'bg-blue-50 text-blue-600'
-                  : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-muted)]'
-              }`}
+              onClick={() => navigate('/cadastros/geral/novo')}
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 font-medium"
             >
-              {tipo !== 'todos' && (
-                <span className={filtroTipo === tipo ? '' : 'opacity-60'}>
-                  {getTipoIcon(tipo)}
-                </span>
-              )}
-              <span>{TIPO_LABELS[tipo]}</span>
-              {filtroTipo === tipo && data && (
-                <span className="ml-1 px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded-full">
-                  {data.total}
-                </span>
-              )}
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">Novo Cadastro</span>
+              <span className="sm:hidden">Novo</span>
             </button>
-          ))}
-        </div>
-      </div>
+          )
+        }
+      >
+        {/* Filtros */}
+        <div className="flex flex-col gap-4 w-full">
+          {/* Tabs de Tipo */}
+          <div className="flex gap-1 overflow-x-auto pb-2 scrollbar-hide">
+            {(['todos', 'cliente', 'fornecedor', 'transportadora', 'vendedor'] as TipoEntidade[]).map((tipo) => (
+              <button
+                key={tipo}
+                onClick={() => handleTipoChange(tipo)}
+                className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-all border ${filtroTipo === tipo
+                  ? 'bg-primary/10 text-primary border-primary/20'
+                  : 'bg-surface text-muted-foreground border-border hover:bg-surface-hover hover:text-foreground'
+                  }`}
+              >
+                {tipo !== 'todos' && (
+                  <span className={filtroTipo === tipo ? '' : 'opacity-60'}>
+                    {getTipoIcon(tipo)}
+                  </span>
+                )}
+                <span>{TIPO_LABELS[tipo]}</span>
+              </button>
+            ))}
+          </div>
 
-      {/* Barra de Busca com Seleção de Coluna */}
-      <SearchBar
-        columns={SEARCH_COLUMNS}
-        onSearch={handleSearchBar}
-        onClear={handleClearFilters}
-        initialValue={filtroBusca}
-        initialColumn={filtroCampo}
-        initialSortDirection={sortDirection}
-        loading={loading}
-      />
-
-      {/* Filtros Extras */}
-      <div className="flex flex-wrap items-center gap-3">
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className={`flex items-center gap-2 px-4 py-2 border rounded-xl transition-all font-medium text-sm ${
-            showFilters || filtroIncluirInativos
-              ? 'border-blue-500 text-blue-600 bg-blue-50'
-              : 'border-[var(--border)] text-[var(--text)] hover:bg-[var(--surface-muted)] bg-[var(--surface)] shadow-sm'
-          }`}
-        >
-          <Filter className="w-4 h-4" />
-          <span>Mais Filtros</span>
-          {filtroIncluirInativos && (
-            <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-          )}
-        </button>
-
-        {/* Filtros Expandidos */}
-        {showFilters && (
-          <>
-            <label className="flex items-center gap-3 px-4 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-xl cursor-pointer hover:bg-[var(--surface-muted)] transition-colors">
+          <div className="flex flex-wrap gap-3 items-center">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
-                type="checkbox"
-                checked={filtroIncluirInativos}
-                onChange={(e) => setFiltroIncluirInativos(e.target.checked)}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                type="text"
+                value={filtroBusca}
+                onChange={(e) => setFiltroBusca(e.target.value)}
+                placeholder="Buscar por nome, código, CPF/CNPJ..."
+                className="w-full pl-9 pr-3 py-2 bg-surface-muted border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
               />
-              <span className="text-sm text-[var(--text)] font-medium">Incluir inativos</span>
-            </label>
+            </div>
+
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition-all border flex items-center gap-2 ${showFilters || filtroIncluirInativos
+                ? 'bg-primary/10 text-primary border-primary/20'
+                : 'bg-surface-muted text-muted-foreground border-border hover:bg-surface-hover'
+                }`}
+            >
+              <Filter className="w-4 h-4" />
+              Filtros
+            </button>
 
             {(filtroBusca || filtroIncluirInativos) && (
               <button
                 onClick={handleClearFilters}
-                className="flex items-center gap-1.5 text-sm text-[var(--text-muted)] hover:text-red-600 transition-colors"
+                className="px-3 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors flex items-center gap-2"
               >
                 <X className="w-4 h-4" />
-                <span>Limpar tudo</span>
+                Limpar
               </button>
             )}
-          </>
-        )}
-      </div>
+          </div>
 
-      {activeFilters.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2 -mt-2">
-          {activeFilters.map((filter, idx) => (
-            <span
-              key={idx}
-              className="inline-flex items-center gap-2 px-3 py-1.5 bg-[var(--surface)] border border-[var(--border)] rounded-full text-sm text-[var(--text)] shadow-sm"
-            >
-              {filter.label}
-              {filter.clear && (
-                <button
-                  type="button"
-                  onClick={filter.clear}
-                  className="text-[var(--text-muted)] hover:text-red-500"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              )}
-            </span>
-          ))}
-          <button
-            type="button"
-            onClick={handleClearAllFilters}
-            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-          >
-            Limpar tudo
-          </button>
+          {/* Filtros Expandidos */}
+          {showFilters && (
+            <div className="pt-2 animate-slide-down">
+              <label className="flex items-center gap-3 px-4 py-3 bg-surface-muted/50 border border-border rounded-xl cursor-pointer hover:bg-surface-muted transition-colors w-fit">
+                <input
+                  type="checkbox"
+                  checked={filtroIncluirInativos}
+                  onChange={(e) => setFiltroIncluirInativos(e.target.checked)}
+                  className="w-4 h-4 text-primary border-border rounded focus:ring-primary"
+                />
+                <span className="text-sm text-foreground font-medium">Incluir inativos</span>
+              </label>
+            </div>
+          )}
         </div>
-      )}
+      </CabecalhoPagina>
 
-      {/* Conteúdo */}
-      <div>
+      <div className="px-6">
         {/* Mensagem de Erro */}
         {error && (
-          <AlertaErro 
-            mensagem={error} 
-            fechavel 
+          <AlertaErro
+            mensagem={error}
+            fechavel
             onFechar={() => setError(null)}
-            className="mb-4"
+            className="mb-6"
           />
         )}
 
-        {/* Loading */}
-        {loading ? (
-          <EstadoCarregando mensagem="Carregando cadastros..." />
-        ) : (
-          <>
-            {/* Contador, ordenação e itens por página */}
-            <div className="mb-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-              <p className="text-sm text-[var(--text-muted)]">
-                <span className="font-semibold text-[var(--text)]">{data?.total || 0}</span> registro(s) encontrado(s)
-              </p>
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-[var(--text-muted)]">Exibir</span>
-                  <select
-                    value={pageSize}
-                    onChange={(e) => {
-                      setPageSize(Number(e.target.value));
-                      setPageNumber(1);
-                    }}
-                    className="px-3 py-1.5 text-sm border border-[var(--border)] rounded-lg bg-[var(--surface)] text-[var(--text)] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                  >
-                    <option value={10}>10</option>
-                    <option value={25}>25</option>
-                    <option value={50}>50</option>
-                    <option value={100}>100</option>
-                  </select>
-                  <span className="text-sm text-[var(--text-muted)]">por página</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Tabela com visual moderno */}
-            <div className="bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-[var(--shadow-soft)] overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-[var(--border)]">
-                  <thead className="bg-[var(--surface-muted)] sticky top-0 z-10">
-                    <tr>
-                      <th className="px-4 py-4 text-left text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
-                        Código
-                      </th>
-                      <th className="px-4 py-4 text-left text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
-                        Razão Social / Nome
-                      </th>
-                      <th className="px-4 py-4 text-left text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
-                        CNPJ/CPF
-                      </th>
-                      <th className="px-4 py-4 text-left text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
-                        Cidade/UF
-                      </th>
-                      <th className="px-4 py-4 text-left text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
-                        Contato
-                      </th>
-                      <th className="px-4 py-4 text-left text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
-                        Tipos
-                      </th>
-                      <th className="px-4 py-4 text-left text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th className="px-4 py-4 text-right text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
-                        Ações
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-[var(--surface)] divide-y divide-[var(--border)]">
-                    {sortedItems.length === 0 ? (
-                      <tr>
-                        <td colSpan={8}>
-                          <EstadoVazio 
-                            tipoBusca={!!filtroBusca}
-                            acao={filtroBusca ? { texto: 'Limpar busca', onClick: handleClearFilters } : undefined}
-                          />
-                        </td>
-                      </tr>
-                    ) : (
-                      sortedItems.map((item) => (
-                        <tr 
-                          key={item.sequenciaDoGeral} 
-                          className={`hover:bg-blue-50/30 transition-colors ${item.inativo ? 'opacity-60' : ''}`}
-                        >
-                          <td className="px-4 py-4 whitespace-nowrap">
-                            <span className="text-sm font-mono text-[var(--text-muted)] bg-[var(--surface-muted)] px-2 py-1 rounded">
-                              {item.sequenciaDoGeral}
-                            </span>
-                          </td>
-                          <td className="px-4 py-4">
-                            <div className="text-sm font-semibold text-[var(--text)]">
-                              {item.razaoSocial}
-                            </div>
-                            {item.nomeFantasia && item.nomeFantasia !== item.razaoSocial && (
-                              <div className="text-xs text-[var(--text-muted)] mt-0.5">
-                                {item.nomeFantasia}
-                              </div>
-                            )}
-                          </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-[var(--text-muted)] font-mono">
-                            {item.cpfECnpj || '-'}
-                          </td>
-                          <td className="px-4 py-4 whitespace-nowrap">
-                            {item.cidade ? (
-                              <div className="flex items-center gap-1.5 text-sm text-[var(--text-muted)]">
-                                <MapPin className="w-3.5 h-3.5 text-[var(--text-muted)] opacity-80" />
-                                <span>{item.cidade}/{item.uf}</span>
-                              </div>
-                            ) : (
-                              <span className="text-sm text-[var(--text-muted)]">-</span>
-                            )}
-                          </td>
-                          <td className="px-4 py-4">
-                            <div className="space-y-1.5">
-                              {item.fone1 && (
-                                <div className="flex items-center gap-1.5 text-sm text-[var(--text-muted)]">
-                                  <Phone className="w-3.5 h-3.5 text-[var(--text-muted)] opacity-80" />
-                                  <span>{item.fone1}</span>
-                                </div>
-                              )}
-                              {item.email && (
-                                <div className="flex items-center gap-1.5 text-sm text-[var(--text-muted)]">
-                                  <Mail className="w-3.5 h-3.5 text-[var(--text-muted)] opacity-80" />
-                                  <span className="truncate max-w-[150px]">{item.email}</span>
-                                </div>
-                              )}
-                              {!item.fone1 && !item.email && (
-                                <span className="text-sm text-[var(--text-muted)]">-</span>
-                              )}
-                            </div>
-                          </td>
-                          <td className="px-4 py-4">
-                            <div className="flex flex-wrap gap-1">
-                              {getTiposAtivos(item).map((tipo) => (
-                                <span
-                                  key={tipo}
-                                  className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide ${TIPO_CORES[tipo as TipoEntidade]}`}
-                                  title={TIPO_LABELS[tipo as TipoEntidade]}
-                                >
-                                  {TIPO_SIGLAS[tipo as TipoEntidade]}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td className="px-4 py-4 whitespace-nowrap">
-                            {item.inativo ? (
-                              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
-                                Inativo
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
-                                Ativo
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-right">
-                            <div className="flex items-center justify-end gap-1">
-                              <button
-                                onClick={() => handleView(item.sequenciaDoGeral)}
-                                className="p-2 text-[var(--text-muted)] hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
-                                title="Visualizar"
-                              >
-                                <Eye className="w-4 h-4" />
-                              </button>
-                              {podeAlterar && (
-                                <button
-                                  onClick={() => navigate(`/cadastros/geral/${item.sequenciaDoGeral}`)}
-                                  className="p-2 text-[var(--text-muted)] hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                                  title="Editar"
-                                >
-                                  <Edit2 className="w-4 h-4" />
-                                </button>
-                              )}
-                              {podeExcluir && (
-                                <button
-                                  onClick={() => handleDelete(item.sequenciaDoGeral, item.razaoSocial)}
-                                  className="p-2 text-[var(--text-muted)] hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                                  title="Inativar"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Paginação */}
-              {data && data.totalPages > 0 && (
-                <Paginacao
-                  paginaAtual={data.pageNumber}
-                  totalPaginas={data.totalPages}
-                  totalItens={data.total}
-                  itensPorPagina={pageSize}
-                  onMudarPagina={setPageNumber}
-                  carregando={loading}
-                />
+        <DataTable
+          data={data?.items || []}
+          columns={columns}
+          getRowKey={(item) => item.sequenciaDoGeral.toString()}
+          loading={loading}
+          totalItems={data?.total || 0}
+          rowActions={(item) => (
+            <>
+              <button
+                onClick={() => handleView(item.sequenciaDoGeral)}
+                className="p-2 text-muted-foreground hover:text-primary hover:bg-surface-hover rounded-lg transition-colors"
+                title="Visualizar"
+              >
+                <Eye className="h-4 w-4" />
+              </button>
+              {podeAlterar && (
+                <button
+                  onClick={() => navigate(`/cadastros/geral/${item.sequenciaDoGeral}`)}
+                  className="p-2 text-muted-foreground hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                  title="Editar"
+                >
+                  <Edit2 className="h-4 w-4" />
+                </button>
               )}
+              {podeExcluir && (
+                <button
+                  onClick={() => handleDeleteClick(item.sequenciaDoGeral, item.razaoSocial)}
+                  className="p-2 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  title="Inativar"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              )}
+            </>
+          )}
+        />
+
+        {/* Paginação Manual (já que a API é paginada) */}
+        {!loading && data && data.totalPages > 0 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border mt-4">
+            <div className="text-sm text-muted-foreground">
+              Página <span className="font-medium text-primary">{pageNumber}</span> de <span className="font-medium text-primary">{data.totalPages}</span>
             </div>
-          </>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setPageNumber(prev => Math.max(1, prev - 1))}
+                disabled={pageNumber === 1}
+                className="px-3 py-1.5 text-sm font-medium border border-border rounded-lg hover:bg-surface-hover disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Anterior
+              </button>
+              <button
+                onClick={() => setPageNumber(prev => Math.min(data.totalPages, prev + 1))}
+                disabled={pageNumber === data.totalPages}
+                className="px-3 py-1.5 text-sm font-medium border border-border rounded-lg hover:bg-surface-hover disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Próxima
+              </button>
+            </div>
+          </div>
         )}
       </div>
 

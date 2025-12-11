@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import {
-  ArrowLeft, Save, Loader2, Wrench, XCircle, Plus, Trash2, DollarSign
+  ArrowLeft, Save, Loader2, Wrench, XCircle, Plus, Trash2, DollarSign, Settings, Package
 } from 'lucide-react';
 import { manutencaoService } from '../../../services/manutencaoService';
 import { veiculoService } from '../../../services/veiculoService';
@@ -165,7 +165,7 @@ export default function ManutencaoFormPage() {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <XCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-700">Acesso Negado</h2>
+          <h2 className="text-xl font-semibold text-primary/80">Acesso Negado</h2>
         </div>
       </div>
     );
@@ -174,10 +174,10 @@ export default function ManutencaoFormPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <button onClick={() => navigate('/transporte/manutencoes')} className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg">
+        <button onClick={() => navigate('/transporte/manutencoes')} className="p-2 text-muted-foreground hover:text-primary/80 hover:bg-gray-100 rounded-lg">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+        <h1 className="text-2xl font-bold text-primary flex items-center gap-2">
           <Wrench className="w-7 h-7 text-purple-600" /> {titulo}
         </h1>
       </div>
@@ -187,89 +187,94 @@ export default function ManutencaoFormPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Dados Principais */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Dados da Manutenção</h2>
+        <div className="bg-surface rounded-xl shadow-sm border border-border p-6">
+          <h2 className="text-lg font-semibold text-primary mb-4 flex items-center gap-2 pb-3 border-b border-border">
+            <Settings className="w-5 h-5 text-purple-500" />
+            Dados da Manutenção
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Veículo <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">Veículo <span className="text-red-500">*</span></label>
               <select name="veiculoId" value={formData.veiculoId} onChange={handleChange} disabled={somenteVisualizacao}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100">
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-surface-hover">
                 <option value={0}>Selecione...</option>
                 {Array.isArray(veiculos) && veiculos.map((v) => (<option key={v.id} value={v.id}>{v.placa} - {v.marca} {v.modelo}</option>))}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Data Manutenção</label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">Data Manutenção</label>
               <input type="date" name="dataManutencao" value={formData.dataManutencao} onChange={handleChange} disabled={somenteVisualizacao}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100" />
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-surface-hover" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">Tipo</label>
               <select name="tipoManutencao" value={formData.tipoManutencao} onChange={handleChange} disabled={somenteVisualizacao}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100">
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-surface-hover">
                 {TIPOS_MANUTENCAO.map((t) => (<option key={t} value={t}>{t}</option>))}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">KM Atual</label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">KM Atual</label>
               <input type="number" name="kmAtual" value={formData.kmAtual || ''} onChange={handleChange} disabled={somenteVisualizacao}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100" />
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-surface-hover" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Fornecedor (Código)</label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">Fornecedor (Código)</label>
               <input type="number" name="fornecedorId" value={formData.fornecedorId || ''} onChange={handleChange} disabled={somenteVisualizacao}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100"
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-surface-hover"
                 placeholder="Código do fornecedor" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Número OS</label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">Número OS</label>
               <input type="text" name="numeroOS" value={formData.numeroOS} onChange={handleChange} disabled={somenteVisualizacao}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100" />
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-surface-hover" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Número NF</label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">Número NF</label>
               <input type="text" name="numeroNF" value={formData.numeroNF} onChange={handleChange} disabled={somenteVisualizacao}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100" />
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-surface-hover" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Valor Mão de Obra (R$)</label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">Valor Mão de Obra (R$)</label>
               <input type="number" name="valorMaoObra" value={formData.valorMaoObra || ''} onChange={handleChange} disabled={somenteVisualizacao}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100" step="0.01" />
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-surface-hover" step="0.01" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Valor Serv. Terceiros (R$)</label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">Valor Serv. Terceiros (R$)</label>
               <input type="number" name="valorServicosTerceiros" value={formData.valorServicosTerceiros || ''} onChange={handleChange} disabled={somenteVisualizacao}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100" step="0.01" />
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-surface-hover" step="0.01" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Próxima Manutenção</label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">Próxima Manutenção</label>
               <input type="date" name="dataProximaManutencao" value={formData.dataProximaManutencao || ''} onChange={handleChange} disabled={somenteVisualizacao}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100" />
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-surface-hover" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">KM Próxima Manutenção</label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">KM Próxima Manutenção</label>
               <input type="number" name="kmProximaManutencao" value={formData.kmProximaManutencao || ''} onChange={handleChange} disabled={somenteVisualizacao}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100" />
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-surface-hover" />
             </div>
           </div>
 
           <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Descrição do Serviço</label>
+            <label className="block text-sm font-medium text-primary/80 mb-1">Descrição do Serviço</label>
             <textarea name="descricaoServico" value={formData.descricaoServico} onChange={handleChange} disabled={somenteVisualizacao} rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100" />
+              className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-surface-hover" />
           </div>
 
           <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Observações</label>
+            <label className="block text-sm font-medium text-primary/80 mb-1">Observações</label>
             <textarea name="observacoes" value={formData.observacoes} onChange={handleChange} disabled={somenteVisualizacao} rows={2}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100" />
+              className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-surface-hover" />
           </div>
         </div>
 
         {/* Peças */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Peças Utilizadas</h2>
+        <div className="bg-surface rounded-xl shadow-sm border border-border p-6">
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-border">
+            <h2 className="text-lg font-semibold text-primary flex items-center gap-2">
+              <Package className="w-5 h-5 text-amber-500" /> Peças Utilizadas
+            </h2>
             {!somenteVisualizacao && (
               <button type="button" onClick={addPeca} className="inline-flex items-center gap-1 px-3 py-1 text-sm bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100">
                 <Plus className="w-4 h-4" /> Adicionar Peça
@@ -278,33 +283,33 @@ export default function ManutencaoFormPage() {
           </div>
 
           {pecas.length === 0 ? (
-            <p className="text-gray-500 text-center py-4">Nenhuma peça cadastrada</p>
+            <p className="text-muted-foreground text-center py-4">Nenhuma peça cadastrada</p>
           ) : (
             <div className="space-y-3">
               {pecas.map((peca, index) => (
-                <div key={index} className="grid grid-cols-1 md:grid-cols-6 gap-3 p-3 bg-gray-50 rounded-lg items-end">
+                <div key={index} className="grid grid-cols-1 md:grid-cols-6 gap-3 p-3 bg-surface-hover rounded-lg items-end">
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">Código</label>
+                    <label className="block text-xs text-muted-foreground mb-1">Código</label>
                     <input type="text" placeholder="Código" value={peca.codigoPeca || ''} onChange={(e) => updatePeca(index, 'codigoPeca', e.target.value)} disabled={somenteVisualizacao}
-                      className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100" />
+                      className="w-full px-2 py-1 border border-input rounded text-sm focus:ring-2 focus:ring-purple-500 disabled:bg-surface-hover" />
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-xs text-gray-500 mb-1">Descrição</label>
+                    <label className="block text-xs text-muted-foreground mb-1">Descrição</label>
                     <input type="text" placeholder="Descrição da peça" value={peca.descricaoPeca} onChange={(e) => updatePeca(index, 'descricaoPeca', e.target.value)} disabled={somenteVisualizacao}
-                      className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100" />
+                      className="w-full px-2 py-1 border border-input rounded text-sm focus:ring-2 focus:ring-purple-500 disabled:bg-surface-hover" />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">Qtde</label>
+                    <label className="block text-xs text-muted-foreground mb-1">Qtde</label>
                     <input type="number" placeholder="Qtd" value={peca.quantidade} onChange={(e) => updatePeca(index, 'quantidade', Number(e.target.value))} disabled={somenteVisualizacao}
-                      className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100" min={1} />
+                      className="w-full px-2 py-1 border border-input rounded text-sm focus:ring-2 focus:ring-purple-500 disabled:bg-surface-hover" min={1} />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">Valor Unit.</label>
+                    <label className="block text-xs text-muted-foreground mb-1">Valor Unit.</label>
                     <input type="number" placeholder="Valor" value={peca.valorUnitario} onChange={(e) => updatePeca(index, 'valorUnitario', Number(e.target.value))} disabled={somenteVisualizacao}
-                      className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100" step="0.01" />
+                      className="w-full px-2 py-1 border border-input rounded text-sm focus:ring-2 focus:ring-purple-500 disabled:bg-surface-hover" step="0.01" />
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-gray-700">
+                    <span className="text-sm font-semibold text-primary/80">
                       R$ {(peca.quantidade * peca.valorUnitario).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </span>
                     {!somenteVisualizacao && (
@@ -324,22 +329,22 @@ export default function ManutencaoFormPage() {
         </div>
 
         {/* Resumo */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <div className="bg-surface rounded-xl shadow-sm border border-border p-6">
+          <h2 className="text-lg font-semibold text-primary mb-4 flex items-center gap-2 pb-3 border-b border-border">
             <DollarSign className="w-5 h-5 text-blue-500" /> Resumo de Custos
           </h2>
           <div className="grid grid-cols-4 gap-4 text-center">
-            <div className="p-4 bg-gray-50 rounded-lg">
+            <div className="p-4 bg-surface-hover rounded-lg">
               <p className="text-sm text-gray-600">Peças</p>
-              <p className="text-xl font-bold text-gray-700">R$ {totalPecas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+              <p className="text-xl font-bold text-primary/80">R$ {totalPecas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
             </div>
-            <div className="p-4 bg-gray-50 rounded-lg">
+            <div className="p-4 bg-surface-hover rounded-lg">
               <p className="text-sm text-gray-600">Mão de Obra</p>
-              <p className="text-xl font-bold text-gray-700">R$ {valorMaoObra.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+              <p className="text-xl font-bold text-primary/80">R$ {valorMaoObra.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
             </div>
-            <div className="p-4 bg-gray-50 rounded-lg">
+            <div className="p-4 bg-surface-hover rounded-lg">
               <p className="text-sm text-gray-600">Serv. Terceiros</p>
-              <p className="text-xl font-bold text-gray-700">R$ {valorTerceiros.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+              <p className="text-xl font-bold text-primary/80">R$ {valorTerceiros.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
             </div>
             <div className="p-4 bg-purple-50 rounded-lg">
               <p className="text-sm text-gray-600">Total Geral</p>
@@ -351,10 +356,10 @@ export default function ManutencaoFormPage() {
         {/* Botões */}
         {!somenteVisualizacao && (
           <div className="flex justify-end gap-4">
-            <button type="button" onClick={() => navigate('/transporte/manutencoes')} className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+            <button type="button" onClick={() => navigate('/transporte/manutencoes')} className="px-4 py-2 text-primary/80 bg-gray-100 rounded-lg hover:bg-gray-200">
               Cancelar
             </button>
-            <button type="submit" disabled={saving} className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50">
+            <button type="submit" disabled={saving} className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg hover:from-purple-600 hover:to-indigo-700 disabled:opacity-50">
               {saving ? (<><Loader2 className="w-5 h-5 animate-spin" />Salvando...</>) : (<><Save className="w-5 h-5" />Salvar</>)}
             </button>
           </div>

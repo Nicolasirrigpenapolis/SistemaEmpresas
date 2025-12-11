@@ -76,6 +76,7 @@ export interface ReboqueDto {
   renavam?: string;
   chassi?: string;
   tipoCarroceria?: string;
+  uf?: string;
   capacidadeCarga?: number;
   tara?: number;
   rntrc?: string;
@@ -93,9 +94,10 @@ export interface ReboqueCreateDto {
   anoFabricacao?: number;
   renavam?: string;
   chassi?: string;
-  tipoCarroceria?: string;
+  tipoCarroceria: string;
+  uf: string;
   capacidadeCarga?: number;
-  tara?: number;
+  tara: number;
   rntrc?: string;
   proprietarioNome?: string;
   proprietarioCpfCnpj?: string;

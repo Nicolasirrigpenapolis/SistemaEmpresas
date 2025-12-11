@@ -40,6 +40,7 @@ public class UsuarioDto
 {
     public string Nome { get; set; } = string.Empty;
     public string Grupo { get; set; } = string.Empty;
+    public string? Email { get; set; }
     public string? Observacoes { get; set; }
     public List<PermissaoDto> Permissoes { get; set; } = new();
 }

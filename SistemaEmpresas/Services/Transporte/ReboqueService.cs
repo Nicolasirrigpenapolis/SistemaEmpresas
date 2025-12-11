@@ -11,7 +11,7 @@ namespace SistemaEmpresas.Services.Transporte;
 // ==========================================
 public interface IReboqueService
 {
-    Task<List<ReboqueListDto>> ListarAsync(bool apenasAtivos = true);
+    Task<DTOs.PagedResult<ReboqueListDto>> ListarAsync(ReboqueFiltros? filtros = null);
     Task<ReboqueDto?> ObterPorIdAsync(int id);
     Task<ReboqueDto?> ObterPorPlacaAsync(string placa);
     Task<(bool Sucesso, string Mensagem, int? Id)> CriarAsync(ReboqueCreateUpdateDto dto);
@@ -34,15 +34,37 @@ public class ReboqueService : IReboqueService
         _logger = logger;
     }
 
-    public async Task<List<ReboqueListDto>> ListarAsync(bool apenasAtivos = true)
+    public async Task<DTOs.PagedResult<ReboqueListDto>> ListarAsync(ReboqueFiltros? filtros = null)
     {
         var query = _context.Reboques.AsQueryable();
         
-        if (apenasAtivos)
-            query = query.Where(r => r.Ativo);
+        // Filtros
+        if (filtros != null)
+        {
+            if (!string.IsNullOrWhiteSpace(filtros.Busca))
+            {
+                var busca = filtros.Busca.ToUpper().Trim();
+                query = query.Where(r => 
+                    r.Placa.Contains(busca) || 
+                    (r.Marca != null && r.Marca.ToUpper().Contains(busca)) ||
+                    (r.Modelo != null && r.Modelo.ToUpper().Contains(busca)));
+            }
+            
+            if (!string.IsNullOrWhiteSpace(filtros.Placa))
+            {
+                query = query.Where(r => r.Placa.Contains(filtros.Placa.ToUpper().Trim()));
+            }
+        }
 
-        return await query
+        // Paginação
+        var pageNumber = filtros?.Pagina ?? 1;
+        var pageSize = filtros?.TamanhoPagina ?? 25;
+        var totalCount = await query.CountAsync();
+
+        var items = await query
             .OrderBy(r => r.Placa)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
             .Select(r => new ReboqueListDto
             {
                 Id = r.Id,
@@ -55,6 +77,8 @@ public class ReboqueService : IReboqueService
                 Ativo = r.Ativo
             })
             .ToListAsync();
+            
+        return new DTOs.PagedResult<ReboqueListDto>(items, totalCount, pageNumber, pageSize);
     }
 
     public async Task<ReboqueDto?> ObterPorIdAsync(int id)

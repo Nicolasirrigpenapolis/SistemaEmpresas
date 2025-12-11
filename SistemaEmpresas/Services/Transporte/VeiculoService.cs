@@ -11,7 +11,7 @@ namespace SistemaEmpresas.Services.Transporte;
 // ==========================================
 public interface IVeiculoService
 {
-    Task<List<VeiculoListDto>> ListarAsync(bool apenasAtivos = true);
+    Task<PagedResult<VeiculoListDto>> ListarAsync(VeiculoFiltros? filtros = null);
     Task<VeiculoDto?> ObterPorIdAsync(int id);
     Task<VeiculoDto?> ObterPorPlacaAsync(string placa);
     Task<(bool Sucesso, string Mensagem, int? Id)> CriarAsync(VeiculoCreateUpdateDto dto);
@@ -34,15 +34,43 @@ public class VeiculoService : IVeiculoService
         _logger = logger;
     }
 
-    public async Task<List<VeiculoListDto>> ListarAsync(bool apenasAtivos = true)
+    public async Task<PagedResult<VeiculoListDto>> ListarAsync(VeiculoFiltros? filtros = null)
     {
         var query = _context.Veiculos.AsQueryable();
         
-        if (apenasAtivos)
+        // Filtros
+        if (filtros != null)
+        {
+            if (filtros.IncluirInativos == false) // Default é false se nulo? Frontend manda false explicitamente
+                query = query.Where(v => v.Ativo);
+                
+            if (!string.IsNullOrWhiteSpace(filtros.Busca))
+            {
+                var busca = filtros.Busca.ToUpper().Trim();
+                query = query.Where(v => 
+                    v.Placa.Contains(busca) || 
+                    (v.Marca != null && v.Marca.ToUpper().Contains(busca)) ||
+                    (v.Modelo != null && v.Modelo.ToUpper().Contains(busca)));
+            }
+            
+            if (!string.IsNullOrWhiteSpace(filtros.TipoVeiculo))
+                query = query.Where(v => v.TipoRodado == filtros.TipoVeiculo);
+        }
+        else
+        {
+            // Comportamento padrão se não passar filtros (apenas ativos)
             query = query.Where(v => v.Ativo);
+        }
 
-        return await query
+        // Paginação
+        var pageNumber = filtros?.Pagina ?? 1;
+        var pageSize = filtros?.TamanhoPagina ?? 25;
+        var totalCount = await query.CountAsync();
+
+        var items = await query
             .OrderBy(v => v.Placa)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
             .Select(v => new VeiculoListDto
             {
                 Id = v.Id,
@@ -57,6 +85,8 @@ public class VeiculoService : IVeiculoService
                 Ativo = v.Ativo
             })
             .ToListAsync();
+            
+        return new PagedResult<VeiculoListDto>(items, totalCount, pageNumber, pageSize);
     }
 
     public async Task<VeiculoDto?> ObterPorIdAsync(int id)

@@ -7,36 +7,65 @@ export default {
   darkMode: ['class', '[data-theme="dark"]'],
   theme: {
     extend: {
+      screens: {
+        'xs': '375px',
+        // sm: 640px (default)
+        // md: 768px (default)
+        // lg: 1024px (default)
+        // xl: 1280px (default)
+      },
       fontFamily: {
-        sans: ['Poppins', 'Inter', 'Segoe UI', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['Inter', 'sans-serif'],
+        display: ['Outfit', 'Inter', 'sans-serif'],
       },
       colors: {
-        primary: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
+        background: "var(--color-background)",
+        surface: {
+          DEFAULT: "var(--color-surface)",
+          hover: "var(--color-surface-hover)",
+          active: "var(--color-surface-active)",
         },
-        // Navy Dark Mode Colors
-        navy: {
-          50: '#e8eef7',
-          100: '#c5d4e8',
-          200: '#8ba3c7',
-          300: '#5a7da8',
-          400: '#3b5f8a',
-          500: '#2a4a6f',
-          600: '#1e3a5f',
-          700: '#142743',
-          800: '#0f1f38',
-          900: '#0a1628',
-        }
-      }
+        primary: {
+          DEFAULT: "var(--color-primary)",
+          foreground: "var(--color-primary-foreground)",
+        },
+        secondary: {
+          DEFAULT: "var(--color-secondary)",
+          foreground: "var(--color-secondary-foreground)",
+        },
+        accent: {
+          DEFAULT: "var(--color-accent)",
+          foreground: "var(--color-accent-foreground)",
+        },
+        muted: {
+          DEFAULT: "var(--color-muted)",
+          foreground: "var(--color-muted-foreground)",
+        },
+        border: "var(--color-border)",
+        input: "var(--color-input)",
+      },
+      spacing: {
+        'safe': 'env(safe-area-inset-bottom)',
+      },
+      animation: {
+        'fade-in': 'fadeIn 0.5s ease-out',
+        'slide-up': 'slideUp 0.5s ease-out',
+        'scale-in': 'scaleIn 0.2s ease-out',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        slideUp: {
+          '0%': { transform: 'translateY(20px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        scaleIn: {
+          '0%': { transform: 'scale(0.95)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+      },
     },
   },
   plugins: [],

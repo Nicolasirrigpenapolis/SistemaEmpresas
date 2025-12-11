@@ -27,25 +27,50 @@ public class VeiculosController : ControllerBase
     }
 
     /// <summary>
-    /// Lista todos os veículos
+    /// Lista todos os veículos com paginação e filtros
     /// </summary>
     [HttpGet]
-    public async Task<ActionResult<List<VeiculoListDto>>> Listar([FromQuery] bool apenasAtivos = true)
+    public async Task<ActionResult<PagedResult<VeiculoListDto>>> Listar([FromQuery] VeiculoFiltros filtros)
     {
         try
         {
             var usuario = User?.Identity?.Name ?? "Desconhecido";
-            _logger.LogInformation("Listando veículos. Usuário: {Usuario}, ApenasAtivos: {ApenasAtivos}", usuario, apenasAtivos);
+            _logger.LogInformation("Listando veículos. Usuário: {Usuario}, Filtros: {@Filtros}", usuario, filtros);
             
-            var veiculos = await _service.ListarAsync(apenasAtivos);
+            var resultado = await _service.ListarAsync(filtros);
             
-            _logger.LogInformation("Listagem de veículos concluída. Total: {Total}", veiculos.Count);
-            return Ok(veiculos);
+            _logger.LogInformation("Listagem de veículos concluída. Total: {Total}", resultado.TotalCount);
+            return Ok(resultado);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Erro ao listar veículos. Usuário: {Usuario}", User?.Identity?.Name ?? "Desconhecido");
-            return StatusCode(500, new { mensagem = "Erro interno ao listar veículos" });
+            return StatusCode(500, new { mensagem = "Erro interno ao listar veículos", erro = ex.Message, stack = ex.StackTrace });
+        }
+    }
+
+    /// <summary>
+    /// Lista veículos ativos para seleção em combos
+    /// </summary>
+    [HttpGet("ativos")]
+    public async Task<ActionResult<List<VeiculoListDto>>> ListarAtivos()
+    {
+        try
+        {
+            var filtros = new VeiculoFiltros 
+            { 
+                Pagina = 1, 
+                TamanhoPagina = 1000, 
+                IncluirInativos = false 
+            };
+            
+            var resultado = await _service.ListarAsync(filtros);
+            return Ok(resultado.Items);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao listar veículos ativos");
+            return StatusCode(500, new { mensagem = "Erro interno ao listar veículos ativos" });
         }
     }
 

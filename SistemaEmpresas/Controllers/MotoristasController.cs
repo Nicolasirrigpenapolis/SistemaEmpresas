@@ -8,7 +8,7 @@ using System.Security.Claims;
 namespace SistemaEmpresas.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/transporte/[controller]")]
 [Authorize]
 public class MotoristasController : ControllerBase
 {
@@ -35,14 +35,12 @@ public class MotoristasController : ControllerBase
         try
         {
             var usuario = User?.Identity?.Name ?? "Desconhecido";
-            filtros ??= new MotoristaFiltrosDto();
-            _logger.LogInformation("Listando motoristas. Usuário: {Usuario}, Página: {Pagina}, Tamanho: {Tamanho}", 
-                usuario, filtros.Pagina, filtros.TamanhoPagina);
+            _logger.LogInformation("Listando motoristas. Filtros: {@Filtros}, Usuário: {Usuario}", filtros, usuario);
 
-            var resultado = await _motoristaService.ListarAsync(filtros);
+            var resultado = await _motoristaService.ListarAsync(filtros ?? new MotoristaFiltrosDto());
             
-            _logger.LogInformation("Motoristas listados com sucesso. Total: {Total}, Usuário: {Usuario}", 
-                resultado.TotalItems, usuario);
+            _logger.LogInformation("Motoristas listados com sucesso. Total: {Total}, Página: {Pagina}, Usuário: {Usuario}", 
+                resultado.TotalCount, filtros?.Pagina ?? 1, usuario);
             return Ok(resultado);
         }
         catch (Exception ex)

@@ -101,16 +101,16 @@ export default function MotoristasPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <User className="w-7 h-7 text-indigo-600" />
+          <h1 className="text-2xl font-bold text-primary flex items-center gap-2">
+            <User className="w-7 h-7 text-blue-600" />
             Motoristas
           </h1>
-          <p className="text-gray-500 mt-1">Gerencie os motoristas/condutores do sistema</p>
+          <p className="text-muted-foreground mt-1">Gerencie os motoristas/condutores do sistema</p>
         </div>
         {podeIncluir && (
           <button
             onClick={() => navigate('/transporte/motoristas/novo')}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-colors"
           >
             <Plus className="w-5 h-5" />
             Novo Motorista
@@ -119,36 +119,36 @@ export default function MotoristasPage() {
       </div>
 
       {/* Barra de Busca e Filtros */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+      <div className="bg-surface rounded-xl shadow-sm border border-border p-4">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground/70 w-5 h-5" />
             <input
               type="text"
               placeholder="Buscar por nome ou CPF..."
               value={buscaTemp}
               onChange={(e) => setBuscaTemp(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleBuscar()}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
           <div className="flex gap-2">
             <button
               onClick={handleBuscar}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700"
             >
               Buscar
             </button>
             <button
               onClick={() => setMostrarFiltros(!mostrarFiltros)}
-              className={`p-2 rounded-lg border ${mostrarFiltros ? 'bg-indigo-100 border-indigo-500' : 'border-gray-300 hover:bg-gray-50'}`}
+              className={`p-2 rounded-lg border ${mostrarFiltros ? 'bg-blue-100 border-blue-500' : 'border-input hover:bg-surface-hover'}`}
             >
               <Filter className="w-5 h-5" />
             </button>
             {(filtros.busca || filtros.uf) && (
               <button
                 onClick={handleLimparFiltros}
-                className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-500"
+                className="p-2 rounded-lg border border-input hover:bg-surface-hover text-muted-foreground"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -158,14 +158,14 @@ export default function MotoristasPage() {
 
         {/* Filtros expandidos */}
         {mostrarFiltros && (
-          <div className="mt-4 pt-4 border-t border-gray-200">
+          <div className="mt-4 pt-4 border-t border-border">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">UF</label>
                 <select
                   value={filtros.uf || ''}
                   onChange={(e) => setFiltros((prev) => ({ ...prev, uf: e.target.value, pagina: 1 }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Todas</option>
                   {UFS_BRASIL.map((uf) => (
@@ -182,7 +182,7 @@ export default function MotoristasPage() {
       {error && <AlertaErro mensagem={error} fechavel onFechar={() => setError(null)} />}
 
       {/* Tabela */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-surface rounded-xl shadow-sm border border-border overflow-hidden">
         {loading ? (
           <EstadoCarregando mensagem="Carregando motoristas..." />
         ) : !motoristas || motoristas.length === 0 ? (
@@ -196,46 +196,46 @@ export default function MotoristasPage() {
           <>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+                <thead className="bg-surface-hover">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Código</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nome</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">CPF</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">RG</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Celular</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">UF</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Ações</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Código</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Nome</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">CPF</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">RG</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Celular</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">UF</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase">Ações</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-surface divide-y divide-gray-200">
                   {motoristas?.map((m) => (
-                    <tr key={m.codigoDoMotorista} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <tr key={m.codigoDoMotorista} className="group hover:bg-surface-hover">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-[var(--text-muted)]">
                         {m.codigoDoMotorista}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-[var(--text)]">
                         {m.nomeDoMotorista}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground">
                         {formatarCPF(m.cpf)}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground">
                         {m.rg || '-'}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
-                          <Phone className="w-4 h-4 text-gray-400" />
+                          <Phone className="w-4 h-4 text-muted-foreground/70" />
                           {formatarTelefone(m.cel) || '-'}
                         </div>
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground">
                         {m.uf || '-'}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-right text-sm">
-                        <div className="flex items-center justify-end gap-2">
+                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={() => navigate(`/transporte/motoristas/${m.codigoDoMotorista}/visualizar`)}
-                            className="p-1.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg"
+                            className="p-1.5 text-muted-foreground hover:text-blue-600 hover:bg-blue-50 rounded-lg"
                             title="Visualizar"
                           >
                             <Eye className="w-4 h-4" />
@@ -243,7 +243,7 @@ export default function MotoristasPage() {
                           {podeAlterar && (
                             <button
                               onClick={() => navigate(`/transporte/motoristas/${m.codigoDoMotorista}/editar`)}
-                              className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+                              className="p-1.5 text-muted-foreground hover:text-blue-600 hover:bg-blue-50 rounded-lg"
                               title="Editar"
                             >
                               <Edit2 className="w-4 h-4" />
@@ -252,7 +252,7 @@ export default function MotoristasPage() {
                           {podeExcluir && (
                             <button
                               onClick={() => setMotoristaExcluir(m)}
-                              className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                              className="p-1.5 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-lg"
                               title="Excluir"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -267,7 +267,7 @@ export default function MotoristasPage() {
             </div>
 
             {/* Paginação */}
-            <div className="px-4 py-3 border-t border-gray-200">
+            <div className="px-4 py-3 border-t border-border">
               <Paginacao
                 paginaAtual={filtros.pagina || 1}
                 totalPaginas={totalPages}

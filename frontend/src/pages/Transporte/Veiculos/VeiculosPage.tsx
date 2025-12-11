@@ -128,8 +128,8 @@ export default function VeiculosPage() {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <XCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-700">Acesso Negado</h2>
-          <p className="text-gray-500 mt-2">Você não tem permissão para acessar esta tela.</p>
+          <h2 className="text-xl font-semibold text-primary/80">Acesso Negado</h2>
+          <p className="text-muted-foreground mt-2">Você não tem permissão para acessar esta tela.</p>
         </div>
       </div>
     );
@@ -140,16 +140,16 @@ export default function VeiculosPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-primary flex items-center gap-2">
             <Truck className="w-7 h-7 text-blue-600" />
             Veículos
           </h1>
-          <p className="text-gray-500 mt-1">Gerencie a frota de veículos</p>
+          <p className="text-muted-foreground mt-1">Gerencie a frota de veículos</p>
         </div>
         {podeIncluir && (
           <button
             onClick={() => navigate('/transporte/veiculos/novo')}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-colors"
           >
             <Plus className="w-5 h-5" />
             Novo Veículo
@@ -158,7 +158,7 @@ export default function VeiculosPage() {
       </div>
 
       {/* Filtros */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+      <div className="bg-surface rounded-xl shadow-sm border border-border p-4">
         <div className="flex flex-col lg:flex-row gap-4">
           {/* Busca */}
           <div className="flex-1">
@@ -169,7 +169,7 @@ export default function VeiculosPage() {
                 value={filtroBusca}
                 onChange={(e) => setFiltroBusca(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full pl-4 pr-10 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
           </div>
@@ -178,24 +178,23 @@ export default function VeiculosPage() {
           <div className="flex gap-2">
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`inline-flex items-center gap-2 px-4 py-2 border rounded-lg transition-colors ${
-                showFilters
-                  ? 'bg-blue-50 border-blue-300 text-blue-700'
-                  : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-              }`}
+              className={`inline-flex items-center gap-2 px-4 py-2 border rounded-lg transition-colors ${showFilters
+                ? 'bg-blue-50 border-blue-300 text-blue-700'
+                : 'border-input text-primary/80 hover:bg-surface-hover'
+                }`}
             >
               <Filter className="w-5 h-5" />
               Filtros
             </button>
             <button
               onClick={handleSearch}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-colors"
             >
               Buscar
             </button>
             <button
               onClick={handleClearFilters}
-              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              className="px-4 py-2 border border-input text-primary/80 rounded-lg hover:bg-surface-hover transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -204,15 +203,15 @@ export default function VeiculosPage() {
 
         {/* Filtros expandidos */}
         {showFilters && (
-          <div className="mt-4 pt-4 border-t border-gray-200 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="mt-4 pt-4 border-t border-border grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-primary/80 mb-1">
                 Tipo de Veículo
               </label>
               <select
                 value={filtroTipo}
                 onChange={(e) => setFiltroTipo(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">Todos</option>
                 {TIPOS_VEICULO.map((tipo) => (
@@ -229,9 +228,9 @@ export default function VeiculosPage() {
                   type="checkbox"
                   checked={filtroIncluirInativos}
                   onChange={(e) => setFiltroIncluirInativos(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  className="w-4 h-4 text-blue-600 border-input rounded focus:ring-blue-500"
                 />
-                <span className="text-sm text-gray-700">Incluir inativos</span>
+                <span className="text-sm text-primary/80">Incluir inativos</span>
               </label>
             </div>
           </div>
@@ -240,15 +239,15 @@ export default function VeiculosPage() {
 
       {/* Erro */}
       {error && (
-        <AlertaErro 
-          mensagem={error} 
-          fechavel 
-          onFechar={() => setError(null)} 
+        <AlertaErro
+          mensagem={error}
+          fechavel
+          onFechar={() => setError(null)}
         />
       )}
 
       {/* Tabela */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-surface rounded-xl shadow-sm border border-border overflow-hidden">
         {loading ? (
           <div className="p-8">
             <EstadoCarregando mensagem="Carregando veículos..." />
@@ -261,9 +260,9 @@ export default function VeiculosPage() {
             acao={
               podeIncluir
                 ? {
-                    texto: 'Cadastrar Veículo',
-                    onClick: () => navigate('/transporte/veiculos/novo'),
-                  }
+                  texto: 'Cadastrar Veículo',
+                  onClick: () => navigate('/transporte/veiculos/novo'),
+                }
                 : undefined
             }
           />
@@ -271,41 +270,41 @@ export default function VeiculosPage() {
           <>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+                <thead className="bg-surface-hover">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Placa
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Marca / Modelo
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Tipo
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Capacidade (kg)
                     </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Ações
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-surface divide-y divide-gray-200">
                   {data.items.map((veiculo) => (
-                    <tr key={veiculo.id} className="hover:bg-gray-50">
+                    <tr key={veiculo.id} className="group hover:bg-surface-hover">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="font-medium text-gray-900">{veiculo.placa}</span>
+                        <span className="text-[var(--text)]">{veiculo.placa}</span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                      <td className="px-6 py-4 whitespace-nowrap text-[var(--text-muted)]">
                         {veiculo.marca} {veiculo.modelo}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                      <td className="px-6 py-4 whitespace-nowrap text-muted-foreground">
                         {veiculo.tipoVeiculo || '-'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                      <td className="px-6 py-4 whitespace-nowrap text-muted-foreground">
                         {veiculo.capacidadeCarga?.toLocaleString('pt-BR') || '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-center">
@@ -322,10 +321,10 @@ export default function VeiculosPage() {
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <div className="flex items-center justify-end gap-2">
+                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={() => navigate(`/transporte/veiculos/${veiculo.id}`)}
-                            className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            className="p-2 text-muted-foreground hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                             title="Visualizar"
                           >
                             <Eye className="w-4 h-4" />
@@ -333,7 +332,7 @@ export default function VeiculosPage() {
                           {podeAlterar && (
                             <button
                               onClick={() => navigate(`/transporte/veiculos/${veiculo.id}/editar`)}
-                              className="p-2 text-gray-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                              className="p-2 text-muted-foreground hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
                               title="Editar"
                             >
                               <Edit2 className="w-4 h-4" />
@@ -342,7 +341,7 @@ export default function VeiculosPage() {
                           {podeExcluir && (
                             <button
                               onClick={() => handleDeleteClick(veiculo.id, veiculo.placa)}
-                              className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              className="p-2 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                               title="Excluir"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -357,7 +356,7 @@ export default function VeiculosPage() {
             </div>
 
             {/* Paginação */}
-            <div className="px-6 py-4 border-t border-gray-200">
+            <div className="px-6 py-4 border-t border-border">
               <Paginacao
                 paginaAtual={data.pageNumber}
                 totalPaginas={data.totalPages}

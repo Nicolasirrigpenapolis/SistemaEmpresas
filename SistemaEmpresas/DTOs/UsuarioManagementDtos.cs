@@ -36,6 +36,7 @@ public class UsuarioListDto
 {
     public string Nome { get; set; } = string.Empty;
     public string Grupo { get; set; } = string.Empty;
+    public string? Email { get; set; }
     public string? Observacoes { get; set; }
     public bool IsAdmin { get; set; }
     public bool Ativo { get; set; } = true;
@@ -51,6 +52,7 @@ public class UsuarioCreateDto
     public string Senha { get; set; } = string.Empty;
     public string ConfirmarSenha { get; set; } = string.Empty;
     public string Grupo { get; set; } = string.Empty;
+    public string? Email { get; set; }
     public string? Observacoes { get; set; }
     public bool Ativo { get; set; } = true;
 }
@@ -63,6 +65,7 @@ public class UsuarioUpdateDto
     public string? NovaSenha { get; set; }
     public string? ConfirmarNovaSenha { get; set; }
     public string Grupo { get; set; } = string.Empty;
+    public string? Email { get; set; }
     public string? Observacoes { get; set; }
     public bool Ativo { get; set; } = true;
 }

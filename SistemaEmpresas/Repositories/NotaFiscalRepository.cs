@@ -114,7 +114,7 @@ public class NotaFiscalRepository : INotaFiscalRepository
         return new PagedResult<NotaFiscalListDto>
         {
             Items = items,
-            TotalItems = totalCount,
+            TotalCount = totalCount,
             PageNumber = filtro.PageNumber,
             PageSize = filtro.PageSize
         };

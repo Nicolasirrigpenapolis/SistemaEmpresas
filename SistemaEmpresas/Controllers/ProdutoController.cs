@@ -27,7 +27,7 @@ public class ProdutoController : ControllerBase
     /// Lista produtos com paginação e filtros
     /// </summary>
     [HttpGet]
-    public async Task<ActionResult<PagedResult<ProdutoListDto>>> Listar([FromQuery] ProdutoFiltroDto filtro)
+    public async Task<ActionResult<DTOs.PagedResult<ProdutoListDto>>> Listar([FromQuery] ProdutoFiltroDto filtro)
     {
         _logger.LogInformation("GET /api/produto - Busca: {Busca}, Grupo: {Grupo}", 
             filtro.Busca, filtro.GrupoProduto);

@@ -220,6 +220,7 @@ public class AuthService : IAuthService
                 {
                     Nome = nomeReal,
                     Grupo = grupoToken,
+                    Email = pwUsuario.PwEmail,
                     Observacoes = pwUsuario.PwObs,
                     Permissoes = permissoes
                 },
@@ -380,6 +381,7 @@ public class AuthService : IAuthService
             {
                 Nome = nomeReal,
                 Grupo = grupoToken,
+                Email = pwUsuario.PwEmail,
                 Observacoes = pwUsuario.PwObs,
                 Permissoes = permissoes
             },

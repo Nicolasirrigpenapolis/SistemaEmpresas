@@ -44,6 +44,7 @@ import {
   Layers,
   Zap,
   RotateCcw,
+  ChevronLeft,
 } from 'lucide-react';
 import { usuarioManagementService } from '../../services/usuarioManagementService';
 import permissoesTelaService from '../../services/permissoesTelaService';
@@ -60,7 +61,7 @@ import type {
   PermissoesCompletasGrupoDto,
 } from '../../types';
 
-type TabType = 'usuarios' | 'grupos' | 'permissoes';
+type TabType = 'usuarios' | 'grupos';
 
 // Ícones por módulo com gradientes
 const moduleIcons: Record<string, React.ReactNode> = {
@@ -128,6 +129,7 @@ export default function UsuariosPage() {
     senha: '',
     confirmarSenha: '',
     grupo: '',
+    email: '',
     observacoes: '',
     ativo: true,
   });
@@ -198,7 +200,7 @@ export default function UsuariosPage() {
 
   // Quando seleciona grupo na aba de permissões
   useEffect(() => {
-    if (tabAtiva === 'permissoes' && grupoSelecionado) {
+    if (tabAtiva === 'grupos' && grupoSelecionado) {
       carregarPermissoesGrupo(grupoSelecionado);
     }
   }, [tabAtiva, grupoSelecionado, carregarPermissoesGrupo]);
@@ -206,10 +208,10 @@ export default function UsuariosPage() {
   // Filtrar usuários
   const usuariosFiltrados = usuarios.filter(u => {
     const matchBusca = u.nome.toLowerCase().includes(busca.toLowerCase()) ||
-                       u.grupo.toLowerCase().includes(busca.toLowerCase());
-    const matchAtivo = filtroAtivo === 'todos' || 
-                       (filtroAtivo === 'ativos' && u.ativo) ||
-                       (filtroAtivo === 'inativos' && !u.ativo);
+      u.grupo.toLowerCase().includes(busca.toLowerCase());
+    const matchAtivo = filtroAtivo === 'todos' ||
+      (filtroAtivo === 'ativos' && u.ativo) ||
+      (filtroAtivo === 'inativos' && !u.ativo);
     return matchBusca && matchAtivo;
   });
 
@@ -287,7 +289,7 @@ export default function UsuariosPage() {
       const resultado = await usuarioManagementService.criarUsuario(usuarioForm);
       if (resultado.sucesso) {
         mostrarToast('sucesso', resultado.mensagem);
-        setUsuarioForm({ nome: '', senha: '', confirmarSenha: '', grupo: '', observacoes: '', ativo: true });
+        setUsuarioForm({ nome: '', senha: '', confirmarSenha: '', grupo: '', email: '', observacoes: '', ativo: true });
         setModalAberto(null);
         await carregarDados();
       } else {
@@ -306,6 +308,7 @@ export default function UsuariosPage() {
       setSalvando(true);
       const updateDto: UsuarioUpdateDto = {
         grupo: usuarioForm.grupo,
+        email: usuarioForm.email,
         observacoes: usuarioForm.observacoes,
         ativo: usuarioForm.ativo,
       };
@@ -359,7 +362,7 @@ export default function UsuariosPage() {
         ativo: novoStatus,
         grupo: usuario.grupo || '',
       });
-      
+
       if (resultado.sucesso) {
         mostrarToast('sucesso', `Usuário ${novoStatus ? 'ativado' : 'inativado'} com sucesso!`);
         await carregarDados();
@@ -380,6 +383,7 @@ export default function UsuariosPage() {
       senha: '',
       confirmarSenha: '',
       grupo: usuario.grupo,
+      email: usuario.email || '',
       observacoes: usuario.observacoes || '',
       ativo: usuario.ativo,
     });
@@ -420,7 +424,7 @@ export default function UsuariosPage() {
 
     // PRIMEIRO verifica se já existe uma versão editada
     let permissaoAtual: PermissoesTelaListDto | undefined = permissoesEditadas.get(tela);
-    
+
     // Se não existe versão editada, busca a original
     if (!permissaoAtual) {
       for (const modulo of permissoesGrupo.modulos) {
@@ -532,23 +536,23 @@ export default function UsuariosPage() {
   };
 
   // === FUNÇÕES DE ESTATÍSTICAS E AÇÕES EM MASSA ===
-  
+
   // Calcula estatísticas de permissões
   const calcularEstatisticas = useMemo(() => {
     if (!grupoSelecionado) return { totalTelas: 0, telasComAcesso: 0, percentual: 0, totalPermissoes: 0, permissoesAtivas: 0 };
-    
+
     let totalTelas = 0;
     let telasComAcesso = 0;
     let totalPermissoes = 0;
     let permissoesAtivas = 0;
-    
+
     telasDisponiveis.forEach(modulo => {
       modulo.telas.forEach(tela => {
         totalTelas++;
         const perm = getPermissao(tela.tela);
         const temAlgumAcesso = perm?.consultar || perm?.incluir || perm?.alterar || perm?.excluir;
         if (temAlgumAcesso) telasComAcesso++;
-        
+
         totalPermissoes += 4;
         if (perm?.consultar) permissoesAtivas++;
         if (perm?.incluir) permissoesAtivas++;
@@ -556,7 +560,7 @@ export default function UsuariosPage() {
         if (perm?.excluir) permissoesAtivas++;
       });
     });
-    
+
     const percentual = totalTelas > 0 ? Math.round((telasComAcesso / totalTelas) * 100) : 0;
     return { totalTelas, telasComAcesso, percentual, totalPermissoes, permissoesAtivas };
   }, [grupoSelecionado, telasDisponiveis, permissoesEditadas, permissoesGrupo]);
@@ -564,7 +568,7 @@ export default function UsuariosPage() {
   // Liberar TODAS as permissões
   const liberarTudo = () => {
     if (!grupoSelecionado) return;
-    
+
     setPermissoesEditadas(prev => {
       const novo = new Map(prev);
       telasDisponiveis.forEach(modulo => {
@@ -593,7 +597,7 @@ export default function UsuariosPage() {
   // Apenas visualizar (somente consultar)
   const apenasVisualizar = () => {
     if (!grupoSelecionado) return;
-    
+
     setPermissoesEditadas(prev => {
       const novo = new Map(prev);
       telasDisponiveis.forEach(modulo => {
@@ -622,7 +626,7 @@ export default function UsuariosPage() {
   // Limpar TODAS as permissões (remover todos os acessos)
   const limparTudo = () => {
     if (!grupoSelecionado) return;
-    
+
     setPermissoesEditadas(prev => {
       const novo = new Map(prev);
       telasDisponiveis.forEach(modulo => {
@@ -671,7 +675,7 @@ export default function UsuariosPage() {
       modulo.telas.forEach(tela => {
         const permissaoExistente = getPermissao(tela.tela);
         const isDashboard = nomeModulo === 'Dashboard';
-        
+
         const novaPermissao = {
           id: permissaoExistente?.id || 0,
           grupo: grupoSelecionado,
@@ -707,24 +711,23 @@ export default function UsuariosPage() {
             </div>
             <div className="absolute inset-0 w-20 h-20 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin" />
           </div>
-          <p className="mt-4 text-lg font-medium text-gray-700">Carregando...</p>
-          <p className="text-sm text-[var(--text-muted)]">Preparando módulo de usuários</p>
+          <p className="mt-4 text-lg font-medium text-primary/80">Carregando...</p>
+          <p className="text-sm text-muted-foreground">Preparando módulo de usuários</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50">
+    <div className="min-h-screen bg-background">
       {/* Toast Notifications */}
       {toast && (
         <div className="fixed top-6 right-6 z-50 transform transition-all duration-500 ease-out animate-slideIn">
           <div
-            className={`flex items-center gap-3 px-5 py-4 rounded-2xl shadow-2xl backdrop-blur-xl border ${
-              toast.tipo === 'sucesso'
-                ? 'bg-gradient-to-r from-emerald-500/90 to-green-500/90 border-emerald-400/30 text-white'
-                : 'bg-gradient-to-r from-red-500/90 to-rose-500/90 border-red-400/30 text-white'
-            }`}
+            className={`flex items-center gap-3 px-5 py-4 rounded-2xl shadow-2xl backdrop-blur-xl border ${toast.tipo === 'sucesso'
+              ? 'bg-gradient-to-r from-emerald-500/90 to-green-500/90 border-emerald-400/30 text-white'
+              : 'bg-gradient-to-r from-red-500/90 to-rose-500/90 border-red-400/30 text-white'
+              }`}
           >
             <div className="p-2 rounded-xl bg-white/20">
               {toast.tipo === 'sucesso' ? <Check className="w-5 h-5" /> : <AlertTriangle className="w-5 h-5" />}
@@ -735,7 +738,7 @@ export default function UsuariosPage() {
       )}
 
       {/* Header Premium */}
-      <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-[var(--border)]/50 shadow-sm">
+      <div className="sticky top-0 z-40 bg-surface/80 backdrop-blur-xl border-b border-border/50 shadow-sm">
         <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-4 md:py-5">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 md:gap-5">
@@ -746,10 +749,10 @@ export default function UsuariosPage() {
                 </div>
               </div>
               <div>
-                <h1 className="text-xl md:text-3xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent">
+                <h1 className="text-xl md:text-3xl font-bold text-primary">
                   Usuários & Permissões
                 </h1>
-                <p className="text-xs md:text-sm text-[var(--text-muted)] mt-1 hidden sm:flex items-center gap-2">
+                <p className="text-xs md:text-sm text-muted-foreground mt-1 hidden sm:flex items-center gap-2">
                   <Activity className="w-4 h-4 text-green-500" />
                   Gerencie acessos e controle de segurança
                 </p>
@@ -758,7 +761,7 @@ export default function UsuariosPage() {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => carregarDados()}
-                className="group p-2.5 md:p-3 text-[var(--text-muted)] hover:text-blue-600 bg-[var(--surface)] hover:bg-blue-50 rounded-xl border border-[var(--border)] hover:border-blue-300 transition-all duration-300 shadow-sm hover:shadow-md"
+                className="group p-2.5 md:p-3 text-muted-foreground hover:text-blue-600 bg-surface hover:bg-blue-50 rounded-xl border border-border hover:border-blue-300 transition-all duration-300 shadow-sm hover:shadow-md"
                 title="Atualizar"
               >
                 <RefreshCw className="w-4 h-4 md:w-5 md:h-5 group-hover:rotate-180 transition-transform duration-500" />
@@ -771,76 +774,76 @@ export default function UsuariosPage() {
       <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-4 md:py-8 space-y-4 md:space-y-8">
         {/* Stats Cards Premium */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-          <div className="group relative overflow-hidden bg-[var(--surface)] rounded-xl md:rounded-2xl shadow-sm hover:shadow-xl transition-all duration-500 border border-[var(--border)]">
+          <div className="group relative overflow-hidden bg-surface rounded-xl md:rounded-2xl shadow-sm hover:shadow-xl transition-all duration-500 border border-border">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="relative p-3 md:p-6">
               <div className="flex items-center justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="text-[10px] md:text-sm font-medium text-[var(--text-muted)] uppercase tracking-wide truncate">Total Usuários</p>
-                  <p className="text-2xl md:text-4xl font-bold text-[var(--text)] mt-1 md:mt-2">{usuarios.length}</p>
+                  <p className="text-[10px] md:text-sm font-medium text-muted-foreground uppercase tracking-wide truncate">Total Usuários</p>
+                  <p className="text-2xl md:text-4xl font-bold text-primary mt-1 md:mt-2">{usuarios.length}</p>
                 </div>
                 <div className="p-2.5 md:p-4 bg-gradient-to-br from-blue-100 to-blue-50 rounded-xl md:rounded-2xl group-hover:scale-110 transition-transform duration-500 flex-shrink-0">
                   <Users className="w-5 h-5 md:w-8 md:h-8 text-blue-600" />
                 </div>
               </div>
-              <div className="mt-2 md:mt-4 hidden sm:flex items-center gap-2 text-sm text-[var(--text-muted)]">
+              <div className="mt-2 md:mt-4 hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
                 <TrendingUp className="w-4 h-4 text-blue-500" />
                 <span>Cadastrados no sistema</span>
               </div>
             </div>
           </div>
 
-          <div className="group relative overflow-hidden bg-[var(--surface)] rounded-xl md:rounded-2xl shadow-sm hover:shadow-xl transition-all duration-500 border border-[var(--border)]">
+          <div className="group relative overflow-hidden bg-surface rounded-xl md:rounded-2xl shadow-sm hover:shadow-xl transition-all duration-500 border border-border">
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-green-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="relative p-3 md:p-6">
               <div className="flex items-center justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="text-[10px] md:text-sm font-medium text-[var(--text-muted)] uppercase tracking-wide">Ativos</p>
+                  <p className="text-[10px] md:text-sm font-medium text-muted-foreground uppercase tracking-wide">Ativos</p>
                   <p className="text-2xl md:text-4xl font-bold text-emerald-600 mt-1 md:mt-2">{contarAtivos}</p>
                 </div>
                 <div className="p-2.5 md:p-4 bg-gradient-to-br from-emerald-100 to-green-50 rounded-xl md:rounded-2xl group-hover:scale-110 transition-transform duration-500 flex-shrink-0">
                   <UserCheck className="w-5 h-5 md:w-8 md:h-8 text-emerald-600" />
                 </div>
               </div>
-              <div className="mt-2 md:mt-4 hidden sm:flex items-center gap-2 text-sm text-[var(--text-muted)]">
+              <div className="mt-2 md:mt-4 hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
                 <UserCheck className="w-4 h-4 text-emerald-500" />
                 <span>Com acesso ao sistema</span>
               </div>
             </div>
           </div>
 
-          <div className="group relative overflow-hidden bg-[var(--surface)] rounded-xl md:rounded-2xl shadow-sm hover:shadow-xl transition-all duration-500 border border-[var(--border)]">
+          <div className="group relative overflow-hidden bg-surface rounded-xl md:rounded-2xl shadow-sm hover:shadow-xl transition-all duration-500 border border-border">
             <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-rose-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="relative p-3 md:p-6">
               <div className="flex items-center justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="text-[10px] md:text-sm font-medium text-[var(--text-muted)] uppercase tracking-wide">Inativos</p>
+                  <p className="text-[10px] md:text-sm font-medium text-muted-foreground uppercase tracking-wide">Inativos</p>
                   <p className="text-2xl md:text-4xl font-bold text-red-600 mt-1 md:mt-2">{contarInativos}</p>
                 </div>
                 <div className="p-2.5 md:p-4 bg-gradient-to-br from-red-100 to-rose-50 rounded-xl md:rounded-2xl group-hover:scale-110 transition-transform duration-500 flex-shrink-0">
                   <UserX className="w-5 h-5 md:w-8 md:h-8 text-red-600" />
                 </div>
               </div>
-              <div className="mt-2 md:mt-4 hidden sm:flex items-center gap-2 text-sm text-[var(--text-muted)]">
+              <div className="mt-2 md:mt-4 hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
                 <Lock className="w-4 h-4 text-red-500" />
                 <span>Acessos desabilitados</span>
               </div>
             </div>
           </div>
 
-          <div className="group relative overflow-hidden bg-[var(--surface)] rounded-xl md:rounded-2xl shadow-sm hover:shadow-xl transition-all duration-500 border border-[var(--border)]">
+          <div className="group relative overflow-hidden bg-surface rounded-xl md:rounded-2xl shadow-sm hover:shadow-xl transition-all duration-500 border border-border">
             <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="relative p-3 md:p-6">
               <div className="flex items-center justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="text-[10px] md:text-sm font-medium text-[var(--text-muted)] uppercase tracking-wide">Grupos</p>
+                  <p className="text-[10px] md:text-sm font-medium text-muted-foreground uppercase tracking-wide">Grupos</p>
                   <p className="text-2xl md:text-4xl font-bold text-violet-600 mt-1 md:mt-2">{grupos.length}</p>
                 </div>
                 <div className="p-2.5 md:p-4 bg-gradient-to-br from-violet-100 to-purple-50 rounded-xl md:rounded-2xl group-hover:scale-110 transition-transform duration-500 flex-shrink-0">
                   <Layers className="w-5 h-5 md:w-8 md:h-8 text-violet-600" />
                 </div>
               </div>
-              <div className="mt-2 md:mt-4 hidden sm:flex items-center gap-2 text-sm text-[var(--text-muted)]">
+              <div className="mt-2 md:mt-4 hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
                 <Layers className="w-4 h-4 text-violet-500" />
                 <span>Níveis de acesso</span>
               </div>
@@ -849,29 +852,26 @@ export default function UsuariosPage() {
         </div>
 
         {/* Main Content Card */}
-        <div className="bg-[var(--surface)] rounded-2xl md:rounded-3xl shadow-sm border border-[var(--border)] overflow-hidden">
-          <div className="border-b border-[var(--border)] bg-gradient-to-r from-gray-50/50 to-white">
+        <div className="bg-surface rounded-2xl md:rounded-3xl shadow-sm border border-border overflow-hidden">
+          <div className="border-b border-border bg-surface-hover/30">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-4 md:px-6">
               <nav className="flex gap-1 overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
                 {[
                   { id: 'usuarios', label: 'Usuários', icon: Users, count: usuarios.length },
                   { id: 'grupos', label: 'Grupos', icon: Building2, count: grupos.length },
-                  { id: 'permissoes', label: 'Permissões', icon: Shield, count: null },
                 ].map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setTabAtiva(tab.id as TabType)}
-                    className={`relative px-4 md:px-6 py-4 md:py-5 text-xs md:text-sm font-medium transition-all duration-300 flex items-center gap-2 md:gap-3 whitespace-nowrap ${
-                      tabAtiva === tab.id ? 'text-blue-600' : 'text-[var(--text-muted)] hover:text-gray-700'
-                    }`}
+                    className={`relative px-4 md:px-6 py-4 md:py-5 text-xs md:text-sm font-medium transition-all duration-300 flex items-center gap-2 md:gap-3 whitespace-nowrap ${tabAtiva === tab.id ? 'text-blue-600' : 'text-muted-foreground hover:text-primary/80'
+                      }`}
                   >
                     <tab.icon className="w-4 h-4 md:w-5 md:h-5" />
                     <span>{tab.label}</span>
                     {tab.count !== null && (
                       <span
-                        className={`px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-[10px] md:text-xs font-semibold transition-colors ${
-                          tabAtiva === tab.id ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-[var(--text-muted)]'
-                        }`}
+                        className={`px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-[10px] md:text-xs font-semibold transition-colors ${tabAtiva === tab.id ? 'bg-blue-100 text-blue-700' : 'bg-surface-hover text-muted-foreground'
+                          }`}
                       >
                         {tab.count}
                       </span>
@@ -883,20 +883,18 @@ export default function UsuariosPage() {
                 ))}
               </nav>
               {tabAtiva === 'usuarios' && (
-                <div className="hidden sm:flex items-center gap-1 p-1 bg-gray-100 rounded-xl my-2 sm:my-0">
+                <div className="hidden sm:flex items-center gap-1 p-1 bg-surface-hover rounded-xl my-2 sm:my-0">
                   <button
                     onClick={() => setViewMode('table')}
-                    className={`p-2 rounded-lg transition-all ${
-                      viewMode === 'table' ? 'bg-[var(--surface)] shadow-sm text-blue-600' : 'text-[var(--text-muted)] hover:text-gray-700'
-                    }`}
+                    className={`p-2 rounded-lg transition-all ${viewMode === 'table' ? 'bg-surface shadow-sm text-blue-600' : 'text-muted-foreground hover:text-primary/80'
+                      }`}
                   >
                     <List className="w-5 h-5" />
                   </button>
                   <button
                     onClick={() => setViewMode('grid')}
-                    className={`p-2 rounded-lg transition-all ${
-                      viewMode === 'grid' ? 'bg-[var(--surface)] shadow-sm text-blue-600' : 'text-[var(--text-muted)] hover:text-gray-700'
-                    }`}
+                    className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-surface shadow-sm text-blue-600' : 'text-muted-foreground hover:text-primary/80'
+                      }`}
                   >
                     <Grid3X3 className="w-5 h-5" />
                   </button>
@@ -914,18 +912,18 @@ export default function UsuariosPage() {
                 <div className="flex items-center gap-4 flex-wrap">
                   <div className="relative flex-1 min-w-[280px]">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <Search className="w-5 h-5 text-gray-400" />
+                      <Search className="w-5 h-5 text-muted-foreground/70" />
                     </div>
                     <input
                       type="text"
                       placeholder="Buscar por nome ou grupo..."
                       value={busca}
                       onChange={(e) => setBusca(e.target.value)}
-                      className="w-full pl-12 pr-4 py-3 bg-[var(--surface-muted)] border border-transparent rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-[var(--surface)] focus:border-blue-200 transition-all duration-300 placeholder-gray-400 shadow-inner"
+                      className="w-full pl-12 pr-4 py-3 bg-surface-hover border border-transparent rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-surface focus:border-blue-200 transition-all duration-300 placeholder-gray-400 shadow-inner"
                     />
                   </div>
 
-                  <div className="flex items-center gap-1 p-1.5 bg-gray-100 rounded-xl shadow-inner">
+                  <div className="flex items-center gap-1 p-1.5 bg-surface-hover rounded-xl shadow-inner">
                     {[
                       { value: 'todos', label: 'Todos', count: usuarios.length },
                       { value: 'ativos', label: 'Ativos', count: contarAtivos },
@@ -934,14 +932,13 @@ export default function UsuariosPage() {
                       <button
                         key={f.value}
                         onClick={() => setFiltroAtivo(f.value as any)}
-                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 flex items-center gap-2 ${
-                          filtroAtivo === f.value 
-                            ? 'bg-[var(--surface)] text-[var(--text)] shadow-sm' 
-                            : 'text-[var(--text-muted)] hover:text-gray-700'
-                        }`}
+                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 flex items-center gap-2 ${filtroAtivo === f.value
+                          ? 'bg-surface text-primary shadow-sm'
+                          : 'text-muted-foreground hover:text-primary/80'
+                          }`}
                       >
                         <span>{f.label}</span>
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-gray-200/70 text-[var(--text-muted)]">{f.count}</span>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-gray-200/70 text-muted-foreground">{f.count}</span>
                       </button>
                     ))}
                   </div>
@@ -970,16 +967,16 @@ export default function UsuariosPage() {
                   </div>
                 </div>
 
-                <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-white/80 border border-[var(--border)] rounded-2xl shadow-sm">
-                  <div className="flex items-center gap-3 text-sm text-[var(--text-muted)]">
+                <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-surface/80 border border-border rounded-2xl shadow-sm">
+                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
                     <Sparkles className="w-4 h-4 text-blue-500" />
                     <span>Resultados refinados em tempo real.</span>
                     {busca && <span className="px-2 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs">Busca: {busca}</span>}
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
-                    <span className="px-2 py-1 rounded-full bg-gray-100 text-gray-700">Modo: {viewMode === 'grid' ? 'Cards' : 'Tabela'}</span>
-                    <span className="px-2 py-1 rounded-full bg-gray-100 text-gray-700">Filtro: {filtroAtivo}</span>
-                    <span className="px-2 py-1 rounded-full bg-gray-100 text-gray-700">Total: {usuariosFiltrados.length}</span>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span className="px-2 py-1 rounded-full bg-surface-hover text-primary/80">Modo: {viewMode === 'grid' ? 'Cards' : 'Tabela'}</span>
+                    <span className="px-2 py-1 rounded-full bg-surface-hover text-primary/80">Filtro: {filtroAtivo}</span>
+                    <span className="px-2 py-1 rounded-full bg-surface-hover text-primary/80">Total: {usuariosFiltrados.length}</span>
                   </div>
                 </div>
 
@@ -988,18 +985,18 @@ export default function UsuariosPage() {
                   /* Grid View - Cards de Usuários */
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {usuariosFiltrados.length === 0 ? (
-                      <div className="col-span-full flex flex-col items-center justify-center py-16 text-[var(--text-muted)]">
-                        <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                      <div className="col-span-full flex flex-col items-center justify-center py-16 text-muted-foreground">
+                        <div className="w-20 h-20 bg-surface-hover rounded-full flex items-center justify-center mb-4">
                           <User className="w-10 h-10 text-gray-300" />
                         </div>
                         <p className="text-lg font-medium">Nenhum usuário encontrado</p>
-                        <p className="text-sm text-gray-400">Tente ajustar os filtros de busca</p>
+                        <p className="text-sm text-muted-foreground/70">Tente ajustar os filtros de busca</p>
                       </div>
                     ) : (
                       usuariosFiltrados.map((usuario) => (
                         <div
                           key={usuario.nome}
-                          className={`group relative bg-[var(--surface)] rounded-2xl border border-[var(--border)] p-5 hover:shadow-xl hover:border-blue-200 transition-all duration-300 ${!usuario.ativo ? 'opacity-70' : ''}`}
+                          className={`group relative bg-surface rounded-2xl border border-border p-5 hover:shadow-xl hover:border-secondary/50 transition-all duration-300 ${!usuario.ativo ? 'opacity-70' : ''}`}
                         >
                           <div className="flex items-start justify-between">
                             <div className="flex items-center gap-4">
@@ -1008,7 +1005,7 @@ export default function UsuariosPage() {
                                 <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${usuario.ativo ? 'bg-emerald-500' : 'bg-gray-400'}`} />
                               </div>
                               <div>
-                                <h3 className="font-semibold text-[var(--text)]">{usuario.nome}</h3>
+                                <h3 className="font-semibold text-primary">{usuario.nome}</h3>
                                 <span className="inline-flex items-center gap-1 text-xs text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full mt-1">
                                   <Shield className="w-3 h-3" />
                                   {usuario.grupo}
@@ -1016,23 +1013,23 @@ export default function UsuariosPage() {
                               </div>
                             </div>
                             <DropdownMenu
-                              triggerClassName="p-2 text-gray-400 hover:text-[var(--text-muted)] hover:bg-gray-100 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                              triggerClassName="p-2 text-muted-foreground/70 hover:text-muted-foreground hover:bg-surface-hover rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                               menuWidth="w-48"
                               items={[
                                 ...(podeAlterar ? [
                                   {
                                     label: 'Editar',
-                                    icon: <Edit3 className="w-4 h-4 text-[var(--text-muted)]" />,
+                                    icon: <Edit3 className="w-4 h-4 text-muted-foreground" />,
                                     onClick: () => abrirEdicao(usuario),
                                   },
                                   {
                                     label: 'Alterar Senha',
-                                    icon: <Key className="w-4 h-4 text-[var(--text-muted)]" />,
+                                    icon: <Key className="w-4 h-4 text-muted-foreground" />,
                                     onClick: () => abrirAlterarSenha(usuario),
                                   },
                                   {
                                     label: usuario.ativo ? 'Inativar' : 'Ativar',
-                                    icon: usuario.ativo 
+                                    icon: usuario.ativo
                                       ? <UserX className="w-4 h-4 text-orange-500" />
                                       : <UserCheck className="w-4 h-4 text-emerald-500" />,
                                     onClick: () => handleToggleAtivo(usuario),
@@ -1051,17 +1048,16 @@ export default function UsuariosPage() {
                             />
                           </div>
                           {usuario.observacoes && (
-                            <p className="mt-3 text-sm text-[var(--text-muted)] truncate">{usuario.observacoes}</p>
+                            <p className="mt-3 text-sm text-muted-foreground truncate">{usuario.observacoes}</p>
                           )}
-                          <div className="mt-4 pt-4 border-t border-[var(--border)] flex items-center justify-between">
+                          <div className="mt-4 pt-4 border-t border-border flex items-center justify-between">
                             <button
                               onClick={() => podeAlterar && handleToggleAtivo(usuario)}
                               disabled={!podeAlterar}
-                              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                                usuario.ativo
-                                  ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                                  : 'bg-gray-100 text-[var(--text-muted)] hover:bg-gray-200'
-                              } ${!podeAlterar ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${usuario.ativo
+                                ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                                : 'bg-surface-hover text-muted-foreground hover:bg-gray-200'
+                                } ${!podeAlterar ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                             >
                               {usuario.ativo ? <><BadgeCheck className="w-3.5 h-3.5" /> Ativo</> : <><UserX className="w-3.5 h-3.5" /> Inativo</>}
                             </button>
@@ -1072,15 +1068,15 @@ export default function UsuariosPage() {
                   </div>
                 ) : (
                   /* Table View - Lista de Usuários */
-                  <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm overflow-x-auto">
+                  <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm overflow-x-auto">
                     <table className="w-full min-w-[720px]">
-                      <thead className="bg-gradient-to-r from-gray-50 to-gray-100/60 sticky top-0 z-10">
+                      <thead className="bg-surface-hover sticky top-0 z-10">
                         <tr>
-                          <th className="text-left px-6 py-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Usuário</th>
-                          <th className="text-left px-6 py-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Grupo</th>
-                          <th className="text-left px-6 py-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider hidden lg:table-cell">Observações</th>
-                          <th className="text-center px-6 py-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Status</th>
-                          <th className="text-center px-6 py-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider w-24">Ações</th>
+                          <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Usuário</th>
+                          <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Grupo</th>
+                          <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden lg:table-cell">Observações</th>
+                          <th className="text-center px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
+                          <th className="text-center px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider w-24">Ações</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
@@ -1088,25 +1084,25 @@ export default function UsuariosPage() {
                           <tr>
                             <td colSpan={5} className="px-6 py-16 text-center">
                               <div className="flex flex-col items-center">
-                                <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                <div className="w-20 h-20 bg-surface-hover rounded-full flex items-center justify-center mb-4">
                                   <User className="w-10 h-10 text-gray-300" />
                                 </div>
-                                <p className="text-lg font-medium text-[var(--text)]">Nenhum usuário encontrado</p>
-                                <p className="text-sm text-[var(--text-muted)] mt-1">Tente ajustar os filtros de busca</p>
+                                <p className="text-lg font-medium text-primary">Nenhum usuário encontrado</p>
+                                <p className="text-sm text-muted-foreground mt-1">Tente ajustar os filtros de busca</p>
                               </div>
                             </td>
                           </tr>
                         ) : (
                           usuariosFiltrados.map((usuario, index) => (
-                            <tr key={usuario.nome} className="group hover:bg-blue-50/50 transition-colors">
+                            <tr key={usuario.nome} className="group hover:bg-surface-hover transition-colors">
                               <td className="px-6 py-4">
                                 <div className="flex items-center gap-4">
                                   <div className={`relative w-12 h-12 rounded-xl flex items-center justify-center text-white font-semibold text-lg shadow-md bg-gradient-to-br ${getAvatarColor(usuario.nome)} transform group-hover:scale-105 transition-transform`}>
                                     {usuario.nome.charAt(0).toUpperCase()}
                                   </div>
                                   <div>
-                                    <p className="font-semibold text-[var(--text)]">{usuario.nome}</p>
-                                    <p className="text-xs text-[var(--text-muted)] flex items-center gap-1 mt-0.5">
+                                    <p className="font-semibold text-primary">{usuario.nome}</p>
+                                    <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                                       <Calendar className="w-3 h-3" />
                                       Usuário #{index + 1}
                                     </p>
@@ -1119,26 +1115,25 @@ export default function UsuariosPage() {
                                 </span>
                               </td>
                               <td className="px-6 py-4 hidden lg:table-cell">
-                                <span className="text-sm text-[var(--text-muted)] truncate max-w-[200px] block">
-                                  {usuario.observacoes || <span className="text-gray-400 italic">Sem observações</span>}
+                                <span className="text-sm text-muted-foreground truncate max-w-[200px] block">
+                                  {usuario.observacoes || <span className="text-muted-foreground/70 italic">Sem observações</span>}
                                 </span>
                               </td>
                               <td className="px-6 py-4 text-center">
                                 <button
                                   onClick={() => podeAlterar && handleToggleAtivo(usuario)}
                                   disabled={!podeAlterar}
-                                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 ${
-                                    usuario.ativo
-                                      ? 'bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 border border-emerald-200 hover:shadow-md hover:shadow-emerald-100'
-                                      : 'bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border border-red-200 hover:shadow-md hover:shadow-red-100'
-                                  } ${!podeAlterar ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 ${usuario.ativo
+                                    ? 'bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 border border-emerald-200 hover:shadow-md hover:shadow-emerald-100'
+                                    : 'bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border border-red-200 hover:shadow-md hover:shadow-red-100'
+                                    } ${!podeAlterar ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                                 >
                                   {usuario.ativo ? <><UserCheck className="w-3.5 h-3.5" /> Ativo</> : <><UserX className="w-3.5 h-3.5" /> Inativo</>}
                                 </button>
                               </td>
                               <td className="px-6 py-4 text-center">
                                 <DropdownMenu
-                                  triggerClassName="p-2 text-gray-400 hover:text-[var(--text-muted)] hover:bg-[var(--surface)] rounded-lg transition-all shadow-sm opacity-0 group-hover:opacity-100"
+                                  triggerClassName="p-2 text-muted-foreground/70 hover:text-muted-foreground hover:bg-surface rounded-lg transition-all shadow-sm opacity-0 group-hover:opacity-100"
                                   items={[
                                     ...(podeAlterar ? [
                                       {
@@ -1158,7 +1153,7 @@ export default function UsuariosPage() {
                                       {
                                         label: usuario.ativo ? 'Inativar' : 'Ativar',
                                         sublabel: usuario.ativo ? 'Desabilitar acesso' : 'Habilitar acesso',
-                                        icon: usuario.ativo 
+                                        icon: usuario.ativo
                                           ? <UserX className="w-4 h-4 text-orange-600" />
                                           : <UserCheck className="w-4 h-4 text-emerald-600" />,
                                         iconBgColor: usuario.ativo ? 'bg-orange-100' : 'bg-emerald-100',
@@ -1188,14 +1183,14 @@ export default function UsuariosPage() {
                 )}
 
                 {/* Footer */}
-                <div className="flex items-center justify-between text-sm text-[var(--text-muted)] pt-2">
+                <div className="flex items-center justify-between text-sm text-muted-foreground pt-2">
                   <span className="flex items-center gap-2">
                     <Filter className="w-4 h-4" />
                     Mostrando {usuariosFiltrados.length} de {usuarios.length} usuários
                   </span>
                   <button
                     onClick={() => carregarDados()}
-                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-[var(--border)] text-[var(--text-muted)] hover:text-blue-600 hover:border-blue-200 transition-colors bg-[var(--surface)]"
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-border text-muted-foreground hover:text-blue-600 hover:border-blue-200 transition-colors bg-surface"
                   >
                     <RefreshCw className="w-4 h-4" />
                     Atualizar lista
@@ -1207,361 +1202,383 @@ export default function UsuariosPage() {
             {/* === TAB GRUPOS === */}
             {tabAtiva === 'grupos' && (
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <p className="text-[var(--text-muted)]">Gerencie os grupos de acesso do sistema</p>
-                  {podeInserir && (
-                    <button
-                      onClick={() => setModalAberto('criar-grupo')}
-                      className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      <FolderPlus className="w-4 h-4" />
-                      Novo Grupo
-                    </button>
-                  )}
-                </div>
+                {!grupoSelecionado ? (
+                  // LISTA DE GRUPOS
+                  <div className="space-y-4 animate-in fade-in slide-in-from-left-4 duration-300">
+                    <div className="flex items-center justify-between">
+                      <p className="text-muted-foreground">Gerencie os grupos de acesso do sistema</p>
+                      {podeInserir && (
+                        <button
+                          onClick={() => setModalAberto('criar-grupo')}
+                          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/20"
+                        >
+                          <FolderPlus className="w-4 h-4" />
+                          Novo Grupo
+                        </button>
+                      )}
+                    </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {grupos.map(grupo => (
-                    <div key={grupo.nome} className="bg-[var(--surface-muted)] rounded-lg border border-[var(--border)] p-4 hover:shadow-md transition-shadow">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-purple-100 rounded-lg">
-                            <Shield className="w-6 h-6 text-purple-600" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {grupos.map(grupo => (
+                        <div key={grupo.nome} className="group bg-surface rounded-xl border border-border p-5 hover:shadow-xl hover:border-blue-200 transition-all duration-300 relative overflow-hidden">
+                          <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => setGrupoSelecionado(grupo.nome)}
+                                className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+                                title="Gerenciar Permissões"
+                              >
+                                <Shield className="w-4 h-4" />
+                              </button>
+                              {podeExcluir && (
+                                <button
+                                  onClick={() => handleExcluirGrupo(grupo.nome)}
+                                  className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
+                                  title="Excluir Grupo"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-center gap-4">
+                              <div className="p-3 bg-gradient-to-br from-violet-100 to-purple-50 rounded-xl shadow-inner">
+                                <Shield className="w-6 h-6 text-violet-600" />
+                              </div>
+                              <div>
+                                <h3 className="font-bold text-lg text-primary">{grupo.nome}</h3>
+                                <p className="text-sm text-muted-foreground flex items-center gap-1.5">
+                                  <Users className="w-3.5 h-3.5" />
+                                  {contarUsuariosPorGrupo(grupo.nome)} usuário(s)
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Lista de usuários do grupo */}
+                          <div className="pt-4 border-t border-border/50">
+                            <div className="flex flex-wrap gap-1.5">
+                              {usuarios.filter(u => u.grupo === grupo.nome).slice(0, 4).map(u => (
+                                <span key={u.nome} className={`text-[10px] font-medium px-2 py-1 rounded-md border ${u.ativo
+                                  ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                                  : 'bg-slate-50 text-slate-500 border-slate-100'}`}>
+                                  {u.nome}
+                                </span>
+                              ))}
+                              {contarUsuariosPorGrupo(grupo.nome) > 4 && (
+                                <span className="text-[10px] font-medium px-2 py-1 rounded-md bg-slate-50 text-slate-500 border border-slate-100">
+                                  +{contarUsuariosPorGrupo(grupo.nome) - 4}
+                                </span>
+                              )}
+                              {contarUsuariosPorGrupo(grupo.nome) === 0 && (
+                                <span className="text-xs text-muted-foreground/60 italic">Nenhum usuário vinculado</span>
+                              )}
+                            </div>
+                          </div>
+
+                          <button
+                            onClick={() => setGrupoSelecionado(grupo.nome)}
+                            className="w-full mt-4 py-2.5 rounded-lg border border-blue-100 text-blue-600 text-sm font-medium hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 group-hover:border-blue-200"
+                          >
+                            <Settings className="w-4 h-4" />
+                            Configurar Permissões
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  // EDITOR DE PERMISSÕES
+                  <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                    {/* Header do Editor */}
+                    <div className="flex items-center gap-4 pb-4 border-b border-border">
+                      <button
+                        onClick={() => setGrupoSelecionado(null)}
+                        className="p-2 hover:bg-surface-hover rounded-lg transition-colors text-muted-foreground hover:text-primary"
+                      >
+                        <ChevronLeft className="w-6 h-6" />
+                      </button>
+                      <div>
+                        <h2 className="text-xl font-bold text-primary flex items-center gap-2">
+                          <Shield className="w-6 h-6 text-blue-600" />
+                          Permissões: {grupoSelecionado}
+                        </h2>
+                        <p className="text-sm text-muted-foreground">Configurando acessos para o grupo {grupoSelecionado}</p>
+                      </div>
+                    </div>
+
+                    {/* Painel de estatísticas e ações em massa */}
+                    <div className="bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl p-4 border border-border">
+                      <div className="flex flex-wrap items-center gap-6">
+                        {/* Círculo de progresso */}
+                        <div className="flex items-center gap-4">
+                          <div className="relative">
+                            <svg className="w-20 h-20 transform -rotate-90">
+                              <circle
+                                cx="40"
+                                cy="40"
+                                r="32"
+                                stroke="#e5e7eb"
+                                strokeWidth="8"
+                                fill="none"
+                              />
+                              <circle
+                                cx="40"
+                                cy="40"
+                                r="32"
+                                stroke={calcularEstatisticas.percentual >= 75 ? '#10b981' : calcularEstatisticas.percentual >= 50 ? '#f59e0b' : '#3b82f6'}
+                                strokeWidth="8"
+                                fill="none"
+                                strokeDasharray={`${calcularEstatisticas.percentual * 2.01} 201`}
+                                strokeLinecap="round"
+                                className="transition-all duration-500"
+                              />
+                            </svg>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span className="text-lg font-bold text-gray-800">{calcularEstatisticas.percentual}%</span>
+                            </div>
                           </div>
                           <div>
-                            <h3 className="font-semibold text-[var(--text)]">{grupo.nome}</h3>
-                            <p className="text-sm text-[var(--text-muted)]">
-                              {contarUsuariosPorGrupo(grupo.nome)} usuário(s)
-                            </p>
+                            <p className="text-sm font-medium text-primary/80">Acesso às Telas</p>
+                            <p className="text-xs text-muted-foreground">{calcularEstatisticas.telasComAcesso} de {calcularEstatisticas.totalTelas} telas</p>
+                            <p className="text-xs text-muted-foreground/70">{calcularEstatisticas.permissoesAtivas} de {calcularEstatisticas.totalPermissoes} permissões</p>
                           </div>
                         </div>
-                        {podeExcluir && (
-                          <button
-                            onClick={() => handleExcluirGrupo(grupo.nome)}
-                            className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
-                            title="Excluir grupo"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
 
-                      {/* Lista de usuários do grupo */}
-                      <div className="mt-3 pt-3 border-t border-[var(--border)]">
-                        <div className="flex flex-wrap gap-1">
-                          {usuarios.filter(u => u.grupo === grupo.nome).slice(0, 5).map(u => (
-                            <span key={u.nome} className={`text-xs px-2 py-0.5 rounded ${u.ativo ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-[var(--text-muted)]'}`}>
-                              {u.nome}
-                            </span>
-                          ))}
-                          {contarUsuariosPorGrupo(grupo.nome) > 5 && (
-                            <span className="text-xs px-2 py-0.5 rounded bg-gray-200 text-[var(--text-muted)]">
-                              +{contarUsuariosPorGrupo(grupo.nome) - 5}
-                            </span>
-                          )}
+                        {/* Separador */}
+                        <div className="hidden sm:block w-px h-16 bg-gray-300" />
+
+                        {/* Ações rápidas em massa */}
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-primary/80 mb-2">Ações Rápidas</p>
+                          <div className="flex flex-wrap gap-2">
+                            <button
+                              onClick={liberarTudo}
+                              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200 transition-colors text-sm font-medium"
+                              title="Liberar todas as permissões"
+                            >
+                              <Unlock className="w-4 h-4" />
+                              Liberar Tudo
+                            </button>
+                            <button
+                              onClick={apenasVisualizar}
+                              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium"
+                              title="Apenas permissão de consulta"
+                            >
+                              <Eye className="w-4 h-4" />
+                              Apenas Visualizar
+                            </button>
+                            <button
+                              onClick={limparTudo}
+                              className="flex items-center gap-1.5 px-3 py-1.5 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium"
+                              title="Remover todas as permissões"
+                            >
+                              <Lock className="w-4 h-4" />
+                              Limpar Tudo
+                            </button>
+                            {permissoesEditadas.size > 0 && (
+                              <button
+                                onClick={desfazerAlteracoes}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-hover text-primary/80 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                                title="Desfazer alterações não salvas"
+                              >
+                                <RotateCcw className="w-4 h-4" />
+                                Desfazer ({permissoesEditadas.size})
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
 
-            {/* === TAB PERMISSÕES === */}
-            {tabAtiva === 'permissoes' && (
-            <div className="space-y-4">
-              {/* Header com seletor e ações */}
-              <div className="flex flex-wrap items-center gap-4">
-                <div className="flex-1 min-w-[200px]">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Selecione o Grupo</label>
-                  <select
-                    value={grupoSelecionado || ''}
-                    onChange={(e) => setGrupoSelecionado(e.target.value || null)}
-                    className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">Selecione um grupo...</option>
-                    {grupos.map(g => (
-                      <option key={g.nome} value={g.nome}>{g.nome}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {!grupoSelecionado ? (
-                <div className="text-center py-12 text-[var(--text-muted)]">
-                  <Shield className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                  <p className="text-lg font-medium">Selecione um grupo</p>
-                  <p className="text-sm">Escolha um grupo para configurar suas permissões</p>
-                </div>
-              ) : (
-                <>
-                  {/* Painel de estatísticas e ações em massa */}
-                  <div className="bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl p-4 border border-[var(--border)]">
-                    <div className="flex flex-wrap items-center gap-6">
-                      {/* Círculo de progresso */}
-                      <div className="flex items-center gap-4">
-                        <div className="relative">
-                          <svg className="w-20 h-20 transform -rotate-90">
-                            <circle
-                              cx="40"
-                              cy="40"
-                              r="32"
-                              stroke="#e5e7eb"
-                              strokeWidth="8"
-                              fill="none"
-                            />
-                            <circle
-                              cx="40"
-                              cy="40"
-                              r="32"
-                              stroke={calcularEstatisticas.percentual >= 75 ? '#10b981' : calcularEstatisticas.percentual >= 50 ? '#f59e0b' : '#3b82f6'}
-                              strokeWidth="8"
-                              fill="none"
-                              strokeDasharray={`${calcularEstatisticas.percentual * 2.01} 201`}
-                              strokeLinecap="round"
-                              className="transition-all duration-500"
-                            />
-                          </svg>
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-lg font-bold text-gray-800">{calcularEstatisticas.percentual}%</span>
-                          </div>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-700">Acesso às Telas</p>
-                          <p className="text-xs text-[var(--text-muted)]">{calcularEstatisticas.telasComAcesso} de {calcularEstatisticas.totalTelas} telas</p>
-                          <p className="text-xs text-gray-400">{calcularEstatisticas.permissoesAtivas} de {calcularEstatisticas.totalPermissoes} permissões</p>
-                        </div>
+                    {/* Tabela de permissões */}
+                    <div className="border border-border rounded-lg overflow-hidden bg-surface shadow-sm">
+                      {/* Header da tabela */}
+                      <div className="bg-surface-hover border-b border-border grid gap-2 px-4 py-3" style={{ gridTemplateColumns: '1fr 80px 80px 80px 80px' }}>
+                        <div className="text-xs font-semibold text-muted-foreground uppercase">Módulo / Tela</div>
+                        <div className="text-xs font-semibold text-muted-foreground uppercase text-center">Consultar</div>
+                        <div className="text-xs font-semibold text-muted-foreground uppercase text-center">Incluir</div>
+                        <div className="text-xs font-semibold text-muted-foreground uppercase text-center">Alterar</div>
+                        <div className="text-xs font-semibold text-muted-foreground uppercase text-center">Excluir</div>
                       </div>
 
-                      {/* Separador */}
-                      <div className="hidden sm:block w-px h-16 bg-gray-300" />
+                      {/* Lista de módulos e telas */}
+                      <div className="divide-y divide-gray-100">
+                        {telasDisponiveis.map(modulo => {
+                          const moduloStatus = getModuloStatus(modulo.nome);
+                          const isExpanded = modulosExpandidos.has(modulo.nome);
 
-                      {/* Ações rápidas em massa */}
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-700 mb-2">Ações Rápidas</p>
-                        <div className="flex flex-wrap gap-2">
-                          <button
-                            onClick={liberarTudo}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200 transition-colors text-sm font-medium"
-                            title="Liberar todas as permissões"
-                          >
-                            <Unlock className="w-4 h-4" />
-                            Liberar Tudo
-                          </button>
-                          <button
-                            onClick={apenasVisualizar}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium"
-                            title="Apenas permissão de consulta"
-                          >
-                            <Eye className="w-4 h-4" />
-                            Apenas Visualizar
-                          </button>
-                          <button
-                            onClick={limparTudo}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium"
-                            title="Remover todas as permissões"
-                          >
-                            <Lock className="w-4 h-4" />
-                            Limpar Tudo
-                          </button>
-                          {permissoesEditadas.size > 0 && (
+                          return (
+                            <div key={modulo.nome}>
+                              {/* Módulo Header */}
+                              <div
+                                className="bg-surface-hover grid gap-2 px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors"
+                                style={{ gridTemplateColumns: '1fr 80px 80px 80px 80px' }}
+                                onClick={() => toggleModulo(modulo.nome)}
+                              >
+                                <div className="flex items-center gap-2 font-medium text-primary">
+                                  {isExpanded ? <ChevronDown className="w-4 h-4 text-muted-foreground" /> : <ChevronRight className="w-4 h-4 text-muted-foreground" />}
+                                  {moduleIcons[modulo.nome] || <Settings className="w-4 h-4 text-blue-500" />}
+                                  <span>{modulo.nome}</span>
+                                  <span className="text-xs text-muted-foreground bg-surface px-2 py-0.5 rounded-full border border-border">
+                                    {modulo.telas.length}
+                                  </span>
+                                  <button
+                                    onClick={(e) => toggleModuloPermissoes(modulo.nome, e)}
+                                    className={`ml-2 p-1 rounded hover:bg-surface transition-colors ${moduloStatus === 'all'
+                                      ? 'text-emerald-600'
+                                      : moduloStatus === 'some'
+                                        ? 'text-amber-500'
+                                        : 'text-muted-foreground/50'
+                                      }`}
+                                    title={moduloStatus === 'all' ? 'Desmarcar todas' : 'Marcar todas'}
+                                  >
+                                    {moduloStatus === 'all' ? (
+                                      <CheckSquare className="w-4 h-4" />
+                                    ) : moduloStatus === 'some' ? (
+                                      <MinusSquare className="w-4 h-4" />
+                                    ) : (
+                                      <CheckSquare className="w-4 h-4" />
+                                    )}
+                                  </button>
+                                </div>
+                                <div />
+                                <div />
+                                <div />
+                                <div />
+                              </div>
+
+                              {/* Telas do módulo */}
+                              {isExpanded && modulo.telas.map(tela => {
+                                const perm = getPermissao(tela.tela);
+                                const isEdited = permissoesEditadas.has(tela.tela);
+
+                                return (
+                                  <div
+                                    key={tela.tela}
+                                    className={[
+                                      'grid gap-2 px-4 py-3 pl-12 hover:bg-blue-50/50 transition-colors group border-t border-gray-50',
+                                      isEdited ? 'bg-amber-50/30' : '',
+                                    ]
+                                      .filter(Boolean)
+                                      .join(' ')}
+                                    style={{ gridTemplateColumns: '1fr 80px 80px 80px 80px' }}
+                                  >
+                                    <div className="text-sm text-primary/80 flex items-center gap-2">
+                                      <span>{tela.nomeTela}</span>
+                                      {isEdited && <span className="w-1.5 h-1.5 rounded-full bg-amber-500" title="Alteração pendente"></span>}
+                                    </div>
+                                    {['consultar', 'incluir', 'alterar', 'excluir'].map((campo) => {
+                                      // Dashboard só tem permissão de consultar
+                                      const isDashboard = modulo.nome === 'Dashboard';
+                                      const isDisabled = isDashboard && campo !== 'consultar';
+
+                                      return (
+                                        <div key={campo} className="flex justify-center">
+                                          {isDisabled ? (
+                                            <div className="w-6 h-6 flex items-center justify-center">
+                                              <span className="text-muted-foreground/30 text-lg select-none">·</span>
+                                            </div>
+                                          ) : (
+                                            <label className="relative cursor-pointer group/checkbox">
+                                              <input
+                                                type="checkbox"
+                                                checked={perm?.[campo as keyof typeof perm] as boolean || false}
+                                                onChange={(e) => alterarPermissao(tela.tela, campo as any, e.target.checked)}
+                                                className="sr-only peer"
+                                              />
+                                              <div className={`w-5 h-5 rounded border transition-all duration-200 flex items-center justify-center ${perm?.[campo as keyof typeof perm]
+                                                ? 'bg-blue-600 border-blue-600 shadow-sm shadow-blue-200'
+                                                : 'bg-white border-gray-300 hover:border-blue-400'
+                                                }`}>
+                                                {perm?.[campo as keyof typeof perm] && (
+                                                  <Check className="w-3.5 h-3.5 text-white" />
+                                                )}
+                                              </div>
+                                            </label>
+                                          )}
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Barra fixa de ações quando há alterações */}
+                    {permissoesEditadas.size > 0 && (
+                      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-surface border border-border shadow-2xl rounded-2xl z-50 animate-in slide-in-from-bottom-10 fade-in duration-300">
+                        <div className="px-6 py-3 flex items-center gap-6">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
+                              <Zap className="w-4 h-4 text-amber-600" />
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="font-bold text-primary">{permissoesEditadas.size} alterações</span>
+                              <span className="text-xs text-muted-foreground">Pendentes de salvamento</span>
+                            </div>
+                          </div>
+                          <div className="h-8 w-px bg-border" />
+                          <div className="flex items-center gap-2">
                             <button
                               onClick={desfazerAlteracoes}
-                              className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
-                              title="Desfazer alterações não salvas"
+                              className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-primary hover:bg-surface-hover rounded-lg transition-colors"
                             >
-                              <RotateCcw className="w-4 h-4" />
-                              Desfazer ({permissoesEditadas.size})
+                              Descartar
                             </button>
-                          )}
+                            <button
+                              onClick={salvarPermissoes}
+                              disabled={salvando}
+                              className="flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 font-medium"
+                            >
+                              {salvando ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                              Salvar Alterações
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    )}
                   </div>
-
-                  {/* Tabela de permissões */}
-                  <div className="border border-[var(--border)] rounded-lg overflow-hidden">
-                    {/* Header da tabela */}
-                    <div className="bg-gray-100 border-b border-[var(--border)] grid gap-2 px-4 py-3" style={{ gridTemplateColumns: '1fr 80px 80px 80px 80px' }}>
-                      <div className="text-xs font-semibold text-[var(--text-muted)] uppercase">Módulo / Tela</div>
-                      <div className="text-xs font-semibold text-[var(--text-muted)] uppercase text-center">Consultar</div>
-                      <div className="text-xs font-semibold text-[var(--text-muted)] uppercase text-center">Incluir</div>
-                      <div className="text-xs font-semibold text-[var(--text-muted)] uppercase text-center">Alterar</div>
-                      <div className="text-xs font-semibold text-[var(--text-muted)] uppercase text-center">Excluir</div>
-                    </div>
-
-                    {/* Lista de módulos e telas */}
-                    <div className="divide-y divide-gray-100">
-                      {telasDisponiveis.map(modulo => {
-                        const moduloStatus = getModuloStatus(modulo.nome);
-                        const isExpanded = modulosExpandidos.has(modulo.nome);
-
-                        return (
-                          <div key={modulo.nome}>
-                            {/* Módulo Header */}
-                            <div 
-                              className="bg-[var(--surface-muted)] grid gap-2 px-4 py-2 cursor-pointer hover:bg-gray-100"
-                              style={{ gridTemplateColumns: '1fr 80px 80px 80px 80px' }}
-                              onClick={() => toggleModulo(modulo.nome)}
-                            >
-                              <div className="flex items-center gap-2 font-medium text-[var(--text)]">
-                                {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                                {moduleIcons[modulo.nome] || <Settings className="w-4 h-4" />}
-                                <span>{modulo.nome}</span>
-                                <span className="text-xs text-[var(--text-muted)]">({modulo.telas.length})</span>
-                                <button
-                                  onClick={(e) => toggleModuloPermissoes(modulo.nome, e)}
-                                  className={`ml-2 p-0.5 rounded transition-colors ${
-                                    moduloStatus === 'all' 
-                                      ? 'text-emerald-600 hover:bg-emerald-100' 
-                                      : moduloStatus === 'some'
-                                      ? 'text-amber-500 hover:bg-amber-100'
-                                      : 'text-gray-400 hover:bg-gray-200'
-                                  }`}
-                                  title={moduloStatus === 'all' ? 'Desmarcar todas as permissões deste módulo' : 'Marcar todas as permissões deste módulo'}
-                                >
-                                  {moduloStatus === 'all' ? (
-                                    <CheckSquare className="w-4 h-4" />
-                                  ) : moduloStatus === 'some' ? (
-                                    <MinusSquare className="w-4 h-4" />
-                                  ) : (
-                                    <CheckSquare className="w-4 h-4" />
-                                  )}
-                                </button>
-                              </div>
-                              <div />
-                              <div />
-                              <div />
-                              <div />
-                            </div>
-
-                            {/* Telas do módulo */}
-                            {isExpanded && modulo.telas.map(tela => {
-                              const perm = getPermissao(tela.tela);
-                              const isEdited = permissoesEditadas.has(tela.tela);
-
-                              return (
-                                <div
-                                  key={tela.tela}
-                                  className={[
-                                    'grid gap-2 px-4 py-2 pl-12 hover:bg-blue-50 group',
-                                    isEdited ? 'bg-yellow-50' : '',
-                                  ]
-                                    .filter(Boolean)
-                                    .join(' ')}
-                                  style={{ gridTemplateColumns: '1fr 80px 80px 80px 80px' }}
-                                >
-                                  <div className="text-sm text-gray-700 flex items-center gap-2">
-                                    <span>{tela.nomeTela}</span>
-                                    {isEdited && <span className="text-xs text-yellow-600">●</span>}
-                                  </div>
-                                  {['consultar', 'incluir', 'alterar', 'excluir'].map((campo) => {
-                                    // Dashboard só tem permissão de consultar
-                                    const isDashboard = modulo.nome === 'Dashboard';
-                                    const isDisabled = isDashboard && campo !== 'consultar';
-                                    
-                                    return (
-                                      <div key={campo} className="flex justify-center">
-                                        {isDisabled ? (
-                                          <div className="w-6 h-6 rounded-md border-2 border-gray-200 bg-gray-100 flex items-center justify-center" title="Não aplicável para Dashboard">
-                                            <span className="text-gray-400 text-xs">—</span>
-                                          </div>
-                                        ) : (
-                                          <label className="relative cursor-pointer">
-                                            <input
-                                              type="checkbox"
-                                              checked={perm?.[campo as keyof typeof perm] as boolean || false}
-                                              onChange={(e) => alterarPermissao(tela.tela, campo as any, e.target.checked)}
-                                              className="sr-only peer"
-                                            />
-                                            <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all ${
-                                              perm?.[campo as keyof typeof perm]
-                                                ? 'bg-blue-600 border-blue-600'
-                                                : 'bg-[var(--surface)] border-gray-300 hover:border-blue-400'
-                                            }`}>
-                                              {perm?.[campo as keyof typeof perm] && (
-                                                <Check className="w-4 h-4 text-white" />
-                                              )}
-                                            </div>
-                                          </label>
-                                        )}
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* Barra fixa de ações quando há alterações */}
-              {grupoSelecionado && permissoesEditadas.size > 0 && (
-                <div className="fixed bottom-0 left-0 right-0 bg-[var(--surface)] border-t border-[var(--border)] shadow-lg z-40">
-                  <div className="max-w-[1600px] mx-auto px-6 py-3 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-2 text-amber-600">
-                        <Zap className="w-5 h-5" />
-                        <span className="font-medium">{permissoesEditadas.size} alteração(ões) não salva(s)</span>
-                      </div>
-                      <button
-                        onClick={desfazerAlteracoes}
-                        className="text-sm text-[var(--text-muted)] hover:text-gray-700 underline"
-                      >
-                        Desfazer todas
-                      </button>
-                    </div>
-                    <button
-                      onClick={salvarPermissoes}
-                      disabled={salvando}
-                      className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-lg hover:from-emerald-600 hover:to-green-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 font-medium"
-                    >
-                      {salvando ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-                      Salvar Permissões
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* === MODAIS === */}
-
-      {/* Modal Criar Grupo */}
       {modalAberto === 'criar-grupo' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-[var(--surface)] rounded-xl shadow-xl w-full max-w-md mx-4">
-            <div className="p-4 border-b border-[var(--border)] flex items-center justify-between">
-              <h3 className="font-semibold text-lg text-[var(--text)] flex items-center gap-2">
+          <div className="bg-surface rounded-xl shadow-xl w-full max-w-md mx-4">
+            <div className="p-4 border-b border-border flex items-center justify-between">
+              <h3 className="font-semibold text-lg text-primary flex items-center gap-2">
                 <FolderPlus className="w-5 h-5 text-blue-600" />
                 Novo Grupo
               </h3>
-              <button onClick={() => setModalAberto(null)} className="text-gray-400 hover:text-[var(--text-muted)]">
+              <button onClick={() => setModalAberto(null)} className="text-muted-foreground/70 hover:text-muted-foreground">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <div className="p-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nome do Grupo</label>
+                <label className="block text-sm font-medium text-primary/80 mb-1">Nome do Grupo</label>
                 <input
                   type="text"
                   value={novoGrupoNome}
                   onChange={(e) => setNovoGrupoNome(e.target.value.toUpperCase())}
                   placeholder="Ex: VENDAS, FINANCEIRO, etc."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   autoFocus
                 />
               </div>
             </div>
-            <div className="p-4 border-t border-[var(--border)] flex justify-end gap-3">
-              <button onClick={() => setModalAberto(null)} className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
+            <div className="p-4 border-t border-border flex justify-end gap-3">
+              <button onClick={() => setModalAberto(null)} className="px-4 py-2 text-primary/80 hover:bg-surface-hover rounded-lg">
                 Cancelar
               </button>
               <button
@@ -1580,64 +1597,64 @@ export default function UsuariosPage() {
       {/* Modal Criar/Editar Usuário */}
       {(modalAberto === 'criar-usuario' || modalAberto === 'editar-usuario') && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-[var(--surface)] rounded-xl shadow-xl w-full max-w-lg mx-4">
-            <div className="p-4 border-b border-[var(--border)] flex items-center justify-between">
-              <h3 className="font-semibold text-lg text-[var(--text)] flex items-center gap-2">
+          <div className="bg-surface rounded-xl shadow-xl w-full max-w-lg mx-4">
+            <div className="p-4 border-b border-border flex items-center justify-between">
+              <h3 className="font-semibold text-lg text-primary flex items-center gap-2">
                 {modalAberto === 'criar-usuario' ? <><UserPlus className="w-5 h-5 text-blue-600" /> Novo Usuário</> : <><Edit3 className="w-5 h-5 text-blue-600" /> Editar Usuário</>}
               </h3>
-              <button onClick={() => setModalAberto(null)} className="text-gray-400 hover:text-[var(--text-muted)]">
+              <button onClick={() => setModalAberto(null)} className="text-muted-foreground/70 hover:text-muted-foreground">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <div className="p-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nome de Usuário</label>
+                <label className="block text-sm font-medium text-primary/80 mb-1">Nome de Usuário</label>
                 <input
                   type="text"
                   value={usuarioForm.nome}
                   onChange={(e) => setUsuarioForm({ ...usuarioForm, nome: e.target.value.toUpperCase() })}
                   placeholder="Nome do usuário"
                   disabled={modalAberto === 'editar-usuario'}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                  className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-surface-hover"
                 />
               </div>
 
               {modalAberto === 'criar-usuario' && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+                    <label className="block text-sm font-medium text-primary/80 mb-1">Senha</label>
                     <div className="relative">
                       <input
                         type={mostrarSenha ? 'text' : 'password'}
                         value={usuarioForm.senha}
                         onChange={(e) => setUsuarioForm({ ...usuarioForm, senha: e.target.value })}
                         placeholder="Senha"
-                        className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 pr-10 border border-input rounded-lg focus:ring-2 focus:ring-blue-500"
                       />
-                      <button type="button" onClick={() => setMostrarSenha(!mostrarSenha)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                      <button type="button" onClick={() => setMostrarSenha(!mostrarSenha)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/70">
                         {mostrarSenha ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar Senha</label>
+                    <label className="block text-sm font-medium text-primary/80 mb-1">Confirmar Senha</label>
                     <input
                       type={mostrarSenha ? 'text' : 'password'}
                       value={usuarioForm.confirmarSenha}
                       onChange={(e) => setUsuarioForm({ ...usuarioForm, confirmarSenha: e.target.value })}
                       placeholder="Confirme a senha"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </>
               )}
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Grupo</label>
+                <label className="block text-sm font-medium text-primary/80 mb-1">Grupo</label>
                 <select
                   value={usuarioForm.grupo}
                   onChange={(e) => setUsuarioForm({ ...usuarioForm, grupo: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Selecione um grupo</option>
                   {grupos.map(g => <option key={g.nome} value={g.nome}>{g.nome}</option>)}
@@ -1645,13 +1662,24 @@ export default function UsuariosPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Observações</label>
+                <label className="block text-sm font-medium text-primary/80 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={usuarioForm.email || ''}
+                  onChange={(e) => setUsuarioForm({ ...usuarioForm, email: e.target.value })}
+                  placeholder="usuario@email.com (opcional)"
+                  className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-primary/80 mb-1">Observações</label>
                 <textarea
                   value={usuarioForm.observacoes || ''}
                   onChange={(e) => setUsuarioForm({ ...usuarioForm, observacoes: e.target.value })}
                   placeholder="Observações (opcional)"
                   rows={2}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -1661,13 +1689,13 @@ export default function UsuariosPage() {
                   id="usuario-ativo"
                   checked={usuarioForm.ativo}
                   onChange={(e) => setUsuarioForm({ ...usuarioForm, ativo: e.target.checked })}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded"
+                  className="w-4 h-4 text-blue-600 border-input rounded"
                 />
-                <label htmlFor="usuario-ativo" className="text-sm text-gray-700">Usuário ativo</label>
+                <label htmlFor="usuario-ativo" className="text-sm text-primary/80">Usuário ativo</label>
               </div>
             </div>
-            <div className="p-4 border-t border-[var(--border)] flex justify-end gap-3">
-              <button onClick={() => setModalAberto(null)} className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
+            <div className="p-4 border-t border-border flex justify-end gap-3">
+              <button onClick={() => setModalAberto(null)} className="px-4 py-2 text-primary/80 hover:bg-surface-hover rounded-lg">
                 Cancelar
               </button>
               <button
@@ -1686,45 +1714,45 @@ export default function UsuariosPage() {
       {/* Modal Alterar Senha */}
       {modalAberto === 'alterar-senha' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-[var(--surface)] rounded-xl shadow-xl w-full max-w-md mx-4">
-            <div className="p-4 border-b border-[var(--border)] flex items-center justify-between">
-              <h3 className="font-semibold text-lg text-[var(--text)] flex items-center gap-2">
+          <div className="bg-surface rounded-xl shadow-xl w-full max-w-md mx-4">
+            <div className="p-4 border-b border-border flex items-center justify-between">
+              <h3 className="font-semibold text-lg text-primary flex items-center gap-2">
                 <Key className="w-5 h-5 text-blue-600" />
                 Alterar Senha - {usuarioSelecionado?.nome}
               </h3>
-              <button onClick={() => setModalAberto(null)} className="text-gray-400 hover:text-[var(--text-muted)]">
+              <button onClick={() => setModalAberto(null)} className="text-muted-foreground/70 hover:text-muted-foreground">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <div className="p-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nova Senha</label>
+                <label className="block text-sm font-medium text-primary/80 mb-1">Nova Senha</label>
                 <div className="relative">
                   <input
                     type={mostrarSenha ? 'text' : 'password'}
                     value={usuarioForm.senha}
                     onChange={(e) => setUsuarioForm({ ...usuarioForm, senha: e.target.value })}
                     placeholder="Nova senha"
-                    className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 pr-10 border border-input rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
-                  <button type="button" onClick={() => setMostrarSenha(!mostrarSenha)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                  <button type="button" onClick={() => setMostrarSenha(!mostrarSenha)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/70">
                     {mostrarSenha ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar Nova Senha</label>
+                <label className="block text-sm font-medium text-primary/80 mb-1">Confirmar Nova Senha</label>
                 <input
                   type={mostrarSenha ? 'text' : 'password'}
                   value={usuarioForm.confirmarSenha}
                   onChange={(e) => setUsuarioForm({ ...usuarioForm, confirmarSenha: e.target.value })}
                   placeholder="Confirme a nova senha"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
-            <div className="p-4 border-t border-[var(--border)] flex justify-end gap-3">
-              <button onClick={() => setModalAberto(null)} className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
+            <div className="p-4 border-t border-border flex justify-end gap-3">
+              <button onClick={() => setModalAberto(null)} className="px-4 py-2 text-primary/80 hover:bg-surface-hover rounded-lg">
                 Cancelar
               </button>
               <button

@@ -193,6 +193,7 @@ public class UsuarioManagementRepository : IUsuarioManagementRepository
         {
             Nome = DecriptaNome(u.PwNome),
             Grupo = u.GrupoUsuarioNavigation?.Nome ?? "SEM GRUPO",
+            Email = u.PwEmail,
             Observacoes = string.IsNullOrEmpty(u.PwObs) ? null : DecriptaNome(u.PwObs),
             IsAdmin = u.GrupoUsuarioNavigation != null && AdminGroupHelper.IsAdminGroup(u.GrupoUsuarioNavigation.Nome),
             Ativo = u.PwAtivo
@@ -214,6 +215,7 @@ public class UsuarioManagementRepository : IUsuarioManagementRepository
             {
                 Nome = DecriptaNome(u.PwNome),
                 Grupo = u.GrupoUsuarioNavigation!.Nome,
+                Email = u.PwEmail,
                 Observacoes = string.IsNullOrEmpty(u.PwObs) ? null : DecriptaNome(u.PwObs),
                 IsAdmin = AdminGroupHelper.IsAdminGroup(u.GrupoUsuarioNavigation.Nome),
                 Ativo = u.PwAtivo
@@ -237,6 +239,7 @@ public class UsuarioManagementRepository : IUsuarioManagementRepository
         {
             Nome = DecriptaNome(usuario.PwNome),
             Grupo = usuario.GrupoUsuarioNavigation?.Nome ?? "SEM GRUPO",
+            Email = usuario.PwEmail,
             Observacoes = string.IsNullOrEmpty(usuario.PwObs) ? null : DecriptaNome(usuario.PwObs),
             IsAdmin = usuario.GrupoUsuarioNavigation != null && AdminGroupHelper.IsAdminGroup(usuario.GrupoUsuarioNavigation.Nome),
             Ativo = usuario.PwAtivo
@@ -275,15 +278,28 @@ public class UsuarioManagementRepository : IUsuarioManagementRepository
             return false;
         }
 
-        // Usa "SEM GRUPO" como valor padrão para o campo PwGrupo (obrigatório na tabela legada)
-        var pwGrupoValue = "SEM GRUPO";
+        // IMPORTANTE: Para satisfazer a FK da tabela legada PW~Usuarios -> PW~Grupos,
+        // sempre usamos o grupo fixo "SEM GRUPO" na tabela legada.
+        // O grupo real do usuário é gerenciado pela tabela nova GrupoUsuario via GrupoUsuarioId.
+        const string GRUPO_LEGADO_PADRAO = "SEM GRUPO";
+        
+        // Verifica se o grupo padrão existe na tabela legada, se não existir, cria
+        var grupoLegadoExiste = await _context.PwGrupos.AnyAsync(g => g.PwNome.ToUpper() == GRUPO_LEGADO_PADRAO);
+        
+        if (!grupoLegadoExiste)
+        {
+            _logger.LogInformation("Criando grupo padrão na tabela legada: {Grupo}", GRUPO_LEGADO_PADRAO);
+            _context.PwGrupos.Add(new Models.PwGrupo { PwNome = GRUPO_LEGADO_PADRAO });
+            await _context.SaveChangesAsync();
+        }
 
         var usuario = new PwUsuario
         {
             PwNome = VB6CryptoService.Encripta(dto.Nome.ToUpper()),
             PwSenha = VB6CryptoService.Encripta(dto.Senha),
-            PwGrupo = pwGrupoValue, // Usa "SEM GRUPO" como padrão para satisfazer FK
+            PwGrupo = GRUPO_LEGADO_PADRAO, // Sempre usa "SEM GRUPO" para satisfazer a FK legada
             PwObs = string.IsNullOrEmpty(dto.Observacoes) ? null : VB6CryptoService.Encripta(dto.Observacoes),
+            PwEmail = dto.Email,
             PwAtivo = dto.Ativo,
             GrupoUsuarioId = grupo.Id // Usa o ID do grupo da tabela nova
         };
@@ -338,18 +354,18 @@ public class UsuarioManagementRepository : IUsuarioManagementRepository
         {
             var novaSenhaCripto = VB6CryptoService.Encripta(dto.NovaSenha);
 
-            // Atualiza obs, ativo, GrupoUsuarioId e senha
+            // Atualiza obs, ativo, GrupoUsuarioId, email e senha
             await _context.Database.ExecuteSqlInterpolatedAsync(
                 $@"UPDATE [PW~Usuarios] 
-                  SET [PW~Obs] = {obsCripto}, [PW~Ativo] = {dto.Ativo}, [PW~Senha] = {novaSenhaCripto}, [GrupoUsuarioId] = {grupoUsuarioId}
+                  SET [PW~Obs] = {obsCripto}, [PW~Ativo] = {dto.Ativo}, [PW~Senha] = {novaSenhaCripto}, [GrupoUsuarioId] = {grupoUsuarioId}, [PW~Email] = {dto.Email}
                   WHERE [PW~Nome] = {usuario.PwNome} AND [PW~Senha] = {usuario.PwSenha}");
         }
         else
         {
-            // Atualiza obs, ativo e GrupoUsuarioId (sem senha)
+            // Atualiza obs, ativo, GrupoUsuarioId e email (sem senha)
             await _context.Database.ExecuteSqlInterpolatedAsync(
                 $@"UPDATE [PW~Usuarios] 
-                  SET [PW~Obs] = {obsCripto}, [PW~Ativo] = {dto.Ativo}, [GrupoUsuarioId] = {grupoUsuarioId}
+                  SET [PW~Obs] = {obsCripto}, [PW~Ativo] = {dto.Ativo}, [GrupoUsuarioId] = {grupoUsuarioId}, [PW~Email] = {dto.Email}
                   WHERE [PW~Nome] = {usuario.PwNome} AND [PW~Senha] = {usuario.PwSenha}");
         }
 
@@ -674,6 +690,7 @@ public class UsuarioManagementRepository : IUsuarioManagementRepository
             {
                 Nome = DecriptaNome(u.PwNome),
                 Grupo = g.Nome,
+                Email = u.PwEmail,
                 Observacoes = string.IsNullOrEmpty(u.PwObs) ? null : DecriptaNome(u.PwObs),
                 IsAdmin = AdminGroupHelper.IsAdminGroup(g.Nome),
                 Ativo = u.PwAtivo

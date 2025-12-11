@@ -1,34 +1,18 @@
 import { AlertTriangle, Loader2, X } from 'lucide-react';
 
-// ============================================================================
-// TIPOS
-// ============================================================================
 export interface ModalConfirmacaoProps {
-  /** Se o modal está aberto */
   aberto: boolean;
-  /** Título do modal */
   titulo?: string;
-  /** Mensagem de confirmação */
   mensagem: string;
-  /** Nome do item sendo excluído (aparece em destaque) */
   nomeItem?: string;
-  /** Texto do botão de confirmar */
   textoBotaoConfirmar?: string;
-  /** Texto do botão de cancelar */
   textoBotaoCancelar?: string;
-  /** Se está processando a ação */
   processando?: boolean;
-  /** Variante visual (danger = vermelho, warning = amarelo) */
   variante?: 'danger' | 'warning';
-  /** Callback ao confirmar */
   onConfirmar: () => void;
-  /** Callback ao cancelar/fechar */
   onCancelar: () => void;
 }
 
-// ============================================================================
-// COMPONENTE
-// ============================================================================
 export function ModalConfirmacao({
   aberto,
   titulo = 'Confirmar Exclusão',
@@ -44,74 +28,74 @@ export function ModalConfirmacao({
   if (!aberto) return null;
 
   const coresBotao = {
-    danger: 'bg-red-600 hover:bg-red-700 focus:ring-red-500',
-    warning: 'bg-amber-600 hover:bg-amber-700 focus:ring-amber-500',
+    danger: 'bg-red-600 hover:bg-red-700 shadow-lg shadow-red-600/20',
+    warning: 'bg-amber-600 hover:bg-amber-700 shadow-lg shadow-amber-600/20',
   };
 
   const coresIcone = {
-    danger: 'text-red-600 bg-red-100',
-    warning: 'text-amber-600 bg-amber-100',
+    danger: 'text-red-600 bg-red-100 ring-red-500/20',
+    warning: 'text-amber-600 bg-amber-100 ring-amber-500/20',
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
+    <div className="fixed inset-0 z-[100] overflow-y-auto">
       {/* Overlay */}
-      <div 
-        className="fixed inset-0 bg-black/50 transition-opacity"
+      <div
+        className="fixed inset-0 bg-background/80 backdrop-blur-sm transition-opacity animate-fade-in"
         onClick={!processando ? onCancelar : undefined}
       />
-      
+
       {/* Modal */}
       <div className="flex min-h-full items-center justify-center p-4">
-        <div className="relative bg-[var(--surface)] rounded-xl shadow-2xl max-w-md w-full transform transition-all">
+        <div className="relative bg-surface rounded-2xl shadow-2xl max-w-md w-full transform transition-all animate-scale-in border border-border">
           {/* Botão Fechar */}
           <button
             onClick={onCancelar}
             disabled={processando}
-            className="absolute top-4 right-4 text-gray-400 hover:text-[var(--text-muted)] transition-colors disabled:opacity-50"
+            className="absolute top-4 right-4 p-2 rounded-lg text-muted-foreground hover:bg-surface-hover hover:text-primary transition-colors disabled:opacity-50"
           >
             <X className="w-5 h-5" />
           </button>
 
           {/* Conteúdo */}
-          <div className="p-6">
+          <div className="p-8">
             {/* Ícone */}
-            <div className={`mx-auto w-12 h-12 rounded-full flex items-center justify-center ${coresIcone[variante]}`}>
-              <AlertTriangle className="w-6 h-6" />
+            <div className={`mx-auto w-16 h-16 rounded-2xl flex items-center justify-center ring-4 ${coresIcone[variante]} mb-6`}>
+              <AlertTriangle className="w-8 h-8" />
             </div>
 
             {/* Título */}
-            <h3 className="mt-4 text-lg font-semibold text-[var(--text)] text-center">
+            <h3 className="text-xl font-bold text-primary text-center mb-2">
               {titulo}
             </h3>
 
             {/* Mensagem */}
-            <p className="mt-2 text-sm text-[var(--text-muted)] text-center">
+            <p className="text-muted-foreground text-center leading-relaxed">
               {mensagem}
             </p>
 
             {/* Nome do Item */}
             {nomeItem && (
-              <div className="mt-3 p-3 bg-[var(--surface-muted)] rounded-lg border border-[var(--border)]">
-                <p className="text-sm font-medium text-[var(--text)] text-center truncate">
+              <div className="mt-4 p-4 bg-surface-active/30 rounded-xl border border-border">
+                <p className="text-sm font-semibold text-primary text-center truncate">
                   {nomeItem}
                 </p>
               </div>
             )}
 
             {/* Botões */}
-            <div className="mt-6 flex gap-3">
+            <div className="mt-8 flex gap-4">
               <button
                 onClick={onCancelar}
                 disabled={processando}
-                className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-[var(--surface)] border border-gray-300 rounded-lg hover:bg-[var(--surface-muted)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 transition-colors"
+                className="flex-1 px-4 py-3 text-sm font-bold text-muted-foreground bg-surface border border-border rounded-xl hover:bg-surface-hover hover:text-primary transition-all disabled:opacity-50"
               >
                 {textoBotaoCancelar}
               </button>
               <button
                 onClick={onConfirmar}
                 disabled={processando}
-                className={`flex-1 px-4 py-2.5 text-sm font-medium text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 transition-colors flex items-center justify-center gap-2 ${coresBotao[variante]}`}
+                className={`flex-1 px-4 py-3 text-sm font-bold text-white rounded-xl transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-2 ${coresBotao[variante]}`}
               >
                 {processando ? (
                   <>

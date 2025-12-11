@@ -11,7 +11,7 @@ namespace SistemaEmpresas.Services.Transporte;
 // ==========================================
 public interface IManutencaoVeiculoService
 {
-    Task<List<ManutencaoVeiculoListDto>> ListarAsync(bool apenasAtivos = true);
+    Task<PagedResult<ManutencaoVeiculoListDto>> ListarAsync(ManutencaoFiltros filtros);
     Task<List<ManutencaoVeiculoListDto>> ListarPorVeiculoAsync(int veiculoId);
     Task<ManutencaoVeiculoDto?> ObterPorIdAsync(int id);
     Task<(bool Sucesso, string Mensagem, int? Id)> CriarAsync(ManutencaoVeiculoCreateUpdateDto dto);
@@ -33,19 +33,46 @@ public class ManutencaoVeiculoService : IManutencaoVeiculoService
         _logger = logger;
     }
 
-    public async Task<List<ManutencaoVeiculoListDto>> ListarAsync(bool apenasAtivos = true)
+    public async Task<PagedResult<ManutencaoVeiculoListDto>> ListarAsync(ManutencaoFiltros filtros)
     {
         var query = _context.ManutencoesVeiculo
             .Include(m => m.Veiculo)
             .Include(m => m.Fornecedor)
-            .Include(m => m.Pecas)
             .AsQueryable();
         
-        if (apenasAtivos)
+        // Filtros
+        if (filtros.IncluirInativos != true)
             query = query.Where(m => m.Ativo);
 
-        return await query
+        if (!string.IsNullOrEmpty(filtros.Busca))
+        {
+            var busca = filtros.Busca.ToLower();
+            query = query.Where(m => 
+                m.Veiculo.Placa.ToLower().Contains(busca) || 
+                (m.Fornecedor != null && m.Fornecedor.NomeFantasia.ToLower().Contains(busca)) ||
+                (m.DescricaoServico != null && m.DescricaoServico.ToLower().Contains(busca)) ||
+                (m.NumeroOS != null && m.NumeroOS.ToLower().Contains(busca)) ||
+                (m.NumeroNF != null && m.NumeroNF.ToLower().Contains(busca)));
+        }
+
+        if (filtros.VeiculoId.HasValue)
+            query = query.Where(m => m.VeiculoId == filtros.VeiculoId.Value);
+
+        if (!string.IsNullOrEmpty(filtros.TipoManutencao))
+            query = query.Where(m => m.TipoManutencao == filtros.TipoManutencao);
+
+        if (filtros.DataInicio.HasValue)
+            query = query.Where(m => m.DataManutencao >= filtros.DataInicio.Value);
+
+        if (filtros.DataFim.HasValue)
+            query = query.Where(m => m.DataManutencao <= filtros.DataFim.Value);
+
+        // Paginação
+        var totalItems = await query.CountAsync();
+        var items = await query
             .OrderByDescending(m => m.DataManutencao)
+            .Skip((filtros.Pagina - 1) * filtros.TamanhoPagina)
+            .Take(filtros.TamanhoPagina)
             .Select(m => new ManutencaoVeiculoListDto
             {
                 Id = m.Id,
@@ -58,6 +85,15 @@ public class ManutencaoVeiculoService : IManutencaoVeiculoService
                 Ativo = m.Ativo
             })
             .ToListAsync();
+
+        return new PagedResult<ManutencaoVeiculoListDto>
+        {
+            Items = items,
+            TotalCount = totalItems,
+            PageNumber = filtros.Pagina,
+            PageSize = filtros.TamanhoPagina,
+            TotalPages = (int)Math.Ceiling(totalItems / (double)filtros.TamanhoPagina)
+        };
     }
 
     public async Task<List<ManutencaoVeiculoListDto>> ListarPorVeiculoAsync(int veiculoId)

@@ -36,7 +36,7 @@ public class NotaFiscalController : ControllerBase
     /// Lista notas fiscais com paginação e filtros
     /// </summary>
     [HttpGet]
-    public async Task<ActionResult<PagedResult<NotaFiscalListDto>>> Listar([FromQuery] NotaFiscalFiltroDto filtro)
+    public async Task<ActionResult<DTOs.PagedResult<NotaFiscalListDto>>> Listar([FromQuery] NotaFiscalFiltroDto filtro)
     {
         _logger.LogInformation("GET /api/notafiscal - Busca: {Busca}, DataInicial: {DataInicial}, DataFinal: {DataFinal}",
             filtro.Busca, filtro.DataInicial, filtro.DataFinal);

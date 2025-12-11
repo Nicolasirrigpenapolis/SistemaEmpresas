@@ -8,7 +8,7 @@ namespace SistemaEmpresas.Services.Transporte;
 
 public interface IMotoristaService
 {
-    Task<PagedResult<MotoristaListDto>> ListarAsync(MotoristaFiltrosDto filtros);
+    Task<DTOs.PagedResult<MotoristaListDto>> ListarAsync(MotoristaFiltrosDto filtros);
     Task<List<MotoristaListDto>> ListarAtivosAsync();
     Task<MotoristaDto?> BuscarPorIdAsync(short id);
     Task<MotoristaDto> CriarAsync(MotoristaCreateDto dto);
@@ -25,7 +25,7 @@ public class MotoristaService : IMotoristaService
         _context = context;
     }
 
-    public async Task<PagedResult<MotoristaListDto>> ListarAsync(MotoristaFiltrosDto filtros)
+    public async Task<DTOs.PagedResult<MotoristaListDto>> ListarAsync(MotoristaFiltrosDto filtros)
     {
         var query = _context.Motoristas.AsQueryable();
 
@@ -61,10 +61,10 @@ public class MotoristaService : IMotoristaService
             })
             .ToListAsync();
 
-        return new PagedResult<MotoristaListDto>
+        return new DTOs.PagedResult<MotoristaListDto>
         {
             Items = items,
-            TotalItems = total,
+            TotalCount = total,
             PageNumber = filtros.Pagina,
             PageSize = filtros.TamanhoPagina
         };

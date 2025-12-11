@@ -149,8 +149,8 @@ export default function MotoristaFormPage() {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <XCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-700">Acesso Negado</h2>
-          <p className="text-gray-500 mt-2">Você não tem permissão para esta operação.</p>
+          <h2 className="text-xl font-semibold text-primary/80">Acesso Negado</h2>
+          <p className="text-muted-foreground mt-2">Você não tem permissão para esta operação.</p>
         </div>
       </div>
     );
@@ -162,13 +162,13 @@ export default function MotoristaFormPage() {
       <div className="flex items-center gap-4">
         <button
           onClick={() => navigate('/transporte/motoristas')}
-          className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-2 text-muted-foreground hover:text-primary/80 hover:bg-surface-hover rounded-lg transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <User className="w-7 h-7 text-indigo-600" />
+          <h1 className="text-2xl font-bold text-primary flex items-center gap-2">
+            <User className="w-7 h-7 text-blue-600" />
             {titulo}
           </h1>
         </div>
@@ -179,16 +179,16 @@ export default function MotoristaFormPage() {
       {success && <AlertaSucesso mensagem={success} />}
 
       {/* Formulário */}
-      <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        {/* Dados Pessoais */}
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <User className="w-5 h-5 text-indigo-500" />
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Seção 1: Dados Pessoais */}
+        <div className="bg-surface rounded-xl shadow-sm border border-border p-6">
+          <h3 className="text-lg font-semibold text-primary mb-4 flex items-center gap-2 pb-3 border-b border-border">
+            <User className="w-5 h-5 text-blue-500" />
             Dados Pessoais
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="lg:col-span-2">
+              <label className="block text-sm font-medium text-primary/80 mb-1">
                 Nome <span className="text-red-500">*</span>
               </label>
               <input
@@ -198,12 +198,12 @@ export default function MotoristaFormPage() {
                 onChange={handleChange}
                 disabled={somenteVisualizacao}
                 maxLength={30}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100"
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-surface-hover"
                 placeholder="Nome completo do motorista"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-primary/80 mb-1">
                 CPF <span className="text-red-500">*</span>
               </label>
               <input
@@ -213,12 +213,12 @@ export default function MotoristaFormPage() {
                 onChange={handleChange}
                 disabled={somenteVisualizacao}
                 maxLength={14}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100"
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-surface-hover"
                 placeholder="000.000.000-00"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">RG</label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">RG</label>
               <input
                 type="text"
                 name="rg"
@@ -226,22 +226,22 @@ export default function MotoristaFormPage() {
                 onChange={handleChange}
                 disabled={somenteVisualizacao}
                 maxLength={20}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100"
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-surface-hover"
                 placeholder="Número do RG"
               />
             </div>
           </div>
         </div>
 
-        {/* Endereço */}
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <MapPin className="w-5 h-5 text-indigo-500" />
+        {/* Seção 2: Endereço */}
+        <div className="bg-surface rounded-xl shadow-sm border border-border p-6">
+          <h3 className="text-lg font-semibold text-primary mb-4 flex items-center gap-2 pb-3 border-b border-border">
+            <MapPin className="w-5 h-5 text-green-500" />
             Endereço
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">CEP</label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">CEP</label>
               <input
                 type="text"
                 name="cep"
@@ -249,12 +249,12 @@ export default function MotoristaFormPage() {
                 onChange={handleChange}
                 disabled={somenteVisualizacao}
                 maxLength={9}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100"
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-surface-hover"
                 placeholder="00000-000"
               />
             </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Endereço</label>
+            <div className="lg:col-span-2">
+              <label className="block text-sm font-medium text-primary/80 mb-1">Endereço</label>
               <input
                 type="text"
                 name="endereco"
@@ -262,12 +262,12 @@ export default function MotoristaFormPage() {
                 onChange={handleChange}
                 disabled={somenteVisualizacao}
                 maxLength={100}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100"
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-surface-hover"
                 placeholder="Rua, Avenida..."
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Número</label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">Número</label>
               <input
                 type="text"
                 name="numero"
@@ -275,12 +275,12 @@ export default function MotoristaFormPage() {
                 onChange={handleChange}
                 disabled={somenteVisualizacao}
                 maxLength={9}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100"
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-surface-hover"
                 placeholder="Nº"
               />
             </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Bairro</label>
+            <div className="lg:col-span-2">
+              <label className="block text-sm font-medium text-primary/80 mb-1">Bairro</label>
               <input
                 type="text"
                 name="bairro"
@@ -288,18 +288,18 @@ export default function MotoristaFormPage() {
                 onChange={handleChange}
                 disabled={somenteVisualizacao}
                 maxLength={50}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100"
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-surface-hover"
                 placeholder="Bairro"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">UF</label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">UF</label>
               <select
                 name="uf"
                 value={formData.uf}
                 onChange={handleChange}
                 disabled={somenteVisualizacao}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100"
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-surface-hover"
               >
                 {UFS_BRASIL.map((uf) => (
                   <option key={uf} value={uf}>{uf}</option>
@@ -307,29 +307,29 @@ export default function MotoristaFormPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Código Município</label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">Código Município</label>
               <input
                 type="number"
                 name="municipio"
                 value={formData.municipio || ''}
                 onChange={handleChange}
                 disabled={somenteVisualizacao}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100"
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-surface-hover"
                 placeholder="Código IBGE"
               />
             </div>
           </div>
         </div>
 
-        {/* Contato */}
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <Phone className="w-5 h-5 text-indigo-500" />
+        {/* Seção 3: Contato */}
+        <div className="bg-surface rounded-xl shadow-sm border border-border p-6">
+          <h3 className="text-lg font-semibold text-primary mb-4 flex items-center gap-2 pb-3 border-b border-border">
+            <Phone className="w-5 h-5 text-amber-500" />
             Contato
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">Telefone</label>
               <input
                 type="text"
                 name="fone"
@@ -337,12 +337,12 @@ export default function MotoristaFormPage() {
                 onChange={handleChange}
                 disabled={somenteVisualizacao}
                 maxLength={15}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100"
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-surface-hover"
                 placeholder="(00) 0000-0000"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Celular</label>
+              <label className="block text-sm font-medium text-primary/80 mb-1">Celular</label>
               <input
                 type="text"
                 name="cel"
@@ -350,7 +350,7 @@ export default function MotoristaFormPage() {
                 onChange={handleChange}
                 disabled={somenteVisualizacao}
                 maxLength={15}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100"
+                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-surface-hover"
                 placeholder="(00) 00000-0000"
               />
             </div>
@@ -359,18 +359,18 @@ export default function MotoristaFormPage() {
 
         {/* Botões */}
         {!somenteVisualizacao && (
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+          <div className="flex justify-end gap-3">
             <button
               type="button"
               onClick={() => navigate('/transporte/motoristas')}
-              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              className="px-4 py-2 text-primary/80 bg-surface-hover rounded-lg hover:bg-gray-200 transition-colors"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 transition-colors"
             >
               {saving ? (
                 <>

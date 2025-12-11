@@ -32,6 +32,7 @@ export interface GrupoCreateDto {
 export interface UsuarioListDto {
   nome: string;
   grupo: string;
+  email?: string;
   observacoes?: string;
   ativo: boolean;
 }
@@ -41,6 +42,7 @@ export interface UsuarioCreateDto {
   senha: string;
   confirmarSenha: string;
   grupo: string;
+  email?: string;
   observacoes?: string;
   ativo?: boolean;
 }
@@ -49,6 +51,7 @@ export interface UsuarioUpdateDto {
   novaSenha?: string;
   confirmarNovaSenha?: string;
   grupo?: string;
+  email?: string;
   observacoes?: string;
   ativo?: boolean;
 }
@@ -130,18 +133,18 @@ export interface UsuarioManagementState {
   arvore: GrupoComUsuariosDto[];
   grupoSelecionado: string | null;
   usuarioSelecionado: string | null;
-  
+
   // Permissões
   permissoesGrupo: PermissoesGrupoDto | null;
   tabelasDisponiveis: ModuloTabelasDto[];
   menusDisponiveis: PermissaoTabelaDto[];
-  
+
   // UI
   tabAtiva: TabType;
   modoEdicao: boolean;
   loading: boolean;
   salvando: boolean;
-  
+
   // Formulários
   novoGrupo: string;
   usuarioForm: UsuarioCreateDto | null;

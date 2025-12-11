@@ -12,6 +12,7 @@ export interface UsuarioDto {
   codigo: number;
   nome: string;
   grupo: string;
+  email?: string;
   ativo: boolean;
   permissoes?: PermissaoDto[];
 }
@@ -51,6 +52,7 @@ export interface User {
   codigo: number;
   nome: string;
   grupo: string;
+  email?: string;
   ativo: boolean;
   permissoes?: PermissaoDto[];
 }
