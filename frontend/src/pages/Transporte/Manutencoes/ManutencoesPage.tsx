@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import {
   Plus, Edit2, Trash2, Wrench, Filter, X, Eye, CheckCircle, XCircle, Calendar
 } from 'lucide-react';
-import { manutencaoService } from '../../../services/manutencaoService';
-import { veiculoService } from '../../../services/veiculoService';
-import type { ManutencaoVeiculoListDto, PagedResult, ManutencaoFiltros, VeiculoListDto } from '../../../types/transporte';
-import { TIPOS_MANUTENCAO } from '../../../types/transporte';
+import { manutencaoService } from '../../../services/Transporte/manutencaoService';
+import { veiculoService } from '../../../services/Transporte/veiculoService';
+import type { ManutencaoVeiculoListDto, PagedResult, ManutencaoFiltros, VeiculoListDto } from '../../../types';
+import { TIPOS_MANUTENCAO } from '../../../types';
 import { usePermissaoTela } from '../../../hooks/usePermissaoTela';
 import {
   ModalConfirmacao, Paginacao, EstadoVazio, EstadoCarregando, AlertaErro,
@@ -99,8 +99,15 @@ export default function ManutencoesPage() {
     }
   };
 
-  const formatDate = (dateStr: string) => new Date(dateStr).toLocaleDateString('pt-BR');
-  const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return '-';
+    return new Date(dateStr).toLocaleDateString('pt-BR');
+  };
+
+  const formatCurrency = (value: number | undefined | null) => {
+    if (value === undefined || value === null) return 'R$ 0,00';
+    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  };
 
   if (carregandoPermissoes) return <EstadoCarregando mensagem="Verificando permissões..." />;
 

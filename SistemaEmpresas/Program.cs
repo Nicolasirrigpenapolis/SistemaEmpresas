@@ -7,7 +7,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SistemaEmpresas.Data;
 using SistemaEmpresas.Middleware;
-using SistemaEmpresas.Services;
+using SistemaEmpresas.Services.Auth;
+using SistemaEmpresas.Services.Tenants;
+using SistemaEmpresas.Services.Fiscal;
+using SistemaEmpresas.Services.Seguranca;
+using SistemaEmpresas.Services.Logs;
+using SistemaEmpresas.Repositories.Fiscal;
+using SistemaEmpresas.Repositories.Produto;
+using SistemaEmpresas.Repositories.NotaFiscal;
+using SistemaEmpresas.Repositories.Seguranca;
+using SistemaEmpresas.Repositories.Logs;
 using Microsoft.Extensions.Hosting.WindowsServices;
 
 // Desabilitar avisos de TLS 1.0 e suportar múltiplas versões
@@ -81,10 +90,9 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy.WithOrigins(
-                "http://localhost:5173", 
-                "http://localhost:5174",
-                "https://192.168.167.125:5001",
-                "http://192.168.167.125:5001")
+                "https://localhost:5173",  // Frontend dev HTTPS
+                "https://localhost:5174",  // Frontend dev alternativo HTTPS
+                "https://192.168.167.125:5001")  // Servidor HTTPS
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -117,38 +125,20 @@ builder.Services.AddScoped<ITenantService, TenantService>();
 // Registro do AuthService
 builder.Services.AddScoped<IAuthService, AuthService>();
 
+// Registro do CertificadoService
+builder.Services.AddScoped<SistemaEmpresas.Services.Certificados.ICertificadoService, SistemaEmpresas.Services.Certificados.CertificadoService>();
+
 // Registro do CacheService (cache centralizado com suporte a multi-tenant)
-builder.Services.AddSingleton<ICacheService, CacheService>();
+builder.Services.AddSingleton<SistemaEmpresas.Services.Common.ICacheService, SistemaEmpresas.Services.Common.CacheService>();
 
 // Configuração de Cache Distribuído (para ClassTrib Sync)
 builder.Services.AddDistributedMemoryCache(); // Em produção, usar Redis
 
-// Carregar certificado digital para API SVRS
-// Por padrão usa o certificado da Irrigação, mas pode ser alterado por tenant
-var certPath = Path.Combine(builder.Environment.ContentRootPath, 
-    builder.Configuration["CertificadosDigitais:Irrigacao:CaminhoArquivo"] ?? "certificado\\Irrigacao.pfx");
-var certSenha = builder.Configuration["CertificadosDigitais:Irrigacao:Senha"] ?? "";
+// CERTIFICADO DIGITAL - AGORA DINÂMICO POR EMITENTE
+// Nota: O certificado não é mais carregado aqui, mas sim dinamicamente pelo CertificadoDinamicoHandler
+// baseado no emitente ativo de cada tenant
 
-X509Certificate2? certificadoDigital = null;
-if (File.Exists(certPath))
-{
-    try
-    {
-        certificadoDigital = new X509Certificate2(certPath, certSenha, X509KeyStorageFlags.MachineKeySet);
-        Console.WriteLine($"✅ Certificado digital carregado: {certificadoDigital.Subject}");
-        Console.WriteLine($"   Válido de {certificadoDigital.NotBefore:dd/MM/yyyy} até {certificadoDigital.NotAfter:dd/MM/yyyy}");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"⚠️ Erro ao carregar certificado digital: {ex.Message}");
-    }
-}
-else
-{
-    Console.WriteLine($"⚠️ Certificado digital não encontrado em: {certPath}");
-}
-
-// Registro do HttpClient para ClassTribApiClient
+// Registro do HttpClient para ClassTribApiClient com Certificado Dinâmico
 builder.Services.AddHttpClient<ClassTribApiClient>(client =>
 {
     // IMPORTANTE: BaseAddress DEVE terminar com "/" para concatenação correta de endpoints
@@ -168,76 +158,65 @@ builder.Services.AddHttpClient<ClassTribApiClient>(client =>
     client.DefaultRequestHeaders.Add("Sec-Fetch-Site", "cross-site");
     client.DefaultRequestHeaders.Add("Origin", "https://cff.svrs.rs.gov.br");
     client.DefaultRequestHeaders.Add("Referer", "https://cff.svrs.rs.gov.br/");
-}).ConfigurePrimaryHttpMessageHandler(() =>
+})
+.ConfigurePrimaryHttpMessageHandler(() =>
 {
-    // Handler configurado com certificado digital para autenticação na API SVRS
+    // Handler base configurado para autenticação na API SVRS
     var handler = new HttpClientHandler
     {
         AutomaticDecompression = System.Net.DecompressionMethods.All,
         AllowAutoRedirect = true,
         UseCookies = true,
-        CookieContainer = new System.Net.CookieContainer()
+        CookieContainer = new System.Net.CookieContainer(),
+        ClientCertificateOptions = ClientCertificateOption.Manual
     };
     
-    // Adicionar certificado digital se disponível
-    if (certificadoDigital != null)
-    {
-        handler.ClientCertificates.Add(certificadoDigital);
-        handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-        Console.WriteLine("✅ Certificado digital anexado ao HttpClient para API SVRS");
-    }
-    
     return handler;
-});
+})
+.AddHttpMessageHandler<SistemaEmpresas.Services.Fiscal.CertificadoDinamicoHandler>();
+
+// Registro do handler de certificado dinâmico
+builder.Services.AddTransient<SistemaEmpresas.Services.Fiscal.CertificadoDinamicoHandler>();
 
 // Registro do HttpClient genérico para uso em controllers (ex: consulta CNPJ)
 builder.Services.AddHttpClient();
 
 // Registro do Repository de Classificação Fiscal
-builder.Services.AddScoped<SistemaEmpresas.Repositories.IClassificacaoFiscalRepository, 
-    SistemaEmpresas.Repositories.ClassificacaoFiscalRepository>();
+builder.Services.AddScoped<IClassificacaoFiscalRepository, ClassificacaoFiscalRepository>();
 
 // Registro do Repository de ClassTrib (Classificações Tributárias SVRS)
-builder.Services.AddScoped<SistemaEmpresas.Repositories.IClassTribRepository, 
-    SistemaEmpresas.Repositories.ClassTribRepository>();
+builder.Services.AddScoped<IClassTribRepository, ClassTribRepository>();
 
 // Registro do Repository de Produtos
-builder.Services.AddScoped<SistemaEmpresas.Repositories.IProdutoRepository,
-    SistemaEmpresas.Repositories.ProdutoRepository>();
+builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
 
 // Registro do Repository de Nota Fiscal
-builder.Services.AddScoped<SistemaEmpresas.Repositories.INotaFiscalRepository,
-    SistemaEmpresas.Repositories.NotaFiscalRepository>();
+builder.Services.AddScoped<INotaFiscalRepository, NotaFiscalRepository>();
 
 // Registro do Repository e Service de Gerenciamento de Usuários
-builder.Services.AddScoped<SistemaEmpresas.Repositories.IUsuarioManagementRepository,
-    SistemaEmpresas.Repositories.UsuarioManagementRepository>();
+builder.Services.AddScoped<IUsuarioManagementRepository, UsuarioManagementRepository>();
 builder.Services.AddScoped<IUsuarioManagementService, UsuarioManagementService>();
 
 // Registro do Repository e Service de Permissões por Tela
-builder.Services.AddScoped<SistemaEmpresas.Repositories.IPermissoesTelaRepository,
-    SistemaEmpresas.Repositories.PermissoesTelaRepository>();
+builder.Services.AddScoped<IPermissoesTelaRepository, PermissoesTelaRepository>();
 builder.Services.AddScoped<IPermissoesTelaService, PermissoesTelaService>();
 
 // Registro do Repository e Service de Grupos/Usuários do Sistema Web (Nova estrutura independente do VB6)
-builder.Services.AddScoped<SistemaEmpresas.Repositories.IGrupoUsuarioRepository,
-    SistemaEmpresas.Repositories.GrupoUsuarioRepository>();
+builder.Services.AddScoped<IGrupoUsuarioRepository, GrupoUsuarioRepository>();
 builder.Services.AddScoped<IGrupoUsuarioService, GrupoUsuarioService>();
 
 // Registro do ClassTrib Sync Service
 builder.Services.AddScoped<ClassTribSyncService>();
 
 // Registro do Repository e Service de Auditoria (Logs)
-builder.Services.AddScoped<SistemaEmpresas.Repositories.ILogAuditoriaRepository,
-    SistemaEmpresas.Repositories.LogAuditoriaRepository>();
+builder.Services.AddScoped<ILogAuditoriaRepository, LogAuditoriaRepository>();
 builder.Services.AddScoped<ILogAuditoriaService, LogAuditoriaService>();
 
 // Registro do Serviço de Logs de Segurança
 builder.Services.AddScoped<ILogSegurancaService, LogSegurancaService>();
 
 // Registro do Serviço de Cálculo de Impostos
-builder.Services.AddScoped<SistemaEmpresas.Services.Fiscal.ICalculoImpostoService,
-    SistemaEmpresas.Services.Fiscal.CalculoImpostoService>();
+builder.Services.AddScoped<ICalculoImpostoService, CalculoImpostoService>();
 
 // ===========================================
 // Módulo de Transporte - Services
@@ -363,6 +342,17 @@ builder.Services.AddRateLimiter(options =>
 
 var app = builder.Build();
 
+// =====================================================
+// CONFIGURAÇÃO DE HTTPS E SEGURANÇA
+// =====================================================
+
+// HSTS - HTTP Strict Transport Security
+// Força navegadores a usarem apenas HTTPS por 1 ano
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -378,6 +368,7 @@ if (app.Environment.IsDevelopment())
 app.UseDefaultFiles(); // Serve index.html por padrão
 app.UseStaticFiles();  // Serve arquivos estáticos (CSS, JS, etc)
 
+// ⚠️ REDIRECIONAMENTO HTTPS - Redireciona automaticamente HTTP para HTTPS
 app.UseHttpsRedirection();
 
 // ⚠️ Headers de Segurança - DEVE ser um dos primeiros middlewares

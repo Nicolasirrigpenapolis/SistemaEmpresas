@@ -11,12 +11,12 @@ import {
   XCircle,
 
 } from 'lucide-react';
-import { classificacaoFiscalService } from '../../services/classificacaoFiscalService';
+import { classificacaoFiscalService } from '../../services/Fiscal/classificacaoFiscalService';
 import type {
   ClassificacaoFiscal,
   PagedResult,
   ClassificacaoFiscalFiltros
-} from '../../types/classificacaoFiscal';
+} from '../../types';
 
 // Componentes reutilizáveis
 import {
@@ -320,7 +320,7 @@ export default function ClassificacaoFiscalPage() {
           columns={columns}
           getRowKey={(item) => item.sequenciaDaClassificacao}
           loading={loading}
-          totalItems={data?.total}
+          totalItems={data?.totalCount}
 
           // Filtros e Ordenação Server-Side
           onFilterChange={(column, value) => {

@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using SistemaEmpresas.Data;
 using SistemaEmpresas.DTOs;
 using SistemaEmpresas.Models;
-using SistemaEmpresas.Models.Fiscal;
 
 namespace SistemaEmpresas.Services.Fiscal;
 

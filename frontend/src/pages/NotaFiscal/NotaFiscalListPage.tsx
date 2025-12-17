@@ -22,15 +22,15 @@ import {
   Lock,
   ChevronDown,
 } from 'lucide-react';
-import { notaFiscalService } from '../../services/notaFiscalService';
+import { notaFiscalService } from '../../services/NotaFiscal/notaFiscalService';
 import type {
   NotaFiscalListDto,
   NotaFiscalFiltroDto,
   PagedResult,
   PropriedadeComboDto,
   NaturezaOperacaoComboDto,
-} from '../../types/notaFiscal';
-import { getStatusNfe, getStatusNfeColor, TIPOS_NOTA } from '../../types/notaFiscal';
+} from '../../types';
+import { getStatusNfe, getStatusNfeColor, TIPOS_NOTA } from '../../types';
 import {
   CabecalhoPagina,
   DataTable,

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SistemaEmpresas.DTOs;
 using SistemaEmpresas.Services;
+using SistemaEmpresas.Services.Logs;
 using SistemaEmpresas.Services.Transporte;
 using System.Security.Claims;
 

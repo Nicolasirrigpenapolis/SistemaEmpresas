@@ -13,12 +13,12 @@ import {
   CheckCircle,
   X,
 } from 'lucide-react';
-import { emitenteService } from '../../services/emitenteService';
+import { emitenteService } from '../../services/Emitentes/emitenteService';
 import type {
   EmitenteDto,
   EmitenteCreateUpdateDto,
-} from '../../types/emitente';
-import { REGIMES_TRIBUTARIOS, AMBIENTES_NFE, UFS } from '../../types/emitente';
+} from '../../types';
+import { REGIMES_TRIBUTARIOS, AMBIENTES_NFE, UFS } from '../../types';
 import { CabecalhoPagina, AlertaErro } from '../../components/common';
 
 // Função para formatar CNPJ

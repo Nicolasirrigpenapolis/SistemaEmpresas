@@ -13,10 +13,10 @@ import {
   TrendingUp,
   TrendingDown,
 } from 'lucide-react';
-import { viagemService } from '../../../services/viagemService';
-import { veiculoService } from '../../../services/veiculoService';
-import type { ViagemListDto, PagedResult, ViagemFiltros, VeiculoListDto } from '../../../types/transporte';
-import { STATUS_VIAGEM } from '../../../types/transporte';
+import { viagemService } from '../../../services/Transporte/viagemService';
+import { veiculoService } from '../../../services/Transporte/veiculoService';
+import type { ViagemListDto, PagedResult, ViagemFiltros, VeiculoListDto } from '../../../types';
+import { STATUS_VIAGEM } from '../../../types';
 import { usePermissaoTela } from '../../../hooks/usePermissaoTela';
 import {
   ModalConfirmacao,
@@ -115,10 +115,12 @@ export default function ViagensPage() {
   };
 
   const formatDate = (dateStr: string) => {
+    if (!dateStr) return '-';
     return new Date(dateStr).toLocaleDateString('pt-BR');
   };
 
-  const formatCurrency = (value: number) => {
+  const formatCurrency = (value: number | undefined | null) => {
+    if (value === undefined || value === null) return 'R$ 0,00';
     return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   };
 

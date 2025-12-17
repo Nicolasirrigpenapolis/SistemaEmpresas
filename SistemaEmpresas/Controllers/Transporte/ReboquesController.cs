@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SistemaEmpresas.DTOs;
 using SistemaEmpresas.Services;
+using SistemaEmpresas.Services.Logs;
 using SistemaEmpresas.Services.Transporte;
 using System.Security.Claims;
 
@@ -48,6 +49,31 @@ public class ReboquesController : ControllerBase
             _logger.LogError(ex, "Erro ao listar reboques. Usuário: {Usuario}", 
                 User?.Identity?.Name ?? "Desconhecido");
             return StatusCode(500, new { mensagem = "Erro interno ao listar reboques", erro = ex.Message, stack = ex.StackTrace });
+        }
+    }
+
+    /// <summary>
+    /// Lista reboques ativos para seleção em combos
+    /// </summary>
+    [HttpGet("ativos")]
+    public async Task<ActionResult<List<ReboqueListDto>>> ListarAtivos()
+    {
+        try
+        {
+            var filtros = new ReboqueFiltros 
+            { 
+                Pagina = 1, 
+                TamanhoPagina = 1000, 
+                IncluirInativos = false 
+            };
+            
+            var resultado = await _service.ListarAsync(filtros);
+            return Ok(resultado.Items);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao listar reboques ativos");
+            return StatusCode(500, new { mensagem = "Erro interno ao listar reboques ativos" });
         }
     }
 

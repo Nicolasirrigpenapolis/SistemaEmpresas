@@ -46,8 +46,8 @@ import {
   RotateCcw,
   ChevronLeft,
 } from 'lucide-react';
-import { usuarioManagementService } from '../../services/usuarioManagementService';
-import permissoesTelaService from '../../services/permissoesTelaService';
+import { usuarioManagementService } from '../../services/Seguranca/usuarioManagementService';
+import permissoesTelaService from '../../services/Seguranca/permissoesTelaService';
 import { ModalConfirmacao } from '../../components/common/ModalConfirmacao';
 import { DropdownMenu } from '../../components/common/DropdownMenu';
 import type {

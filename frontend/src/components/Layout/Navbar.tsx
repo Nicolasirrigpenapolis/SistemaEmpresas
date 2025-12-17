@@ -17,7 +17,7 @@ import {
   Menu,
   Bell
 } from 'lucide-react';
-import { authService } from '../../services/authService';
+import { authService } from '../../services/Auth/authService';
 import { APP_VERSION } from '../../config/version';
 
 interface NavbarProps {

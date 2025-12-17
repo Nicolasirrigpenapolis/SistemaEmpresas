@@ -3,12 +3,12 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import {
   ArrowLeft, Save, Loader2, Wrench, XCircle, Plus, Trash2, DollarSign, Settings, Package
 } from 'lucide-react';
-import { manutencaoService } from '../../../services/manutencaoService';
-import { veiculoService } from '../../../services/veiculoService';
+import { manutencaoService } from '../../../services/Transporte/manutencaoService';
+import { veiculoService } from '../../../services/Transporte/veiculoService';
 import type {
   ManutencaoVeiculoCreateDto, VeiculoListDto, ManutencaoPecaCreateDto
-} from '../../../types/transporte';
-import { TIPOS_MANUTENCAO } from '../../../types/transporte';
+} from '../../../types';
+import { TIPOS_MANUTENCAO } from '../../../types';
 import { usePermissaoTela } from '../../../hooks/usePermissaoTela';
 import { AlertaErro, AlertaSucesso, EstadoCarregando } from '../../../components/common';
 

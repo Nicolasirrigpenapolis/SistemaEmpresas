@@ -1,5 +1,5 @@
 import { AlertTriangle, Clock, Package, AlertCircle, CheckCircle } from 'lucide-react';
-import type { AlertaOperacional } from '../../../types/dashboard';
+import type { AlertaOperacional } from '../../../types/Dashboard/dashboard';
 
 interface AlertasPanelProps {
   alertas: AlertaOperacional[];

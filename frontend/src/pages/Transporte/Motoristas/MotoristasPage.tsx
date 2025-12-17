@@ -11,9 +11,9 @@ import {
   Search,
   Phone,
 } from 'lucide-react';
-import { motoristaService } from '../../../services/motoristaService';
-import type { MotoristaListDto, PagedResult, MotoristaFiltros } from '../../../types/transporte';
-import { UFS_BRASIL } from '../../../types/transporte';
+import { motoristaService } from '../../../services/Transporte/motoristaService';
+import type { MotoristaListDto, PagedResult, MotoristaFiltros } from '../../../types';
+import { UFS_BRASIL } from '../../../types';
 import { usePermissaoTela } from '../../../hooks/usePermissaoTela';
 import {
   ModalConfirmacao,

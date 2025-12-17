@@ -31,7 +31,7 @@ export function CabecalhoPagina({
   sticky = true,
 }: CabecalhoPaginaProps) {
   return (
-    <div className={`bg-[var(--surface)] border-b border-[var(--border)] ${sticky ? 'sticky top-0 z-20' : ''}`}>
+    <div className={`bg-[var(--surface)]/95 backdrop-blur-sm border-b border-[var(--border)] ${sticky ? 'sticky top-0 z-30' : ''}`}>
       <div className="px-6 py-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           {/* Título e Subtítulo */}

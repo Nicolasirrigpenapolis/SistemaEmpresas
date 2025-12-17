@@ -13980,7 +13980,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                         .HasMaxLength(255)
                         .IsUnicode(false)
                         .HasColumnType("varchar(255)")
-                        .HasColumnName("PW~Email");
+                        .HasColumnName("Email");
 
                     b.Property<string>("PwGrupo")
                         .IsRequired()

@@ -61,7 +61,7 @@ public partial class PwUsuario
     /// Email do usuário (opcional).
     /// Pode haver múltiplos usuários com o mesmo email.
     /// </summary>
-    [Column("PW~Email")]
+    [Column("Email")]
     [StringLength(255)]
     [Unicode(false)]
     public string? PwEmail { get; set; }

@@ -158,6 +158,16 @@
   .table-mobile-scroll {
     @apply overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0;
   }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 @layer utilities {

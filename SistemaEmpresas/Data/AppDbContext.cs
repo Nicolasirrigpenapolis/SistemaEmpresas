@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using SistemaEmpresas.Models;
-using SistemaEmpresas.Models.Transporte;
 
 namespace SistemaEmpresas.Data;
 

@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SistemaEmpresas.Data;
 using SistemaEmpresas.DTOs;
-using SistemaEmpresas.Models.Transporte;
+using SistemaEmpresas.Models;
 
 namespace SistemaEmpresas.Services.Transporte;
 

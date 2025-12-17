@@ -4,15 +4,15 @@ import {
   ArrowLeft, Save, Loader2, Route, XCircle, Plus, Trash2,
   DollarSign, TrendingUp, TrendingDown
 } from 'lucide-react';
-import { viagemService } from '../../../services/viagemService';
-import { veiculoService } from '../../../services/veiculoService';
-import { reboqueService } from '../../../services/reboqueService';
-import { motoristaService } from '../../../services/motoristaService';
+import { viagemService } from '../../../services/Transporte/viagemService';
+import { veiculoService } from '../../../services/Transporte/veiculoService';
+import { reboqueService } from '../../../services/Transporte/reboqueService';
+import { motoristaService } from '../../../services/Transporte/motoristaService';
 import type {
   ViagemCreateDto, VeiculoListDto, ReboqueListDto, MotoristaListDto,
   DespesaViagemCreateDto, ReceitaViagemCreateDto
-} from '../../../types/transporte';
-import { STATUS_VIAGEM, TIPOS_DESPESA, TIPOS_RECEITA, UFS_BRASIL } from '../../../types/transporte';
+} from '../../../types';
+import { STATUS_VIAGEM, TIPOS_DESPESA, TIPOS_RECEITA, UFS_BRASIL } from '../../../types';
 import { usePermissaoTela } from '../../../hooks/usePermissaoTela';
 import { AlertaErro, AlertaSucesso, EstadoCarregando } from '../../../components/common';
 

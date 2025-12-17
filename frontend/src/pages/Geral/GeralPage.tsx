@@ -19,13 +19,13 @@ import {
   Search,
   Briefcase
 } from 'lucide-react';
-import { geralService } from '../../services/geralService';
+import { geralService } from '../../services/Geral/geralService';
 import type {
   GeralListDto,
   PagedResult,
   TipoEntidade,
-} from '../../types/geral';
-import { TIPO_LABELS, TIPO_CORES, TIPO_SIGLAS, getTiposAtivos } from '../../types/geral';
+} from '../../types';
+import { TIPO_LABELS, TIPO_CORES, TIPO_SIGLAS, getTiposAtivos } from '../../types';
 import { usePermissaoTela } from '../../hooks/usePermissaoTela';
 
 // Componentes reutilizáveis
@@ -441,7 +441,7 @@ export default function GeralPage() {
           columns={columns}
           getRowKey={(item) => item.sequenciaDoGeral.toString()}
           loading={loading}
-          totalItems={data?.total || 0}
+          totalItems={data?.totalCount || 0}
           rowActions={(item) => (
             <>
               <button

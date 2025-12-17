@@ -8,7 +8,8 @@ import {
   TrendingUp,
   ArrowUpRight,
   ArrowDownRight,
-  Activity
+  Activity,
+  Info
 } from 'lucide-react';
 import {
   AreaChart,
@@ -22,13 +23,13 @@ import {
   Pie,
   Cell,
 } from 'recharts';
-import { dashboardService } from '../../services/dashboardService';
+import { dashboardService } from '../../services/Dashboard/dashboardService';
 import type {
   DashboardKpi,
   OrcamentoResumido,
   OrcamentosPorStatus,
   TimelineOrcamentos,
-} from '../../types/dashboard';
+} from '../../types';
 
 // Cores Premium
 const COLORS = {
@@ -173,6 +174,7 @@ export default function DashboardPage() {
             color="red"
             trend="Atenção"
             trendUp={false}
+            tooltip="Produtos com estoque contábil abaixo da quantidade mínima definida"
           />
         </div>
       )}
@@ -416,9 +418,10 @@ interface KpiCardProps {
   color: 'blue' | 'emerald' | 'amber' | 'indigo' | 'red';
   trend?: string;
   trendUp?: boolean;
+  tooltip?: string;
 }
 
-function KpiCard({ title, value, icon: Icon, color, trend, trendUp }: KpiCardProps) {
+function KpiCard({ title, value, icon: Icon, color, trend, trendUp, tooltip }: KpiCardProps) {
 
 
   const iconBgClasses = {
@@ -445,7 +448,18 @@ function KpiCard({ title, value, icon: Icon, color, trend, trendUp }: KpiCardPro
 
       <div>
         <h3 className="text-3xl font-bold text-primary tracking-tight mb-1">{value}</h3>
-        <p className="text-sm font-medium text-muted-foreground">{title}</p>
+        <div className="flex items-center gap-1.5">
+          <p className="text-sm font-medium text-muted-foreground">{title}</p>
+          {tooltip && (
+            <div className="group/tooltip relative">
+              <Info className="w-4 h-4 text-muted-foreground hover:text-primary cursor-help transition-colors" />
+              <div className="invisible group-hover/tooltip:visible absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap z-50 shadow-lg">
+                {tooltip}
+                <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900"></div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

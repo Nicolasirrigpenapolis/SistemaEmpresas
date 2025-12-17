@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -10,7 +10,6 @@ import {
   Edit2,
   Hash,
   ChevronRight,
-  BadgeCheck,
   X,
   Barcode,
   MapPin,
@@ -30,8 +29,10 @@ import {
   XCircle,
   ExternalLink,
 } from 'lucide-react';
-import { produtoService } from '../../services/produtoService';
-import type { ProdutoCreateUpdateDto } from '../../types/produto';
+import { produtoService } from '../../services/Produto/produtoService';
+import { SeletorComBusca } from '../../components/SeletorComBusca';
+import type { ProdutoCreateUpdateDto } from '../../types';
+import type { GrupoProduto, SubGrupoProduto, Unidade } from '../../services/Produto/produtoService';
 
 // ============================================================================
 // COMPONENTES DE UI REUTILIZÁVEIS
@@ -64,7 +65,8 @@ function InputModerno({
   maxLength,
 }: InputModernoProps) {
   const [focado, setFocado] = useState(false);
-  const temValor = value !== undefined && value !== '' && value !== 0;
+  // Considera 0 como valor preenchido para evitar sobrepor o rótulo em campos numéricos
+  const temValor = value !== undefined && value !== '';
   
   return (
     <div className={`relative ${className}`}>
@@ -153,49 +155,6 @@ function SelectModerno({ label, value, onChange, opcoes, disabled, icone, classN
   );
 }
 
-// Checkbox moderno com estilo de chip
-interface CheckboxChipProps {
-  checked: boolean;
-  onChange: (checked: boolean) => void;
-  label: string;
-  icone?: React.ReactNode;
-  cor?: string;
-  disabled?: boolean;
-}
-
-function CheckboxChip({ checked, onChange, label, icone, cor = 'blue', disabled }: CheckboxChipProps) {
-  const cores: Record<string, { bg: string; border: string; text: string; icon: string }> = {
-    blue: { bg: 'bg-blue-50', border: 'border-blue-300', text: 'text-blue-700', icon: 'text-blue-500' },
-    green: { bg: 'bg-green-50', border: 'border-green-300', text: 'text-green-700', icon: 'text-green-500' },
-    purple: { bg: 'bg-purple-50', border: 'border-purple-300', text: 'text-purple-700', icon: 'text-purple-500' },
-    orange: { bg: 'bg-orange-50', border: 'border-orange-300', text: 'text-orange-700', icon: 'text-orange-500' },
-    red: { bg: 'bg-red-50', border: 'border-red-300', text: 'text-red-700', icon: 'text-red-500' },
-    amber: { bg: 'bg-amber-50', border: 'border-amber-300', text: 'text-amber-700', icon: 'text-amber-500' },
-  };
-  
-  const estilo = cores[cor] || cores.blue;
-  
-  return (
-    <button
-      type="button"
-      onClick={() => !disabled && onChange(!checked)}
-      disabled={disabled}
-      className={`
-        flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 transition-all duration-200
-        ${checked 
-          ? `${estilo.bg} ${estilo.border} ${estilo.text} shadow-sm` 
-          : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
-        }
-        ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-      `}
-    >
-      {icone && <span className={checked ? estilo.icon : 'text-gray-400'}>{icone}</span>}
-      <span className="text-sm font-medium">{label}</span>
-      {checked && <BadgeCheck className={`w-4 h-4 ${estilo.icon}`} />}
-    </button>
-  );
-}
-
 // Card de seção com título
 interface SecaoCardProps {
   titulo: string;
@@ -207,7 +166,7 @@ interface SecaoCardProps {
 
 function SecaoCard({ titulo, subtitulo, icone, children, className = '' }: SecaoCardProps) {
   return (
-    <div className={`bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden ${className}`}>
+    <div className={`bg-white rounded-2xl border border-gray-100 shadow-sm overflow-visible ${className}`}>
       <div className="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
@@ -298,6 +257,12 @@ export default function ProdutoFormPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>('dados');
+  
+  // Estados para listas auxiliares
+  const [grupos, setGrupos] = useState<GrupoProduto[]>([]);
+  const [subGrupos, setSubGrupos] = useState<SubGrupoProduto[]>([]);
+  const [unidades, setUnidades] = useState<Unidade[]>([]);
+  const [loadingAuxiliares, setLoadingAuxiliares] = useState(false);
   
   // Dados extras para visualização (somente leitura)
   const [dadosExtras, setDadosExtras] = useState<{
@@ -416,6 +381,25 @@ export default function ProdutoFormPage() {
     }
   };
 
+  // Carregar dados auxiliares (Grupos, SubGrupos, Unidades)
+  const loadAuxiliares = async () => {
+    try {
+      setLoadingAuxiliares(true);
+      const [gruposData, subGruposData, unidadesData] = await Promise.all([
+        produtoService.listarGrupos(),
+        produtoService.listarSubGrupos(),
+        produtoService.listarUnidades(),
+      ]);
+      setGrupos(gruposData);
+      setSubGrupos(subGruposData);
+      setUnidades(unidadesData);
+    } catch (error) {
+      console.error('Erro ao carregar dados auxiliares:', error);
+    } finally {
+      setLoadingAuxiliares(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -466,7 +450,27 @@ export default function ProdutoFormPage() {
 
   useEffect(() => {
     loadData();
+    loadAuxiliares();
   }, [id]);
+
+  // Recarregar SubGrupos quando o Grupo mudar (igual ao VB6: PoeRelEFiltroCbo)
+  useEffect(() => {
+    const loadSubGruposFiltrados = async () => {
+      if (formData.sequenciaDoGrupoProduto > 0) {
+        try {
+          const subGruposData = await produtoService.listarSubGrupos(formData.sequenciaDoGrupoProduto);
+          setSubGrupos(subGruposData);
+        } catch (error) {
+          console.error('Erro ao carregar subgrupos:', error);
+        }
+      } else {
+        // Se não tem grupo selecionado, carrega todos os subgrupos ou limpa
+        setSubGrupos([]);
+      }
+    };
+    
+    loadSubGruposFiltrados();
+  }, [formData.sequenciaDoGrupoProduto]);
 
   // Formatar valores
   const formatCurrency = (value: number) => {
@@ -527,26 +531,172 @@ export default function ProdutoFormPage() {
       {/* Classificação */}
       <SecaoCard titulo="Classificação" subtitulo="Grupo, unidade e classificação fiscal" icone={<Layers className="w-5 h-5" />}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <InputModerno
-            label="Grupo"
-            value={isViewMode ? dadosExtras.grupoProduto : formData.sequenciaDoGrupoProduto}
-            onChange={(v) => handleNumberChange('sequenciaDoGrupoProduto', v)}
+          {/* Grupo do Produto */}
+          <SeletorComBusca
+            label="Grupo do Produto"
+            value={formData.sequenciaDoGrupoProduto}
+            descricao={dadosExtras.grupoProduto || ''}
+            onSelect={(id, descricao) => {
+              handleChange('sequenciaDoGrupoProduto', id);
+              setDadosExtras(prev => ({ ...prev, grupoProduto: descricao }));
+              // Limpar SubGrupo quando trocar de Grupo (igual ao VB6)
+              handleChange('sequenciaDoSubGrupoProduto', 0);
+              setDadosExtras(prev => ({ ...prev, subGrupoProduto: '' }));
+            }}
+            items={grupos}
+            getItemId={(item) => item.sequenciaDoGrupoProduto}
+            getItemDescricao={(item) => item.descricao}
+            placeholder="Selecione um grupo"
             disabled={isViewMode}
-            icone={<Layers className="w-4 h-4" />}
+            loading={loadingAuxiliares}
           />
-          <InputModerno
-            label="Sub Grupo"
-            value={isViewMode ? dadosExtras.subGrupoProduto : formData.sequenciaDoSubGrupoProduto}
-            onChange={(v) => handleNumberChange('sequenciaDoSubGrupoProduto', v)}
+
+          {/* SubGrupo do Produto */}
+          <SeletorComBusca
+            label="SubGrupo do Produto"
+            value={formData.sequenciaDoSubGrupoProduto}
+            descricao={dadosExtras.subGrupoProduto || ''}
+            onSelect={(id, descricao) => {
+              handleChange('sequenciaDoSubGrupoProduto', id);
+              setDadosExtras(prev => ({ ...prev, subGrupoProduto: descricao }));
+            }}
+            items={subGrupos}
+            getItemId={(item) => item.sequenciaDoSubGrupoProduto}
+            getItemDescricao={(item) => item.descricao}
+            placeholder="Selecione um subgrupo"
             disabled={isViewMode}
+            loading={loadingAuxiliares}
           />
-          <InputModerno
+
+          {/* Unidade */}
+          <SeletorComBusca
             label="Unidade"
-            value={isViewMode ? dadosExtras.unidade : formData.sequenciaDaUnidade}
-            onChange={(v) => handleNumberChange('sequenciaDaUnidade', v)}
+            value={formData.sequenciaDaUnidade}
+            descricao={dadosExtras.unidade || ''}
+            onSelect={(id, descricao) => {
+              handleChange('sequenciaDaUnidade', id);
+              setDadosExtras(prev => ({ ...prev, unidade: descricao }));
+            }}
+            items={unidades}
+            getItemId={(item) => item.sequenciaDaUnidade}
+            getItemDescricao={(item) => item.descricao}
+            getItemSecundario={(item) => item.siglaDaUnidade}
+            placeholder="Selecione uma unidade"
             disabled={isViewMode}
-            icone={<Box className="w-4 h-4" />}
+            loading={loadingAuxiliares}
           />
+        </div>
+      </SecaoCard>
+
+      {/* Status e Características */}
+      <SecaoCard titulo="Características do Produto" subtitulo="Classificação e tipo do material" icone={<AlertCircle className="w-5 h-5" />}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Coluna 1: Status (apenas para edição) */}
+          {isEditing && (
+            <div className="space-y-3">
+              <h4 className="text-sm font-semibold text-gray-700 mb-2">Status</h4>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.inativo}
+                  onChange={(e) => handleChange('inativo', e.target.checked)}
+                  disabled={isViewMode}
+                  className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                />
+                <span className="text-sm text-gray-700">Inativo</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.obsoleto}
+                  onChange={(e) => handleChange('obsoleto', e.target.checked)}
+                  disabled={isViewMode}
+                  className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                />
+                <span className="text-sm text-gray-700">Obsoleto</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.usadoNoProjeto}
+                  onChange={(e) => handleChange('usadoNoProjeto', e.target.checked)}
+                  disabled={isViewMode}
+                  className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                />
+                <span className="text-sm text-gray-700">Filtrar nos Projetos</span>
+              </label>
+            </div>
+          )}
+
+          {/* Coluna 2: Tipo de Material */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-semibold text-gray-700 mb-2">Tipo de Material</h4>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.eMateriaPrima}
+                onChange={(e) => handleChange('eMateriaPrima', e.target.checked)}
+                disabled={isViewMode}
+                className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Matéria Prima</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.materialAdquiridoDeTerceiro}
+                onChange={(e) => handleChange('materialAdquiridoDeTerceiro', e.target.checked)}
+                disabled={isViewMode}
+                className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Material Ad. de Terceiro</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.industrializacao}
+                onChange={(e) => handleChange('industrializacao', e.target.checked)}
+                disabled={isViewMode}
+                className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Industrialização</span>
+            </label>
+          </div>
+
+          {/* Coluna 3: Uso e Origem */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-semibold text-gray-700 mb-2">Uso e Origem</h4>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.usado}
+                onChange={(e) => handleChange('usado', e.target.checked)}
+                disabled={isViewMode}
+                className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Usado</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.sucata}
+                onChange={(e) => handleChange('sucata', e.target.checked)}
+                disabled={isViewMode}
+                className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Sucata</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.importado}
+                onChange={(e) => handleChange('importado', e.target.checked)}
+                disabled={isViewMode}
+                className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Importado</span>
+            </label>
+          </div>
         </div>
       </SecaoCard>
 
@@ -587,7 +737,7 @@ export default function ProdutoFormPage() {
                     A Classificação Fiscal deste produto não possui um ClassTrib vinculado.
                   </p>
                   <p className="text-xs text-amber-600 mt-1">
-                    Configure o ClassTrib em <span className="font-medium">Fiscal → Classificação Fiscal</span> para habilitar os impostos IBS/CBS.
+                    Configure o ClassTrib em <span className="font-medium">Fiscal -&gt; Classificação Fiscal</span> para habilitar os impostos IBS/CBS.
                   </p>
                 </div>
               )}
@@ -600,8 +750,8 @@ export default function ProdutoFormPage() {
       <SecaoCard titulo="Estoque e Valores" subtitulo="Quantidades e preços" icone={<Calculator className="w-5 h-5" />}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <InputModerno
-            label="Estoque"
-            value={formatQuantity(dadosExtras.quantidadeNoEstoque || 0)}
+            label="Estoque Contábil"
+            value={formatQuantity(dadosExtras.quantidadeContabil || 0)}
             onChange={() => {}}
             disabled={true}
             icone={<Package className="w-4 h-4" />}
@@ -695,13 +845,6 @@ export default function ProdutoFormPage() {
               icone={<Scale className="w-4 h-4" />}
               className="flex-1"
             />
-            <CheckboxChip
-              checked={formData.pesoOk}
-              onChange={(v) => handleChange('pesoOk', v)}
-              label="Conferido"
-              cor="green"
-              disabled={isViewMode}
-            />
           </div>
         </div>
       </SecaoCard>
@@ -742,15 +885,6 @@ export default function ProdutoFormPage() {
             icone={<Percent className="w-4 h-4" />}
           />
         </div>
-        <div className="mt-4">
-          <CheckboxChip
-            checked={formData.conferidoPeloContabil}
-            onChange={(v) => handleChange('conferidoPeloContabil', v)}
-            label="NCM - Conferido pela Contabilidade"
-            cor="green"
-            disabled={isViewMode}
-          />
-        </div>
       </SecaoCard>
 
       {/* Medidas e Projeto */}
@@ -785,15 +919,125 @@ export default function ProdutoFormPage() {
             maxLength={29}
           />
         </div>
+      </SecaoCard>
 
-        <div className="flex flex-wrap gap-3 mt-4">
-          <CheckboxChip
-            checked={formData.usadoNoProjeto}
-            onChange={(v) => handleChange('usadoNoProjeto', v)}
-            label="Filtrar nos Projetos"
-            cor="blue"
-            disabled={isViewMode}
-          />
+      {/* Opções Adicionais */}
+      <SecaoCard titulo="Opções Adicionais" subtitulo="Configurações extras do produto" icone={<ClipboardList className="w-5 h-5" />}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Coluna 1: Características Técnicas */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-semibold text-gray-700 mb-2">Características Técnicas</h4>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.lance}
+                onChange={(e) => handleChange('lance', e.target.checked)}
+                disabled={isViewMode}
+                className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Lance</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.eRegulador}
+                onChange={(e) => handleChange('eRegulador', e.target.checked)}
+                disabled={isViewMode}
+                className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">É Regulador</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.travaReceita}
+                onChange={(e) => handleChange('travaReceita', e.target.checked)}
+                disabled={isViewMode}
+                className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Trava Receita</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.mpInicial}
+                onChange={(e) => handleChange('mpInicial', e.target.checked)}
+                disabled={isViewMode}
+                className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">M.Prima Inicial</span>
+            </label>
+          </div>
+
+          {/* Coluna 2: Opções de Exibição */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-semibold text-gray-700 mb-2">Opções de Exibição</h4>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.naoSairNoChecklist}
+                onChange={(e) => handleChange('naoSairNoChecklist', e.target.checked)}
+                disabled={isViewMode}
+                className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Não mostrar no Controle de Pedidos</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.naoMostrarReceita}
+                onChange={(e) => handleChange('naoMostrarReceita', e.target.checked)}
+                disabled={isViewMode}
+                className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Não Mostrar Receita</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.naoSairNoRelatorio}
+                onChange={(e) => handleChange('naoSairNoRelatorio', e.target.checked)}
+                disabled={isViewMode}
+                className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Não Sair no Relatório da Produção</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.mostrarReceitaSecundaria}
+                onChange={(e) => handleChange('mostrarReceitaSecundaria', e.target.checked)}
+                disabled={isViewMode}
+                className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Mostrar Receita Secundária</span>
+            </label>
+          </div>
+
+          {/* Coluna 3: Outras Opções */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-semibold text-gray-700 mb-2">Outras Opções</h4>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.pesoOk}
+                onChange={(e) => handleChange('pesoOk', e.target.checked)}
+                disabled={isViewMode}
+                className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Peso Conferido</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.conferidoPeloContabil}
+                onChange={(e) => handleChange('conferidoPeloContabil', e.target.checked)}
+                disabled={isViewMode}
+                className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">NCM - Conferido pela Contabilidade</span>
+            </label>
+          </div>
         </div>
       </SecaoCard>
     </div>
@@ -899,138 +1143,11 @@ export default function ProdutoFormPage() {
             disabled={true}
           />
           <InputModerno
-            label="Estoque"
-            value={formatQuantity(dadosExtras.quantidadeNoEstoque || 0)}
+            label="Estoque Contábil"
+            value={formatQuantity(dadosExtras.quantidadeContabil || 0)}
             onChange={() => {}}
             disabled={true}
             icone={<Package className="w-4 h-4" />}
-          />
-        </div>
-      </SecaoCard>
-
-      {/* Características do Produto */}
-      <SecaoCard titulo="Características do Produto" subtitulo="Classificação e atributos" icone={<Box className="w-5 h-5" />}>
-        <div className="flex flex-wrap gap-3">
-          <CheckboxChip
-            checked={formData.eMateriaPrima}
-            onChange={(v) => handleChange('eMateriaPrima', v)}
-            label="Matéria Prima"
-            cor="blue"
-            disabled={isViewMode}
-          />
-          <CheckboxChip
-            checked={formData.usado}
-            onChange={(v) => handleChange('usado', v)}
-            label="Usado"
-            cor="amber"
-            disabled={isViewMode}
-          />
-          <CheckboxChip
-            checked={formData.materialAdquiridoDeTerceiro}
-            onChange={(v) => handleChange('materialAdquiridoDeTerceiro', v)}
-            label="Material Ad. de Terceiro"
-            cor="blue"
-            disabled={isViewMode}
-          />
-          <CheckboxChip
-            checked={formData.sucata}
-            onChange={(v) => handleChange('sucata', v)}
-            label="Sucata"
-            cor="amber"
-            disabled={isViewMode}
-          />
-          <CheckboxChip
-            checked={formData.industrializacao}
-            onChange={(v) => handleChange('industrializacao', v)}
-            label="Industrialização"
-            cor="purple"
-            disabled={isViewMode}
-          />
-          <CheckboxChip
-            checked={formData.importado}
-            onChange={(v) => handleChange('importado', v)}
-            label="Importado"
-            cor="green"
-            disabled={isViewMode}
-          />
-          <CheckboxChip
-            checked={formData.obsoleto}
-            onChange={(v) => handleChange('obsoleto', v)}
-            label="Obsoleto"
-            cor="red"
-            disabled={isViewMode}
-          />
-          <CheckboxChip
-            checked={formData.inativo}
-            onChange={(v) => handleChange('inativo', v)}
-            label="Inativo"
-            cor="red"
-            disabled={isViewMode}
-          />
-        </div>
-        
-        <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t">
-          <CheckboxChip
-            checked={formData.lance}
-            onChange={(v) => handleChange('lance', v)}
-            label="Lance"
-            cor="blue"
-            disabled={isViewMode}
-          />
-          <CheckboxChip
-            checked={formData.eRegulador}
-            onChange={(v) => handleChange('eRegulador', v)}
-            label="E Regulador"
-            cor="orange"
-            disabled={isViewMode}
-          />
-          <CheckboxChip
-            checked={formData.travaReceita}
-            onChange={(v) => handleChange('travaReceita', v)}
-            label="Trava Receita"
-            cor="red"
-            disabled={isViewMode}
-          />
-          <CheckboxChip
-            checked={formData.mpInicial}
-            onChange={(v) => handleChange('mpInicial', v)}
-            label="M.Prima Inicial"
-            cor="green"
-            disabled={isViewMode}
-          />
-        </div>
-      </SecaoCard>
-
-      {/* Flags de Controle */}
-      <SecaoCard titulo="Opções de Controle" subtitulo="Configurações do produto" icone={<ClipboardList className="w-5 h-5" />}>
-        <div className="flex flex-wrap gap-3">
-          <CheckboxChip
-            checked={formData.naoSairNoChecklist}
-            onChange={(v) => handleChange('naoSairNoChecklist', v)}
-            label="Não mostrar no Controle de Pedidos"
-            cor="amber"
-            disabled={isViewMode}
-          />
-          <CheckboxChip
-            checked={formData.naoMostrarReceita}
-            onChange={(v) => handleChange('naoMostrarReceita', v)}
-            label="Não Mostrar Receita"
-            cor="orange"
-            disabled={isViewMode}
-          />
-          <CheckboxChip
-            checked={formData.naoSairNoRelatorio}
-            onChange={(v) => handleChange('naoSairNoRelatorio', v)}
-            label="Não Sair no Relatório da Produção"
-            cor="red"
-            disabled={isViewMode}
-          />
-          <CheckboxChip
-            checked={formData.mostrarReceitaSecundaria}
-            onChange={(v) => handleChange('mostrarReceitaSecundaria', v)}
-            label="Mostrar Receita Secundária"
-            cor="green"
-            disabled={isViewMode}
           />
         </div>
       </SecaoCard>
@@ -1170,10 +1287,9 @@ export default function ProdutoFormPage() {
 
         {/* Descrição - Campo Principal - Igual VB6 */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-          {/* Cabeçalho com Descrição e Checkboxes Direita (igual VB6) */}
-          <div className="flex items-start justify-between gap-6 mb-4">
-            {/* Lado Esquerdo - Descrição */}
-            <div className="flex-1">
+          {/* Cabeçalho com Descrição e Status agrupados */}
+          <div className="grid gap-4 lg:grid-cols-3 mb-4">
+            <div className="lg:col-span-2">
               <InputModerno
                 label="Descrição"
                 value={formData.descricao}
@@ -1183,107 +1299,10 @@ export default function ProdutoFormPage() {
                 icone={<Package className="w-4 h-4" />}
               />
             </div>
-            
-            {/* Lado Direito - Checkboxes (Inativo, Lance, E Regulador, Obsoleto, Trava Receita, M.Prima Inicial) */}
-            <div className="flex flex-col gap-2 min-w-fit">
-              <div className="flex flex-wrap gap-2 justify-end">
-                <CheckboxChip
-                  checked={formData.inativo}
-                  onChange={(v) => handleChange('inativo', v)}
-                  label="Inativo"
-                  cor="red"
-                  disabled={isViewMode}
-                />
-                <CheckboxChip
-                  checked={formData.lance}
-                  onChange={(v) => handleChange('lance', v)}
-                  label="Lance"
-                  cor="blue"
-                  disabled={isViewMode}
-                />
-                <CheckboxChip
-                  checked={formData.eRegulador}
-                  onChange={(v) => handleChange('eRegulador', v)}
-                  label="E Regulador"
-                  cor="orange"
-                  disabled={isViewMode}
-                />
-              </div>
-              <div className="flex flex-wrap gap-2 justify-end">
-                <CheckboxChip
-                  checked={formData.obsoleto}
-                  onChange={(v) => handleChange('obsoleto', v)}
-                  label="Obsoleto"
-                  cor="amber"
-                  disabled={isViewMode}
-                />
-                <CheckboxChip
-                  checked={formData.travaReceita}
-                  onChange={(v) => handleChange('travaReceita', v)}
-                  label="Trava Receita"
-                  cor="red"
-                  disabled={isViewMode}
-                />
-                <CheckboxChip
-                  checked={formData.mpInicial}
-                  onChange={(v) => handleChange('mpInicial', v)}
-                  label="M.Prima Inicial"
-                  cor="green"
-                  disabled={isViewMode}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Linha de Checkboxes abaixo da descrição (igual VB6) */}
-          <div className="flex flex-wrap gap-2 pt-3 border-t border-gray-100">
-            <CheckboxChip
-              checked={formData.eMateriaPrima}
-              onChange={(v) => handleChange('eMateriaPrima', v)}
-              label="Matéria Prima"
-              cor="purple"
-              disabled={isViewMode}
-            />
-            <CheckboxChip
-              checked={formData.usado}
-              onChange={(v) => handleChange('usado', v)}
-              label="Usado"
-              cor="amber"
-              disabled={isViewMode}
-            />
-            <CheckboxChip
-              checked={formData.materialAdquiridoDeTerceiro}
-              onChange={(v) => handleChange('materialAdquiridoDeTerceiro', v)}
-              label="Material Ad. de Terceiro"
-              cor="blue"
-              disabled={isViewMode}
-            />
-            <CheckboxChip
-              checked={formData.sucata}
-              onChange={(v) => handleChange('sucata', v)}
-              label="Sucata"
-              cor="amber"
-              disabled={isViewMode}
-            />
-            <CheckboxChip
-              checked={formData.industrializacao}
-              onChange={(v) => handleChange('industrializacao', v)}
-              label="Industrialização"
-              cor="purple"
-              disabled={isViewMode}
-            />
-            <CheckboxChip
-              checked={formData.importado}
-              onChange={(v) => handleChange('importado', v)}
-              label="Importado"
-              cor="green"
-              disabled={isViewMode}
-            />
           </div>
         </div>
-
         {/* Abas Modernas */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
           {/* Tab Headers */}
           <div className="flex border-b border-gray-100 bg-gray-50/50 overflow-x-auto">
             {[

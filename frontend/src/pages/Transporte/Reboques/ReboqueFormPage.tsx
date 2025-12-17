@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ArrowLeft, Save, Loader2, Container, XCircle, FileText, User, Settings } from 'lucide-react';
-import { reboqueService } from '../../../services/reboqueService';
-import type { ReboqueCreateDto } from '../../../types/transporte';
-import { TIPOS_CARROCERIA, UFS_BRASIL } from '../../../types/transporte';
+import { reboqueService } from '../../../services/Transporte/reboqueService';
+import type { ReboqueCreateDto } from '../../../types';
+import { TIPOS_CARROCERIA, UFS_BRASIL } from '../../../types';
 import { usePermissaoTela } from '../../../hooks/usePermissaoTela';
 import { AlertaErro, AlertaSucesso, EstadoCarregando } from '../../../components/common';
-import { mascaraPlaca, formatarDocumento, limparNumeros } from '../../../utils/formatters';
+import { mascaraPlaca, formatarDocumento, limparNumeros, parsePlaca, parseCPFCNPJ } from '../../../utils/formatters';
 
 export default function ReboqueFormPage() {
   const navigate = useNavigate();
@@ -118,11 +118,18 @@ export default function ReboqueFormPage() {
       setSaving(true);
       setError(null);
 
+      // Preparar dados para envio (remover máscaras)
+      const dadosParaEnviar: ReboqueCreateDto = {
+        ...formData,
+        placa: parsePlaca(formData.placa),
+        proprietarioCpfCnpj: parseCPFCNPJ(formData.proprietarioCpfCnpj),
+      };
+
       if (modo === 'criar') {
-        await reboqueService.criar(formData);
+        await reboqueService.criar(dadosParaEnviar);
         setSuccess('Reboque cadastrado com sucesso!');
       } else {
-        await reboqueService.atualizar(Number(id), formData);
+        await reboqueService.atualizar(Number(id), dadosParaEnviar);
         setSuccess('Reboque atualizado com sucesso!');
       }
       setTimeout(() => navigate('/transporte/reboques'), 1500);

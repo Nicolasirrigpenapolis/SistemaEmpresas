@@ -14,10 +14,10 @@ import {
   X,
   Loader2,
 } from 'lucide-react';
-import { classificacaoFiscalService } from '../../services/classificacaoFiscalService';
-import { classTribService } from '../../services/classTribService';
-import type { ClassificacaoFiscalInput } from '../../types/classificacaoFiscal';
-import { DEFAULT_CLASSIFICACAO_FISCAL } from '../../types/classificacaoFiscal';
+import { classificacaoFiscalService } from '../../services/Fiscal/classificacaoFiscalService';
+import { classTribService } from '../../services/Fiscal/classTribService';
+import type { ClassificacaoFiscalInput } from '../../types';
+import { DEFAULT_CLASSIFICACAO_FISCAL } from '../../types';
 import ClassTribSelector from '../../components/ClassTribSelector';
 
 // ============================================================================

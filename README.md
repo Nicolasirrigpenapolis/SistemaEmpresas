@@ -89,7 +89,6 @@ SistemaEmpresas/
 │   └── Program.cs              # Entry point
 │
 ├── 📂 SistemaEmpresas.Tests/   # Testes unitários
-├── 📂 scripts/                 # Scripts SQL úteis
 └── SistemaEmpresas.sln         # Solution Visual Studio
 ```
 

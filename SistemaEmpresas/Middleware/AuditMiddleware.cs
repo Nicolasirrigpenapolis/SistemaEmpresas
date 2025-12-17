@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using SistemaEmpresas.DTOs;
 using SistemaEmpresas.Models;
 using SistemaEmpresas.Services;
+using SistemaEmpresas.Services.Logs;
 using System.Diagnostics;
 using System.Security.Claims;
 using System.Text;

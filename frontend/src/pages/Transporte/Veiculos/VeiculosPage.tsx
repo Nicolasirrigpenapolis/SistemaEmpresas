@@ -11,9 +11,9 @@ import {
   CheckCircle,
   XCircle,
 } from 'lucide-react';
-import { veiculoService } from '../../../services/veiculoService';
-import type { VeiculoListDto, PagedResult, VeiculoFiltros } from '../../../types/transporte';
-import { TIPOS_VEICULO } from '../../../types/transporte';
+import { veiculoService } from '../../../services/Transporte/veiculoService';
+import type { VeiculoListDto, PagedResult, VeiculoFiltros } from '../../../types';
+import { TIPOS_VEICULO } from '../../../types';
 import { usePermissaoTela } from '../../../hooks/usePermissaoTela';
 import {
   ModalConfirmacao,

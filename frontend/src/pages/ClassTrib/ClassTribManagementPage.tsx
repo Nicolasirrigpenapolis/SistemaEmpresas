@@ -15,8 +15,8 @@ import {
   BookOpen,
   XCircle
 } from 'lucide-react';
-import { classTribService } from '../../services/classTribService';
-import type { ClassTribDto } from '../../services/classTribService';
+import { classTribService } from '../../services/Fiscal/classTribService';
+import type { ClassTribDto } from '../../services/Fiscal/classTribService';
 import { usePermissaoTela } from '../../hooks/usePermissaoTela';
 
 // Componentes reutilizáveis

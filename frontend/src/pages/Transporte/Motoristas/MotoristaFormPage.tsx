@@ -9,9 +9,9 @@ import {
   MapPin,
   Phone,
 } from 'lucide-react';
-import { motoristaService } from '../../../services/motoristaService';
-import type { MotoristaCreateDto } from '../../../types/transporte';
-import { UFS_BRASIL } from '../../../types/transporte';
+import { motoristaService } from '../../../services/Transporte/motoristaService';
+import type { MotoristaCreateDto } from '../../../types';
+import { UFS_BRASIL } from '../../../types';
 import { usePermissaoTela } from '../../../hooks/usePermissaoTela';
 import { AlertaErro, AlertaSucesso, EstadoCarregando } from '../../../components/common';
 import { mascaraCPF, mascaraTelefone, mascaraCEP, formatarCPF, formatarTelefone, formatarCEP, limparNumeros } from '../../../utils/formatters';

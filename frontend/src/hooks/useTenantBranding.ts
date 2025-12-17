@@ -27,8 +27,8 @@ const TENANT_BRANDING: Record<string, TenantBranding> = {
 const DEFAULT_BRANDING: TenantBranding = {
   nome: 'Sistema Empresas',
   nomeCompleto: 'Sistema Empresarial',
-  logo: '/logos/default.png',
-  favicon: '/vite.svg',
+  logo: '/logos/logo_IP.png',
+  favicon: '/logos/logo_IP.png',
 };
 
 export function useTenantBranding(): TenantBranding {

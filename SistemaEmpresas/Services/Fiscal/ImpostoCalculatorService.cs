@@ -1,5 +1,5 @@
 using System;
-using SistemaEmpresas.Models.Fiscal;
+using SistemaEmpresas.Models;
 
 namespace SistemaEmpresas.Services.Fiscal
 {

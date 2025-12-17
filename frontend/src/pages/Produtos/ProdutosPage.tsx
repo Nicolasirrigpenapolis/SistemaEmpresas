@@ -13,8 +13,8 @@ import {
   Box,
   Layers
 } from 'lucide-react';
-import { produtoService } from '../../services/produtoService';
-import type { ProdutoListDto, PagedResult, ProdutoFiltroDto } from '../../types/produto';
+import { produtoService } from '../../services/Produto/produtoService';
+import type { ProdutoListDto, PagedResult, ProdutoFiltroDto } from '../../types';
 
 // Componentes reutilizáveis
 import {
@@ -162,19 +162,36 @@ export default function ProdutosPage() {
       )
     },
     {
-      key: 'quantidadeNoEstoque',
-      header: 'Estoque',
+      key: 'quantidadeMinima',
+      header: 'Estoque Mínimo',
       align: 'right',
       sortable: true,
       render: (item) => (
-        <div className="flex flex-col items-end">
+        <span className="text-sm text-[var(--text-muted)]">
+          {item.quantidadeMinima > 0
+            ? new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 0 }).format(item.quantidadeMinima)
+            : '-'
+          }
+        </span>
+      )
+    },
+    {
+      key: 'quantidadeContabil',
+      header: 'Estoque Contábil',
+      align: 'right',
+      sortable: true,
+      render: (item) => (
+        <div className="flex flex-col items-end gap-0.5">
           <span className={`font-medium ${item.estoqueCritico ? 'text-red-600' :
-            item.quantidadeNoEstoque > item.quantidadeMinima * 2 ? 'text-emerald-600' : 'text-[var(--text)]'
+            item.quantidadeContabil > item.quantidadeMinima * 2 ? 'text-emerald-600' : 'text-[var(--text)]'
             }`}>
-            {new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(item.quantidadeNoEstoque)}
+            {new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(item.quantidadeContabil)}
           </span>
           {item.estoqueCritico && (
-            <span className="text-[10px] font-medium text-red-600 bg-red-50 px-1.5 py-0.5 rounded-full flex items-center gap-1 mt-0.5">
+            <span
+              className="text-[10px] font-medium text-red-600 bg-red-50 px-1.5 py-0.5 rounded-full flex items-center gap-1"
+              title={`Estoque abaixo do mínimo (${new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(item.quantidadeMinima)})`}
+            >
               <AlertTriangle className="w-3 h-3" />
               Crítico
             </span>
@@ -322,7 +339,7 @@ export default function ProdutosPage() {
           columns={columns}
           getRowKey={(item) => item.sequenciaDoProduto}
           loading={loading}
-          totalItems={data?.totalItems}
+          totalItems={data?.totalCount}
 
           // Filtros Server-Side
           onFilterChange={(_, value) => {

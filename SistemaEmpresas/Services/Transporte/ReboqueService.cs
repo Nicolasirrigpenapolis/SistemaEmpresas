@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SistemaEmpresas.Data;
 using SistemaEmpresas.DTOs;
-using SistemaEmpresas.Models.Transporte;
+using SistemaEmpresas.Models;
 
 namespace SistemaEmpresas.Services.Transporte;
 
@@ -41,6 +41,12 @@ public class ReboqueService : IReboqueService
         // Filtros
         if (filtros != null)
         {
+            // Filtro de ativos/inativos
+            if (!filtros.IncluirInativos)
+            {
+                query = query.Where(r => r.Ativo);
+            }
+            
             if (!string.IsNullOrWhiteSpace(filtros.Busca))
             {
                 var busca = filtros.Busca.ToUpper().Trim();

@@ -25,8 +25,8 @@ import {
   Check
 } from 'lucide-react';
 
-import { notaFiscalService } from '../../services/notaFiscalService';
-import { emitenteService } from '../../services/emitenteService';
+import { notaFiscalService } from '../../services/NotaFiscal/notaFiscalService';
+import { emitenteService } from '../../services/Emitentes/emitenteService';
 import type {
   NotaFiscalDto,
   NotaFiscalCreateUpdateDto,
@@ -47,9 +47,9 @@ import type {
   ParcelaNotaFiscalDto,
   ParcelaNotaFiscalCreateDto,
   PropriedadeComboDto,
-} from '../../types/notaFiscal';
-import type { EmitenteDto } from '../../types/emitente';
-import { MODALIDADES_FRETE } from '../../types/notaFiscal';
+} from '../../types';
+import type { EmitenteDto } from '../../types';
+import { MODALIDADES_FRETE } from '../../types';
 
 // Tabs da nota fiscal - 7 abas como no VB6 (sem Serviços)
 type TabId = 'dados' | 'transportadora' | 'produtos' | 'conjuntos' | 'pecas' | 'financeiro' | 'nfe';

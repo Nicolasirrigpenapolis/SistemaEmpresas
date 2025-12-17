@@ -29,12 +29,22 @@ import {
   BadgeCheck,
   X,
 } from 'lucide-react';
-import { geralService } from '../../services/geralService';
-import type { 
+import { geralService } from '../../services/Geral/geralService';
+import type {
   GeralCreateDto,
   GeralListDto,
-} from '../../types/geral';
-import { GERAL_DEFAULT, getLabelDocumento, getLabelIdentidade } from '../../types/geral';
+} from '../../types';
+import { GERAL_DEFAULT, getLabelDocumento, getLabelIdentidade } from '../../types';
+import {
+  formatarCPF,
+  formatarCNPJ,
+  formatarCEP,
+  formatarTelefone,
+  parseCPFCNPJ,
+  parseCEP,
+  parseTelefone,
+  limparNumeros,
+} from '../../utils/formatters';
 
 // ============================================================================
 // COMPONENTES DE UI REUTILIZÁVEIS
@@ -72,7 +82,7 @@ function InputModerno({
 }: InputModernoProps) {
   const [focado, setFocado] = useState(false);
   const temValor = value !== undefined && value !== '' && value !== 0;
-  
+
   return (
     <div className={`relative ${className}`}>
       <div className={`
@@ -105,8 +115,8 @@ function InputModerno({
           <label className={`
             absolute left-0 transition-all duration-200 pointer-events-none
             ${icone ? 'left-1' : 'left-3'}
-            ${focado || temValor 
-              ? '-top-2.5 text-xs bg-white px-1 rounded' 
+            ${focado || temValor
+              ? '-top-2.5 text-xs bg-white px-1 rounded'
               : 'top-3 text-sm'
             }
             ${focado ? 'text-blue-600' : 'text-gray-500'}
@@ -187,9 +197,9 @@ function CheckboxChip({ checked, onChange, label, icone, cor, disabled }: Checkb
     red: { bg: 'bg-red-50', border: 'border-red-300', text: 'text-red-700', icon: 'text-red-500' },
     amber: { bg: 'bg-amber-50', border: 'border-amber-300', text: 'text-amber-700', icon: 'text-amber-500' },
   };
-  
+
   const estilo = cores[cor] || cores.blue;
-  
+
   return (
     <button
       type="button"
@@ -197,8 +207,8 @@ function CheckboxChip({ checked, onChange, label, icone, cor, disabled }: Checkb
       disabled={disabled}
       className={`
         flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 transition-all duration-200
-        ${checked 
-          ? `${estilo.bg} ${estilo.border} ${estilo.text} shadow-sm` 
+        ${checked
+          ? `${estilo.bg} ${estilo.border} ${estilo.text} shadow-sm`
           : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
         }
         ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
@@ -255,13 +265,13 @@ export default function GeralFormPage() {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'dados' | 'cobranca'>('dados');
   const [vendedores, setVendedores] = useState<GeralListDto[]>([]);
-  
+
   // Estados para busca CNPJ/CEP
   const [buscandoCnpj, setBuscandoCnpj] = useState(false);
   const [buscandoCep, setBuscandoCep] = useState(false);
   const [cnpjEncontrado, setCnpjEncontrado] = useState(false);
   const [cepEncontrado, setCepEncontrado] = useState(false);
-  
+
   // Dados extras para visualização
   const [dadosExtras, setDadosExtras] = useState<{
     municipioNome?: string;
@@ -269,7 +279,7 @@ export default function GeralFormPage() {
     vendedorNome?: string;
     dataDoCadastro?: string;
   }>({});
-  
+
   // Form data
   const [formData, setFormData] = useState<GeralCreateDto>(GERAL_DEFAULT);
 
@@ -282,7 +292,7 @@ export default function GeralFormPage() {
     try {
       setLoading(true);
       const data = await geralService.buscarPorId(Number(id));
-      
+
       setFormData({
         cliente: data.cliente,
         fornecedor: data.fornecedor,
@@ -341,7 +351,7 @@ export default function GeralFormPage() {
         codigoAdiantamento: data.codigoAdiantamento,
         salBruto: data.salBruto,
       });
-      
+
       // Guarda dados extras para visualização
       setDadosExtras({
         municipioNome: data.municipioNome,
@@ -368,19 +378,31 @@ export default function GeralFormPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       setSaving(true);
       setError(null);
 
+      // Preparar dados para envio (remover máscaras)
+      const dadosParaEnviar: GeralCreateDto = {
+        ...formData,
+        cpfECnpj: parseCPFCNPJ(formData.cpfECnpj),
+        cep: parseCEP(formData.cep),
+        fone1: parseTelefone(formData.fone1),
+        fone2: parseTelefone(formData.fone2),
+        celular: parseTelefone(formData.celular),
+        fax: parseTelefone(formData.fax),
+        cepDeCobranca: parseCEP(formData.cepDeCobranca),
+      };
+
       // Backend valida campos obrigatórios (razão social, tipo)
       if (isEditing) {
         await geralService.atualizar(Number(id), {
-          ...formData,
+          ...dadosParaEnviar,
           sequenciaDoGeral: Number(id),
         });
       } else {
-        await geralService.criar(formData);
+        await geralService.criar(dadosParaEnviar);
       }
 
       navigate('/cadastros/geral');
@@ -401,13 +423,13 @@ export default function GeralFormPage() {
 
   const handleBuscarCnpj = async () => {
     if (!formData.cpfECnpj) return;
-    
+
     try {
       setBuscandoCnpj(true);
       setError(null);
-      
+
       const dados = await geralService.consultarCnpj(formData.cpfECnpj);
-      
+
       // Preenche os dados no formulário
       setFormData((prev) => ({
         ...prev,
@@ -422,7 +444,7 @@ export default function GeralFormPage() {
         fone1: dados.telefone || prev.fone1,
         email: dados.email || prev.email,
       }));
-      
+
       setCnpjEncontrado(true);
       // Se encontrou o CEP, marca como encontrado também
       if (dados.cep) setCepEncontrado(true);
@@ -437,13 +459,13 @@ export default function GeralFormPage() {
 
   const handleBuscarCep = async () => {
     if (!formData.cep) return;
-    
+
     try {
       setBuscandoCep(true);
       setError(null);
-      
+
       const dados = await geralService.consultarCep(formData.cep);
-      
+
       // Preenche os dados no formulário
       setFormData((prev) => ({
         ...prev,
@@ -452,7 +474,7 @@ export default function GeralFormPage() {
         bairro: dados.bairro || prev.bairro,
         sequenciaDoMunicipio: dados.sequenciaDoMunicipio || prev.sequenciaDoMunicipio,
       }));
-      
+
       setCepEncontrado(true);
     } catch (err: any) {
       console.error('Erro ao buscar CEP:', err);
@@ -491,19 +513,17 @@ export default function GeralFormPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className={`flex items-center justify-between ${
-        isViewMode 
-          ? 'bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-500 -mx-6 -mt-6 px-6 py-4 rounded-t-xl' 
+      <div className={`flex items-center justify-between ${isViewMode
+          ? 'bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-500 -mx-6 -mt-6 px-6 py-4 rounded-t-xl'
           : ''
-      }`}>
+        }`}>
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate('/cadastros/geral')}
-            className={`p-2.5 rounded-xl transition-all duration-200 ${
-              isViewMode 
-                ? 'hover:bg-white/20 text-white' 
+            className={`p-2.5 rounded-xl transition-all duration-200 ${isViewMode
+                ? 'hover:bg-white/20 text-white'
                 : 'hover:bg-gray-100 text-gray-600'
-            }`}
+              }`}
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
@@ -538,7 +558,7 @@ export default function GeralFormPage() {
             </div>
           </div>
         </div>
-        
+
         {isViewMode ? (
           <button
             type="button"
@@ -576,8 +596,8 @@ export default function GeralFormPage() {
               <p className="font-medium">Erro ao processar</p>
               <p className="text-sm text-red-600">{error}</p>
             </div>
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={() => setError(null)}
               className="p-1.5 hover:bg-red-100 rounded-lg transition-colors"
             >
@@ -599,7 +619,7 @@ export default function GeralFormPage() {
               </span>
             )}
           </div>
-          
+
           <div className="flex flex-wrap gap-3">
             <CheckboxChip
               checked={formData.cliente}
@@ -649,7 +669,7 @@ export default function GeralFormPage() {
               cor="amber"
               disabled={isViewMode}
             />
-            
+
             <div className="border-l-2 border-gray-200 pl-3 ml-2">
               <CheckboxChip
                 checked={formData.inativo}
@@ -670,11 +690,10 @@ export default function GeralFormPage() {
             <button
               type="button"
               onClick={() => setActiveTab('dados')}
-              className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 text-sm font-medium transition-all duration-200 relative ${
-                activeTab === 'dados'
+              className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 text-sm font-medium transition-all duration-200 relative ${activeTab === 'dados'
                   ? 'text-blue-600 bg-white'
                   : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-              }`}
+                }`}
             >
               <FileText className="w-4 h-4" />
               <span>Dados Principais</span>
@@ -685,11 +704,10 @@ export default function GeralFormPage() {
             <button
               type="button"
               onClick={() => setActiveTab('cobranca')}
-              className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 text-sm font-medium transition-all duration-200 relative ${
-                activeTab === 'cobranca'
+              className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 text-sm font-medium transition-all duration-200 relative ${activeTab === 'cobranca'
                   ? 'text-blue-600 bg-white'
                   : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-              }`}
+                }`}
             >
               <Landmark className="w-4 h-4" />
               <span>Cobrança e Conta Corrente</span>
@@ -702,8 +720,8 @@ export default function GeralFormPage() {
           {/* Tab Content */}
           <div className="p-6">
             {activeTab === 'dados' ? (
-              <TabDadosPrincipais 
-                formData={formData} 
+              <TabDadosPrincipais
+                formData={formData}
                 onChange={handleChange}
                 vendedores={vendedores}
                 onBuscarCnpj={handleBuscarCnpj}
@@ -716,8 +734,8 @@ export default function GeralFormPage() {
                 dadosExtras={dadosExtras}
               />
             ) : (
-              <TabCobrancaConta 
-                formData={formData} 
+              <TabCobrancaConta
+                formData={formData}
                 onChange={handleChange}
                 isViewMode={isViewMode}
               />
@@ -751,9 +769,9 @@ interface TabProps {
   };
 }
 
-function TabDadosPrincipais({ 
-  formData, 
-  onChange, 
+function TabDadosPrincipais({
+  formData,
+  onChange,
   vendedores = [],
   onBuscarCnpj,
   onBuscarCep,
@@ -764,12 +782,12 @@ function TabDadosPrincipais({
   isViewMode,
   // dadosExtras não é usado nesta aba atualmente
 }: TabProps) {
-  
+
   return (
     <div className="space-y-6">
       {/* Identificação */}
-      <SecaoCard 
-        titulo="Identificação" 
+      <SecaoCard
+        titulo="Identificação"
         subtitulo="Dados do documento e pessoa"
         icone={<FileText className="w-5 h-5" />}
       >
@@ -785,11 +803,17 @@ function TabDadosPrincipais({
               { value: 1, label: 'Pessoa Jurídica' },
             ]}
           />
-          
+
           <InputModerno
             label={getLabelDocumento(formData.tipo)}
             value={formData.cpfECnpj}
-            onChange={(v) => onChange('cpfECnpj', v)}
+            onChange={(v) => {
+              // Aplica máscara de CPF/CNPJ de acordo com o tipo de pessoa
+              const numeros = limparNumeros(v).slice(0, formData.tipo === 0 ? 11 : 14);
+              // Usa formatação específica baseada no tipo (0=PF/CPF, 1=PJ/CNPJ)
+              const formatado = formData.tipo === 0 ? formatarCPF(numeros) : formatarCNPJ(numeros);
+              onChange('cpfECnpj', formatado);
+            }}
             disabled={isViewMode}
             placeholder={formData.tipo === 0 ? '000.000.000-00' : '00.000.000/0000-00'}
             icone={<Hash className="w-4 h-4" />}
@@ -814,7 +838,7 @@ function TabDadosPrincipais({
               )
             }
           />
-          
+
           <InputModerno
             label={getLabelIdentidade(formData.tipo)}
             value={formData.rgEIe}
@@ -822,7 +846,7 @@ function TabDadosPrincipais({
             disabled={isViewMode}
             icone={<FileText className="w-4 h-4" />}
           />
-          
+
           <InputModerno
             label="Suframa"
             value={formData.codigoDoSuframa}
@@ -831,14 +855,14 @@ function TabDadosPrincipais({
             icone={<Hash className="w-4 h-4" />}
           />
         </div>
-        
+
         {cnpjEncontrado && !isViewMode && (
           <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-xl flex items-center gap-2 text-green-700 text-sm">
             <CheckCircle2 className="w-4 h-4" />
             <span>Dados preenchidos automaticamente a partir do CNPJ</span>
           </div>
         )}
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           <InputModerno
             label="Razão Social / Nome"
@@ -848,7 +872,7 @@ function TabDadosPrincipais({
             required
             icone={<Building2 className="w-4 h-4" />}
           />
-          
+
           <InputModerno
             label="Nome Fantasia"
             value={formData.nomeFantasia}
@@ -860,8 +884,8 @@ function TabDadosPrincipais({
       </SecaoCard>
 
       {/* Endereço */}
-      <SecaoCard 
-        titulo="Endereço" 
+      <SecaoCard
+        titulo="Endereço"
         subtitulo="Localização principal"
         icone={<MapPin className="w-5 h-5" />}
       >
@@ -891,7 +915,7 @@ function TabDadosPrincipais({
               disabled={isViewMode}
             />
           </div>
-          
+
           <div className="md:col-span-4">
             <InputModerno
               label="Bairro"
@@ -904,7 +928,11 @@ function TabDadosPrincipais({
             <InputModerno
               label="CEP"
               value={formData.cep}
-              onChange={(v) => onChange('cep', v)}
+              onChange={(v) => {
+                // Aplica máscara de CEP
+                const numeros = limparNumeros(v).slice(0, 8);
+                onChange('cep', formatarCEP(numeros));
+              }}
               disabled={isViewMode}
               placeholder="00000-000"
               sucesso={cepEncontrado}
@@ -947,7 +975,7 @@ function TabDadosPrincipais({
             />
           </div>
         </div>
-        
+
         {cepEncontrado && (
           <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-xl flex items-center gap-2 text-green-700 text-sm">
             <CheckCircle2 className="w-4 h-4" />
@@ -957,8 +985,8 @@ function TabDadosPrincipais({
       </SecaoCard>
 
       {/* Contato */}
-      <SecaoCard 
-        titulo="Contato" 
+      <SecaoCard
+        titulo="Contato"
         subtitulo="Telefones e meios de comunicação"
         icone={<Phone className="w-5 h-5" />}
       >
@@ -966,33 +994,45 @@ function TabDadosPrincipais({
           <InputModerno
             label="Telefone 1"
             value={formData.fone1}
-            onChange={(v) => onChange('fone1', v)}
+            onChange={(v) => {
+              const numeros = limparNumeros(v).slice(0, 11);
+              onChange('fone1', formatarTelefone(numeros));
+            }}
             disabled={isViewMode}
             icone={<Phone className="w-4 h-4" />}
           />
           <InputModerno
             label="Telefone 2"
             value={formData.fone2}
-            onChange={(v) => onChange('fone2', v)}
+            onChange={(v) => {
+              const numeros = limparNumeros(v).slice(0, 11);
+              onChange('fone2', formatarTelefone(numeros));
+            }}
             disabled={isViewMode}
             icone={<Phone className="w-4 h-4" />}
           />
           <InputModerno
             label="Celular"
             value={formData.celular}
-            onChange={(v) => onChange('celular', v)}
+            onChange={(v) => {
+              const numeros = limparNumeros(v).slice(0, 11);
+              onChange('celular', formatarTelefone(numeros));
+            }}
             disabled={isViewMode}
             icone={<Smartphone className="w-4 h-4" />}
           />
           <InputModerno
             label="Fax"
             value={formData.fax}
-            onChange={(v) => onChange('fax', v)}
+            onChange={(v) => {
+              const numeros = limparNumeros(v).slice(0, 11);
+              onChange('fax', formatarTelefone(numeros));
+            }}
             disabled={isViewMode}
             icone={<Phone className="w-4 h-4" />}
           />
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
           <InputModerno
             label="Nome do Contato"
@@ -1021,8 +1061,8 @@ function TabDadosPrincipais({
 
       {/* Vendedor e Flags */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <SecaoCard 
-          titulo="Vendedor Responsável" 
+        <SecaoCard
+          titulo="Vendedor Responsável"
           icone={<UserCircle className="w-5 h-5" />}
         >
           <div className="space-y-4">
@@ -1049,8 +1089,8 @@ function TabDadosPrincipais({
           </div>
         </SecaoCard>
 
-        <SecaoCard 
-          titulo="Flags Fiscais" 
+        <SecaoCard
+          titulo="Flags Fiscais"
           icone={<FileText className="w-5 h-5" />}
         >
           <div className="grid grid-cols-2 gap-3">
@@ -1077,8 +1117,8 @@ function TabDadosPrincipais({
       </div>
 
       {/* Observações */}
-      <SecaoCard 
-        titulo="Observações" 
+      <SecaoCard
+        titulo="Observações"
         icone={<FileText className="w-5 h-5" />}
       >
         <textarea
@@ -1101,8 +1141,8 @@ function TabCobrancaConta({ formData, onChange, isViewMode }: TabProps) {
   return (
     <div className="space-y-6">
       {/* Endereço de Cobrança */}
-      <SecaoCard 
-        titulo="Endereço de Cobrança" 
+      <SecaoCard
+        titulo="Endereço de Cobrança"
         subtitulo="Endereço alternativo para cobranças"
         icone={<MapPin className="w-5 h-5" />}
       >
@@ -1144,7 +1184,10 @@ function TabCobrancaConta({ formData, onChange, isViewMode }: TabProps) {
             <InputModerno
               label="CEP"
               value={formData.cepDeCobranca}
-              onChange={(v) => onChange('cepDeCobranca', v)}
+              onChange={(v) => {
+                const numeros = limparNumeros(v).slice(0, 8);
+                onChange('cepDeCobranca', formatarCEP(numeros));
+              }}
               disabled={isViewMode}
               placeholder="00000-000"
             />
@@ -1170,8 +1213,8 @@ function TabCobrancaConta({ formData, onChange, isViewMode }: TabProps) {
       </SecaoCard>
 
       {/* Conta Corrente 1 */}
-      <SecaoCard 
-        titulo="Conta Corrente 1" 
+      <SecaoCard
+        titulo="Conta Corrente 1"
         subtitulo="Dados bancários principais"
         icone={<Landmark className="w-5 h-5" />}
       >
@@ -1208,8 +1251,8 @@ function TabCobrancaConta({ formData, onChange, isViewMode }: TabProps) {
       </SecaoCard>
 
       {/* Conta Corrente 2 */}
-      <SecaoCard 
-        titulo="Conta Corrente 2" 
+      <SecaoCard
+        titulo="Conta Corrente 2"
         subtitulo="Dados bancários secundários"
         icone={<Landmark className="w-5 h-5" />}
       >
@@ -1246,8 +1289,8 @@ function TabCobrancaConta({ formData, onChange, isViewMode }: TabProps) {
       </SecaoCard>
 
       {/* Dados Adicionais */}
-      <SecaoCard 
-        titulo="Dados Adicionais" 
+      <SecaoCard
+        titulo="Dados Adicionais"
         subtitulo="Informações complementares"
         icone={<FileText className="w-5 h-5" />}
       >

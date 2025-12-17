@@ -11,9 +11,9 @@ import {
   CheckCircle,
   XCircle,
 } from 'lucide-react';
-import { reboqueService } from '../../../services/reboqueService';
-import type { ReboqueListDto, PagedResult, ReboqueFiltros } from '../../../types/transporte';
-import { TIPOS_CARROCERIA } from '../../../types/transporte';
+import { reboqueService } from '../../../services/Transporte/reboqueService';
+import type { ReboqueListDto, PagedResult, ReboqueFiltros } from '../../../types';
+import { TIPOS_CARROCERIA } from '../../../types';
 import { usePermissaoTela } from '../../../hooks/usePermissaoTela';
 import {
   ModalConfirmacao,

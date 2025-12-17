@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { Search, X, ChevronDown, Loader2, Check, FileText } from 'lucide-react';
-import { classTribService } from '../services/classTribService';
-import type { ClassTribAutocomplete } from '../services/classTribService';
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Search, X, ChevronDown, Loader2, Check, FileText } from "lucide-react";
+import { classTribService } from "../services/Fiscal/classTribService";
+import type { ClassTribAutocomplete } from '../services/Fiscal/classTribService';
 
 interface ClassTribSelectorProps {
   value: number | null;

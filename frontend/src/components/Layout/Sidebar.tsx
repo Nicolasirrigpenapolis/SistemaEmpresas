@@ -319,7 +319,6 @@ export default function Sidebar({ collapsed = false, onCollapse, mobileOpen = fa
                 <span className="text-primary font-display font-bold text-lg leading-tight tracking-tight">
                   {branding.nome || 'Sistema'}
                 </span>
-                <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Enterprise</span>
               </div>
             </div>
           ) : (

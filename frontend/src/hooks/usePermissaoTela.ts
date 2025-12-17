@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import permissoesTelaService from '../services/permissoesTelaService';
-import type { PermissoesUsuarioLogadoDto, PermissaoTelaResumoDto } from '../types/permissoes';
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { useAuth } from "../contexts/AuthContext";
+import permissoesTelaService from "../services/Seguranca/permissoesTelaService";
+import type { PermissoesUsuarioLogadoDto, PermissaoTelaResumoDto } from '../types';
 
 // ==========================================
 // INTERFACE DE RETORNO DO HOOK

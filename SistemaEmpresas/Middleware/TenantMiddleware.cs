@@ -1,4 +1,5 @@
 using SistemaEmpresas.Services;
+using SistemaEmpresas.Services.Tenants;
 
 namespace SistemaEmpresas.Middleware
 {

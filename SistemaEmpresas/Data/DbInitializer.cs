@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SistemaEmpresas.Models;
 using SistemaEmpresas.Services;
+using SistemaEmpresas.Services.Auth;
 
 namespace SistemaEmpresas.Data;
 

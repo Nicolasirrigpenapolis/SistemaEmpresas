@@ -10,12 +10,12 @@ import {
   User,
   Settings,
 } from 'lucide-react';
-import { veiculoService } from '../../../services/veiculoService';
-import type { VeiculoCreateDto } from '../../../types/transporte';
-import { TIPOS_VEICULO, TIPOS_CARROCERIA, UFS_BRASIL } from '../../../types/transporte';
+import { veiculoService } from '../../../services/Transporte/veiculoService';
+import type { VeiculoCreateDto } from '../../../types';
+import { TIPOS_VEICULO, TIPOS_CARROCERIA, UFS_BRASIL } from '../../../types';
 import { usePermissaoTela } from '../../../hooks/usePermissaoTela';
 import { AlertaErro, AlertaSucesso, EstadoCarregando } from '../../../components/common';
-import { mascaraPlaca, formatarDocumento, limparNumeros } from '../../../utils/formatters';
+import { mascaraPlaca, formatarDocumento, limparNumeros, parsePlaca, parseCPFCNPJ } from '../../../utils/formatters';
 
 export default function VeiculoFormPage() {
   const navigate = useNavigate();
@@ -140,11 +140,19 @@ export default function VeiculoFormPage() {
       setSaving(true);
       setError(null);
 
+      // Preparar dados para envio (remover máscaras)
+      const dadosParaEnviar: VeiculoCreateDto = {
+        ...formData,
+        placa: parsePlaca(formData.placa), // Remove hífen da placa
+        placaReboque: formData.placaReboque ? parsePlaca(formData.placaReboque) : '',
+        proprietarioCpfCnpj: parseCPFCNPJ(formData.proprietarioCpfCnpj), // Remove pontos e traços
+      };
+
       if (modo === 'criar') {
-        await veiculoService.criar(formData);
+        await veiculoService.criar(dadosParaEnviar);
         setSuccess('Veículo cadastrado com sucesso!');
       } else {
-        await veiculoService.atualizar(Number(id), formData);
+        await veiculoService.atualizar(Number(id), dadosParaEnviar);
         setSuccess('Veículo atualizado com sucesso!');
       }
 
