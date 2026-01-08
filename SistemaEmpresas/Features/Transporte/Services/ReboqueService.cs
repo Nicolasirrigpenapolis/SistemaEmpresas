@@ -1,17 +1,18 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SistemaEmpresas.Data;
-using SistemaEmpresas.DTOs;
+using SistemaEmpresas.Features.Transporte.Dtos;
+using SistemaEmpresas.Core.Dtos;
 using SistemaEmpresas.Models;
 
-namespace SistemaEmpresas.Services.Transporte;
+namespace SistemaEmpresas.Features.Transporte.Services;
 
 // ==========================================
 // INTERFACE DO SERVICE DE REBOQUES
 // ==========================================
 public interface IReboqueService
 {
-    Task<DTOs.PagedResult<ReboqueListDto>> ListarAsync(ReboqueFiltros? filtros = null);
+    Task<PagedResult<ReboqueListDto>> ListarAsync(ReboqueFiltros? filtros = null);
     Task<ReboqueDto?> ObterPorIdAsync(int id);
     Task<ReboqueDto?> ObterPorPlacaAsync(string placa);
     Task<(bool Sucesso, string Mensagem, int? Id)> CriarAsync(ReboqueCreateUpdateDto dto);
@@ -34,7 +35,7 @@ public class ReboqueService : IReboqueService
         _logger = logger;
     }
 
-    public async Task<DTOs.PagedResult<ReboqueListDto>> ListarAsync(ReboqueFiltros? filtros = null)
+    public async Task<PagedResult<ReboqueListDto>> ListarAsync(ReboqueFiltros? filtros = null)
     {
         var query = _context.Reboques.AsQueryable();
         
@@ -84,7 +85,7 @@ public class ReboqueService : IReboqueService
             })
             .ToListAsync();
             
-        return new DTOs.PagedResult<ReboqueListDto>(items, totalCount, pageNumber, pageSize);
+        return new PagedResult<ReboqueListDto>(items, totalCount, pageNumber, pageSize);
     }
 
     public async Task<ReboqueDto?> ObterPorIdAsync(int id)

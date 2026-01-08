@@ -1,14 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using SistemaEmpresas.Data;
-using SistemaEmpresas.DTOs;
+using SistemaEmpresas.Features.Transporte.Dtos;
 using SistemaEmpresas.Models;
-using SistemaEmpresas.Repositories;
+using SistemaEmpresas.Core.Dtos;
 
-namespace SistemaEmpresas.Services.Transporte;
+namespace SistemaEmpresas.Features.Transporte.Services;
 
 public interface IMotoristaService
 {
-    Task<DTOs.PagedResult<MotoristaListDto>> ListarAsync(MotoristaFiltrosDto filtros);
+    Task<PagedResult<MotoristaListDto>> ListarAsync(MotoristaFiltrosDto filtros);
     Task<List<MotoristaListDto>> ListarAtivosAsync();
     Task<MotoristaDto?> BuscarPorIdAsync(short id);
     Task<MotoristaDto> CriarAsync(MotoristaCreateDto dto);
@@ -25,7 +25,7 @@ public class MotoristaService : IMotoristaService
         _context = context;
     }
 
-    public async Task<DTOs.PagedResult<MotoristaListDto>> ListarAsync(MotoristaFiltrosDto filtros)
+    public async Task<PagedResult<MotoristaListDto>> ListarAsync(MotoristaFiltrosDto filtros)
     {
         var query = _context.Motoristas.AsQueryable();
 
@@ -61,7 +61,7 @@ public class MotoristaService : IMotoristaService
             })
             .ToListAsync();
 
-        return new DTOs.PagedResult<MotoristaListDto>
+        return new PagedResult<MotoristaListDto>
         {
             Items = items,
             TotalCount = total,

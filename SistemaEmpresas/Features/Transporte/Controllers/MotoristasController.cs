@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SistemaEmpresas.DTOs;
+using SistemaEmpresas.Features.Transporte.Dtos;
+using SistemaEmpresas.Features.Transporte.Services;
 using SistemaEmpresas.Services.Logs;
-using SistemaEmpresas.Services.Transporte;
+using SistemaEmpresas.Core.Dtos;
 using System.Security.Claims;
 
-namespace SistemaEmpresas.Controllers.Transporte;
+namespace SistemaEmpresas.Features.Transporte.Controllers;
 
 [ApiController]
 [Route("api/transporte/[controller]")]

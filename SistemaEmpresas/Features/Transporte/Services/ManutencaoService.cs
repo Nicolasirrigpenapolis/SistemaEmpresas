@@ -1,10 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SistemaEmpresas.Data;
-using SistemaEmpresas.DTOs;
+using SistemaEmpresas.Features.Transporte.Dtos;
+using SistemaEmpresas.Core.Dtos;
 using SistemaEmpresas.Models;
 
-namespace SistemaEmpresas.Services.Transporte;
+namespace SistemaEmpresas.Features.Transporte.Services;
 
 // ==========================================
 // INTERFACE DO SERVICE DE MANUTENÇÃO DE VEÍCULOS

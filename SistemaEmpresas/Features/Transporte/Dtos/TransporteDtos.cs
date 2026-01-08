@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace SistemaEmpresas.DTOs;
+namespace SistemaEmpresas.Features.Transporte.Dtos;
 
 // ==========================================
 // VEÍCULO DTOs

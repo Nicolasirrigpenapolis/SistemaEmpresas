@@ -244,24 +244,24 @@ builder.Services.AddScoped<SistemaEmpresas.Services.Fiscal.INFeXmlParserService,
 // ===========================================
 // Módulo de Transporte - Services
 // ===========================================
-builder.Services.AddScoped<SistemaEmpresas.Services.Transporte.IVeiculoService,
-    SistemaEmpresas.Services.Transporte.VeiculoService>();
-builder.Services.AddScoped<SistemaEmpresas.Services.Transporte.IReboqueService,
-    SistemaEmpresas.Services.Transporte.ReboqueService>();
-builder.Services.AddScoped<SistemaEmpresas.Services.Transporte.IViagemService,
-    SistemaEmpresas.Services.Transporte.ViagemService>();
-builder.Services.AddScoped<SistemaEmpresas.Services.Transporte.IDespesaViagemService,
-    SistemaEmpresas.Services.Transporte.DespesaViagemService>();
-builder.Services.AddScoped<SistemaEmpresas.Services.Transporte.IReceitaViagemService,
-    SistemaEmpresas.Services.Transporte.ReceitaViagemService>();
-builder.Services.AddScoped<SistemaEmpresas.Services.Transporte.IManutencaoVeiculoService,
-    SistemaEmpresas.Services.Transporte.ManutencaoVeiculoService>();
-builder.Services.AddScoped<SistemaEmpresas.Services.Transporte.IManutencaoPecaService,
-    SistemaEmpresas.Services.Transporte.ManutencaoPecaService>();
+builder.Services.AddScoped<SistemaEmpresas.Features.Transporte.Services.IVeiculoService,
+    SistemaEmpresas.Features.Transporte.Services.VeiculoService>();
+builder.Services.AddScoped<SistemaEmpresas.Features.Transporte.Services.IReboqueService,
+    SistemaEmpresas.Features.Transporte.Services.ReboqueService>();
+builder.Services.AddScoped<SistemaEmpresas.Features.Transporte.Services.IViagemService,
+    SistemaEmpresas.Features.Transporte.Services.ViagemService>();
+builder.Services.AddScoped<SistemaEmpresas.Features.Transporte.Services.IDespesaViagemService,
+    SistemaEmpresas.Features.Transporte.Services.DespesaViagemService>();
+builder.Services.AddScoped<SistemaEmpresas.Features.Transporte.Services.IReceitaViagemService,
+    SistemaEmpresas.Features.Transporte.Services.ReceitaViagemService>();
+builder.Services.AddScoped<SistemaEmpresas.Features.Transporte.Services.IManutencaoVeiculoService,
+    SistemaEmpresas.Features.Transporte.Services.ManutencaoVeiculoService>();
+builder.Services.AddScoped<SistemaEmpresas.Features.Transporte.Services.IManutencaoPecaService,
+    SistemaEmpresas.Features.Transporte.Services.ManutencaoPecaService>();
 
 // Motorista
-builder.Services.AddScoped<SistemaEmpresas.Services.Transporte.IMotoristaService,
-    SistemaEmpresas.Services.Transporte.MotoristaService>();
+builder.Services.AddScoped<SistemaEmpresas.Features.Transporte.Services.IMotoristaService,
+    SistemaEmpresas.Features.Transporte.Services.MotoristaService>();
 
 // Configuração da Autenticação JWT
 var jwtSecretKey = builder.Configuration["Jwt:SecretKey"] ?? throw new InvalidOperationException("Jwt:SecretKey não configurado");

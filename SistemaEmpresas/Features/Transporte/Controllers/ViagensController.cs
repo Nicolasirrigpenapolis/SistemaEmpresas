@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SistemaEmpresas.DTOs;
-using SistemaEmpresas.Services;
+using SistemaEmpresas.Features.Transporte.Dtos;
+using SistemaEmpresas.Features.Transporte.Services;
 using SistemaEmpresas.Services.Logs;
-using SistemaEmpresas.Services.Transporte;
+using SistemaEmpresas.Core.Dtos;
 using System.Security.Claims;
 
-namespace SistemaEmpresas.Controllers.Transporte;
+namespace SistemaEmpresas.Features.Transporte.Controllers;
 
 [ApiController]
 [Route("api/transporte/[controller]")]
@@ -37,7 +37,7 @@ public class ViagensController : ControllerBase
     /// Lista todas as viagens com paginação e filtros
     /// </summary>
     [HttpGet]
-    public async Task<ActionResult<DTOs.PagedResult<ViagemListDto>>> Listar([FromQuery] ViagemFiltros filtros)
+    public async Task<ActionResult<PagedResult<ViagemListDto>>> Listar([FromQuery] ViagemFiltros filtros)
     {
         try
         {

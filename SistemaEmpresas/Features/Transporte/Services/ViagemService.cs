@@ -1,17 +1,18 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SistemaEmpresas.Data;
-using SistemaEmpresas.DTOs;
+using SistemaEmpresas.Features.Transporte.Dtos;
+using SistemaEmpresas.Core.Dtos;
 using SistemaEmpresas.Models;
 
-namespace SistemaEmpresas.Services.Transporte;
+namespace SistemaEmpresas.Features.Transporte.Services;
 
 // ==========================================
 // INTERFACE DO SERVICE DE VIAGENS
 // ==========================================
 public interface IViagemService
 {
-    Task<DTOs.PagedResult<ViagemListDto>> ListarAsync(ViagemFiltros? filtros = null);
+    Task<PagedResult<ViagemListDto>> ListarAsync(ViagemFiltros? filtros = null);
     Task<List<ViagemListDto>> ListarPorVeiculoAsync(int veiculoId);
     Task<List<ViagemListDto>> ListarPorMotoristaAsync(short motoristaId);
     Task<List<ViagemListDto>> ListarPorPeriodoAsync(DateTime dataInicio, DateTime dataFim);
@@ -35,7 +36,7 @@ public class ViagemService : IViagemService
         _logger = logger;
     }
 
-    public async Task<DTOs.PagedResult<ViagemListDto>> ListarAsync(ViagemFiltros? filtros = null)
+    public async Task<PagedResult<ViagemListDto>> ListarAsync(ViagemFiltros? filtros = null)
     {
         var query = _context.Viagens
             .Include(v => v.Veiculo)
@@ -77,7 +78,7 @@ public class ViagemService : IViagemService
             .Select(v => MapToListDto(v))
             .ToListAsync();
             
-        return new DTOs.PagedResult<ViagemListDto>(items, totalCount, pageNumber, pageSize);
+        return new PagedResult<ViagemListDto>(items, totalCount, pageNumber, pageSize);
     }
 
     public async Task<List<ViagemListDto>> ListarPorVeiculoAsync(int veiculoId)

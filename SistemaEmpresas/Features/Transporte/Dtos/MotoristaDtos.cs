@@ -1,4 +1,4 @@
-namespace SistemaEmpresas.DTOs;
+namespace SistemaEmpresas.Features.Transporte.Dtos;
 
 // DTO para listagem
 public class MotoristaListDto

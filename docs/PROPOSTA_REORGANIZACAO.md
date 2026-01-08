@@ -43,17 +43,15 @@ SistemaEmpresas/
   Migrations/             # manter aqui no inicio
   Middleware/
 
-  Core/                   # cross-cutting
+  Core/                   # cross-cutting (compartilhado entre features)
     Enums/
     Exceptions/
     Extensions/
     Interfaces/
-    Dtos/                 # DTOs compartilhados
-    Validation/
+    Dtos/                 # DTOs compartilhados (PagedResult, etc)
+    Validation/           # Validadores e Sanitizers (antigo Utils)
 
-  Infrastructure/         # detalhes tecnicos
-    Security/
-    Audit/
+  Middleware/             # MANTER COMO ESTA (ja bem organizado)
 
   Features/               # por modulo de negocio
     Auth/
@@ -191,10 +189,10 @@ Tudo novo vai para `features/` e `core/`. Assim a migracao e gradual.
 4. Atualizar DI no Program.cs se necessario.
 5. Compilar e commitar.
 
-### Fase 2 - Core e Infrastructure (1 dia)
-- Mover Utils e Enums para `Core/`.
-- Mover Audit/Security/Middleware especifico para `Infrastructure/`.
-- Manter `Data/` e `Migrations/` no lugar por enquanto.
+### Fase 2 - Core (1 dia)
+- Mover Utils para `Core/Validation/`.
+- Mover Enums para `Core/Enums/`.
+- Middleware permanece onde esta (ja organizado).
 
 ### Fase 3 - Frontend por modulo (0.5 a 1 dia por modulo)
 1. Criar `core/` e `features/`.
