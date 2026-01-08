@@ -617,9 +617,19 @@ public class PermissoesTelaRepository : IPermissoesTelaRepository
             },
             new ModuloComTelasDto
             {
+                Nome = "Estoque",
+                Icone = "Warehouse",
+                Ordem = 3,
+                Telas = new List<TelaDisponivelDto>
+                {
+                    new() { Modulo = "Estoque", Tela = "MovimentoContabil", NomeTela = "Movimento Contábil", Rota = "/estoque/movimento-contabil", Icone = "ClipboardCheck", Ordem = 1 }
+                }
+            },
+            new ModuloComTelasDto
+            {
                 Nome = "Fiscal",
                 Icone = "FileText",
-                Ordem = 3,
+                Ordem = 4,
                 Telas = new List<TelaDisponivelDto>
                 {
                     new() { Modulo = "Fiscal", Tela = "NotaFiscal", NomeTela = "Notas Fiscais", Rota = "/notas-fiscais", Icone = "FileText", Ordem = 1 },
@@ -658,7 +668,7 @@ public class PermissoesTelaRepository : IPermissoesTelaRepository
                 Ordem = 99,
                 Telas = new List<TelaDisponivelDto>
                 {
-                    new() { Modulo = "Sistema", Tela = "DadosEmitente", NomeTela = "Dados do Emitente", Rota = "/emitente", Icone = "Building2", Ordem = 1 },
+                    new() { Modulo = "Sistema", Tela = "DadosEmitente", NomeTela = "Configurações do Sistema", Rota = "/emitente", Icone = "Settings", Ordem = 1 },
                     new() { Modulo = "Sistema", Tela = "Usuarios", NomeTela = "Usuários e Permissões", Rota = "/usuarios", Icone = "Users", Ordem = 2 }
                 }
             }

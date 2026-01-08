@@ -4670,7 +4670,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                         .HasDefaultValue("")
                         .HasColumnName("Home Page");
 
-                    b.Property<bool>("ImportouNoZap")
+                    b.Property<bool>("WhatsAppSincronizado")
                         .HasColumnType("bit")
                         .HasColumnName("Importou no Zap");
 

@@ -14,6 +14,7 @@ interface SeletorComBuscaProps<T> {
   disabled?: boolean;
   loading?: boolean;
   required?: boolean;
+  onSearch?: (term: string) => void;
 }
 
 export function SeletorComBusca<T>({
@@ -29,6 +30,7 @@ export function SeletorComBusca<T>({
   disabled = false,
   loading = false,
   required = false,
+  onSearch,
 }: SeletorComBuscaProps<T>) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -55,9 +57,9 @@ export function SeletorComBusca<T>({
     }
 
     const filtered = sortedItems.filter((item) => {
-      const id = String(getItemId(item));
-      const desc = getItemDescricao(item).toLowerCase();
-      const sec = getItemSecundario ? getItemSecundario(item).toLowerCase() : '';
+      const id = String(getItemId(item) || '');
+      const desc = String(getItemDescricao(item) || '').toLowerCase();
+      const sec = getItemSecundario ? String(getItemSecundario(item) || '').toLowerCase() : '';
       return id.includes(term) || desc.includes(term) || sec.includes(term);
     });
     setFilteredItems(filtered);
@@ -97,11 +99,13 @@ export function SeletorComBusca<T>({
     e.stopPropagation();
     onSelect(0, '');
     setSearchTerm('');
+    if (onSearch) onSearch('');
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setSearchTerm(newValue);
+    if (onSearch) onSearch(newValue);
     if (!isDropdownOpen && newValue) {
       setIsDropdownOpen(true);
     }
@@ -306,18 +310,18 @@ export function SeletorComBusca<T>({
         <>
           {/* Backdrop */}
           <div
-            className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm"
             onClick={() => setIsModalOpen(false)}
           />
 
           {/* Modal */}
-          <div className="fixed inset-4 md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-2xl z-50 bg-white rounded-xl shadow-2xl flex flex-col max-h-[90vh] md:max-h-[600px]">
+          <div className="fixed inset-4 md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-2xl z-[101] bg-white rounded-xl shadow-2xl flex flex-col max-h-[90vh] md:max-h-[600px]">
             {/* Header */}
             <div className="p-4 border-b border-gray-200">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                   <Search className="w-5 h-5 text-blue-600" />
-                  Buscar {label}
+                  {label.startsWith('Buscar') ? label : `Buscar ${label}`}
                 </h3>
                 <button
                   onClick={() => setIsModalOpen(false)}
@@ -333,14 +337,21 @@ export function SeletorComBusca<T>({
                 <input
                   type="text"
                   value={modalSearchTerm}
-                  onChange={(e) => setModalSearchTerm(e.target.value)}
+                  onChange={(e) => {
+                    const newValue = e.target.value;
+                    setModalSearchTerm(newValue);
+                    if (onSearch) onSearch(newValue);
+                  }}
                   placeholder="Digite código ou descrição..."
                   autoFocus
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm"
                 />
                 {modalSearchTerm && (
                   <button
-                    onClick={() => setModalSearchTerm('')}
+                    onClick={() => {
+                      setModalSearchTerm('');
+                      if (onSearch) onSearch('');
+                    }}
                     className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded"
                   >
                     <X className="w-4 h-4 text-gray-400" />
@@ -373,14 +384,14 @@ export function SeletorComBusca<T>({
                 <table className="w-full">
                   <thead className="bg-gray-50 sticky top-0">
                     <tr>
-                      <th className="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-20">
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-20 align-middle">
                         Código
                       </th>
-                      <th className="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider align-middle">
                         Descrição
                       </th>
                       {getItemSecundario && (
-                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-32">
+                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-32 align-middle">
                           Info
                         </th>
                       )}
@@ -399,28 +410,17 @@ export function SeletorComBusca<T>({
                           onClick={() => handleSelect(item)}
                           className={`
                             cursor-pointer transition-colors
-                            ${isSelected 
-                              ? 'bg-blue-50 hover:bg-blue-100' 
-                              : 'hover:bg-gray-50'
-                            }
+                            ${isSelected ? 'bg-blue-50' : 'hover:bg-gray-50'}
                           `}
                         >
-                          <td className="px-4 py-3">
-                            <span className={`
-                              inline-flex items-center justify-center min-w-[2.5rem] px-2 py-1 rounded text-sm font-semibold
-                              ${isSelected 
-                                ? 'bg-blue-600 text-white' 
-                                : 'bg-gray-100 text-gray-700'
-                              }
-                            `}>
-                              {itemId}
-                            </span>
+                          <td className="px-4 py-2 text-sm font-mono text-blue-600 font-bold align-middle">
+                            #{itemId}
                           </td>
-                          <td className={`px-4 py-3 text-sm ${isSelected ? 'font-medium text-blue-900' : 'text-gray-900'}`}>
+                          <td className="px-4 py-2 text-sm text-gray-900 align-middle">
                             {itemDesc}
                           </td>
                           {getItemSecundario && (
-                            <td className="px-4 py-3 text-sm text-gray-500">
+                            <td className="px-4 py-2 text-sm text-gray-500 align-middle">
                               {itemSec}
                             </td>
                           )}

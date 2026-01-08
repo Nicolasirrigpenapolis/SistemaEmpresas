@@ -37,7 +37,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                         .HasDefaultValue("")
                         .HasColumnName("Descrição da Ação");
 
-                    b.ToTable("Acoes");
+                    b.ToTable("Acoes", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.AdicaoDaDeclaracao", b =>
@@ -79,7 +79,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "SequenciaDaDeclaracao", "NumeroDaAdicao" }, "Seq Declaração e Número Adição"), 90);
 
-                    b.ToTable("Adições da Declaração");
+                    b.ToTable("Adições da Declaração", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Adutora", b =>
@@ -130,7 +130,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDaAdutora")
                         .HasName("Sequencia da Adutora");
 
-                    b.ToTable("Adutoras");
+                    b.ToTable("Adutoras", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Advogado", b =>
@@ -162,7 +162,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("CodigoDoAdvogado")
                         .HasName("Codigo do Advogado");
 
-                    b.ToTable("Advogados");
+                    b.ToTable("Advogados", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Agencia", b =>
@@ -273,7 +273,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDaAgencia")
                         .HasName("Seqüência da Agência");
 
-                    b.ToTable("Agencias");
+                    b.ToTable("Agencias", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.AgendamentoDeBackup", b =>
@@ -337,7 +337,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "Hora" }, "Hora"), 90);
 
-                    b.ToTable("Agendamento de Backup");
+                    b.ToTable("Agendamento de Backup", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.AlteracaoBaixaConta", b =>
@@ -414,7 +414,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                         .HasColumnType("decimal(11, 2)")
                         .HasColumnName("Vr Pago");
 
-                    b.ToTable("Alteracao Baixa Contas");
+                    b.ToTable("Alteracao Baixa Contas", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.AspersorFinal", b =>
@@ -480,7 +480,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDoAspersor")
                         .HasName("Sequencia do Aspersor");
 
-                    b.ToTable("Aspersor Final");
+                    b.ToTable("Aspersor Final", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.BaixaComissaoLote", b =>
@@ -521,7 +521,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SeqDaBx")
                         .HasName("Seq da Bx");
 
-                    b.ToTable("Baixa Comissão Lote");
+                    b.ToTable("Baixa Comissão Lote", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.BaixaComissaoLoteConta", b =>
@@ -570,7 +570,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("IdDaBaixa", "IdDoAdiantamento")
                         .HasName("Id da Baixa");
 
-                    b.ToTable("Baixa Comissão Lote Contas");
+                    b.ToTable("Baixa Comissão Lote Contas", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.BaixaConta", b =>
@@ -725,7 +725,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SeqüênciaDaAgência", "SeqüênciaDaCcDaAgência");
 
-                    b.ToTable("Baixa Contas");
+                    b.ToTable("Baixa Contas", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.BaixaDoEstoqueContabil", b =>
@@ -887,7 +887,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "SequenciaDoMovimento", "SequenciaDoItem", "SequenciaDaBaixa" }, "Seq Mvto Seq Bx e Seq Item"), 90);
 
-                    b.ToTable("Baixa Industrialização");
+                    b.ToTable("Baixa Industrialização", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.BaixaMpConjunto", b =>
@@ -938,7 +938,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDaBaixa")
                         .HasName("Seq Baixa MP Conj");
 
-                    b.ToTable("Baixa MP Conjunto");
+                    b.ToTable("Baixa MP Conjunto", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.BaixaMpProduto", b =>
@@ -993,7 +993,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoProduto");
 
-                    b.ToTable("Baixa MP Produto");
+                    b.ToTable("Baixa MP Produto", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.BocalAspersorNelson", b =>
@@ -1061,7 +1061,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDoBocal")
                         .HasName("Sequencia do Bocal");
 
-                    b.ToTable("Bocal Aspersor Nelson");
+                    b.ToTable("Bocal Aspersor Nelson", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.BxConsumoPedidoCompra", b =>
@@ -1113,7 +1113,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("IdDoPedido", "IdDespesa")
                         .HasName("Bx Consumo");
 
-                    b.ToTable("Bx Consumo Pedido Compra");
+                    b.ToTable("Bx Consumo Pedido Compra", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.BxDespesaPedidoCompra", b =>
@@ -1161,7 +1161,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("IdDoPedido", "IdDaDespesa")
                         .HasName("Bx Despesa");
 
-                    b.ToTable("Bx Despesas Pedido Compra");
+                    b.ToTable("Bx Despesas Pedido Compra", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.BxProdutoPedidoCompra", b =>
@@ -1221,7 +1221,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("IdDoPedido", "IdDoProduto", "SequenciaDoItem")
                         .HasName("Bx Produto");
 
-                    b.ToTable("Bx Produtos Pedido Compra");
+                    b.ToTable("Bx Produtos Pedido Compra", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Calendario", b =>
@@ -1254,7 +1254,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "DtaDoFeriado" }, "Dta do Feriado"), 90);
 
-                    b.ToTable("Calendario");
+                    b.ToTable("Calendario", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.CancelamentoNfe", b =>
@@ -1293,7 +1293,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "SequenciaDaNotaFiscal" }, "Seq NF"), 90);
 
-                    b.ToTable("Cancelamento NFe");
+                    b.ToTable("Cancelamento NFe", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.CartaDeCorrecaoNfe", b =>
@@ -1332,7 +1332,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "SequenciaDaNotaFiscal", "NumeroDaCorrecao" }, "Seq NF e Num Cor"), 90);
 
-                    b.ToTable("Carta de Correção NFe");
+                    b.ToTable("Carta de Correção NFe", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.CheckListMaquina", b =>
@@ -1364,7 +1364,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDoProduto", "SequenciaDoItem")
                         .HasName("Seq_e_itemcheck");
 
-                    b.ToTable("Check list maquina");
+                    b.ToTable("Check list maquina", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ChequeCancelado", b =>
@@ -1409,7 +1409,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("Sequencia")
                         .HasName("Sequencia do Cheque");
 
-                    b.ToTable("Cheques Cancelados");
+                    b.ToTable("Cheques Cancelados", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ClassTrib", b =>
@@ -1500,7 +1500,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("CodigoSituacaoTributaria");
 
-                    b.ToTable("ClassTrib");
+                    b.ToTable("ClassTrib", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ClassificacaoFiscal", b =>
@@ -1582,7 +1582,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("ClassTribId");
 
-                    b.ToTable("Classificação Fiscal");
+                    b.ToTable("Classificação Fiscal", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ClienteProcesso", b =>
@@ -1609,7 +1609,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("CodigoDoCliente")
                         .HasName("Codigo do Cliente");
 
-                    b.ToTable("Clientes Processos");
+                    b.ToTable("Clientes Processos", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.CobrarFornecedor", b =>
@@ -1661,7 +1661,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("CodigoDaCobranca")
                         .HasName("Codigo da Cobrança");
 
-                    b.ToTable("Cobrar Fornecedor");
+                    b.ToTable("Cobrar Fornecedor", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Comissao", b =>
@@ -1696,7 +1696,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "SequenciaDaNotaFiscal" }, "Seq NF Comissao"), 90);
 
-                    b.ToTable("Comissao");
+                    b.ToTable("Comissao", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ComissaoDoMontador", b =>
@@ -1740,7 +1740,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDaComissao")
                         .HasName("Sequencia da comissão");
 
-                    b.ToTable("Comissão do montador");
+                    b.ToTable("Comissão do montador", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ComposicaoDoEquipamento", b =>
@@ -1773,7 +1773,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDoProjeto", "SequenciaDoItem")
                         .HasName("SeqProjeto_item");
 
-                    b.ToTable("Composição do Equipamento");
+                    b.ToTable("Composição do Equipamento", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ConciliaContaAntecipadum", b =>
@@ -1812,7 +1812,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDaConciliacao")
                         .HasName("Sequencia da Conciliação");
 
-                    b.ToTable("Concilia Conta Antecipada");
+                    b.ToTable("Concilia Conta Antecipada", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ConciliacaoDeCheque", b =>
@@ -1853,7 +1853,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SeqDaConciliacao")
                         .HasName("Seq da Conciliação");
 
-                    b.ToTable("Conciliação de Cheques");
+                    b.ToTable("Conciliação de Cheques", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ConfiguracaoIntegracao", b =>
@@ -1890,7 +1890,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasIndex(new[] { "Chave" }, "UK_ConfiguracaoIntegracao_Chave")
                         .IsUnique();
 
-                    b.ToTable("ConfiguracaoIntegracao");
+                    b.ToTable("ConfiguracaoIntegracao", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Conjunto", b =>
@@ -2042,7 +2042,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoSubGrupoProduto", "SequenciaDoGrupoProduto");
 
-                    b.ToTable("Conjuntos");
+                    b.ToTable("Conjuntos", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ConjuntoDaNotaFiscal", b =>
@@ -2173,7 +2173,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoConjunto");
 
-                    b.ToTable("Conjuntos da Nota Fiscal");
+                    b.ToTable("Conjuntos da Nota Fiscal", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ConjuntoDaOrdemDeServico", b =>
@@ -2268,7 +2268,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoConjunto");
 
-                    b.ToTable("Conjuntos da Ordem de Serviço");
+                    b.ToTable("Conjuntos da Ordem de Serviço", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ConjuntoDoMovimentoEstoque", b =>
@@ -2363,7 +2363,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoConjunto");
 
-                    b.ToTable("Conjuntos do Movimento Estoque");
+                    b.ToTable("Conjuntos do Movimento Estoque", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ConjuntoDoOrcamento", b =>
@@ -2502,7 +2502,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoConjunto");
 
-                    b.ToTable("Conjuntos do Orçamento");
+                    b.ToTable("Conjuntos do Orçamento", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ConjuntoDoPedido", b =>
@@ -2601,7 +2601,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoConjunto");
 
-                    b.ToTable("Conjuntos do Pedido");
+                    b.ToTable("Conjuntos do Pedido", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ConjuntoDoProjeto", b =>
@@ -2645,7 +2645,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDoProjeto", "SequenciaDoItem")
                         .HasName("Seq_e_Conjunto");
 
-                    b.ToTable("Conjuntos do Projeto");
+                    b.ToTable("Conjuntos do Projeto", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ConjuntoMovimentoContabil", b =>
@@ -2709,7 +2709,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoConjunto");
 
-                    b.ToTable("Conjuntos Movimento Contábil");
+                    b.ToTable("Conjuntos Movimento Contábil", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ConjuntoMvtoContabilNovo", b =>
@@ -2773,7 +2773,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoConjunto");
 
-                    b.ToTable("Conjuntos Mvto Contábil Novo");
+                    b.ToTable("Conjuntos Mvto Contábil Novo", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ConsultaNotaDestinadum", b =>
@@ -2832,7 +2832,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDaConsulta")
                         .HasName("Seqüência da Consulta");
 
-                    b.ToTable("Consulta Notas Destinada");
+                    b.ToTable("Consulta Notas Destinada", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ConsumoDoPedidoCompra", b =>
@@ -2881,7 +2881,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("IdDaDespesa");
 
-                    b.ToTable("Consumo do Pedido Compra");
+                    b.ToTable("Consumo do Pedido Compra", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ContaContabil", b =>
@@ -2922,7 +2922,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "ContaContabil1" }, "Conta_Contab"), 90);
 
-                    b.ToTable("Conta Contabil");
+                    b.ToTable("Conta Contabil", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ContaCorrenteDaAgencium", b =>
@@ -3003,7 +3003,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "NumeroDaContaCorrente", "SequenciaDaAgencia" }, "Número da Conta Corrente"), 90);
 
-                    b.ToTable("Conta Corrente da Agência");
+                    b.ToTable("Conta Corrente da Agência", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ContaDoVendedor", b =>
@@ -3060,7 +3060,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("IdDaConta")
                         .HasName("Id da Conta");
 
-                    b.ToTable("Conta do Vendedor");
+                    b.ToTable("Conta do Vendedor", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ControleDeCompra", b =>
@@ -3157,7 +3157,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "IdDoPedido", "SequenciaDoItem" }, "Id_e_Seq_Compra"), 90);
 
-                    b.ToTable("Controle de Compras");
+                    b.ToTable("Controle de Compras", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ControleDeGarantium", b =>
@@ -3193,7 +3193,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDoControle")
                         .HasName("Sequencia do Controle");
 
-                    b.ToTable("Controle de Garantia");
+                    b.ToTable("Controle de Garantia", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ControleDePneu", b =>
@@ -3234,7 +3234,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDoProjeto", "SequenciaDoPneu")
                         .HasName("Projeto_Pneu");
 
-                    b.ToTable("Controle de Pneus");
+                    b.ToTable("Controle de Pneus", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ControleDeProcesso", b =>
@@ -3269,7 +3269,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("CodigoDoStatus");
 
-                    b.ToTable("Controle de Processos");
+                    b.ToTable("Controle de Processos", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.CorrecaoBloko", b =>
@@ -3288,7 +3288,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDaCorrecao")
                         .HasName("Sequencia da Correção");
 
-                    b.ToTable("Correcao Bloko K");
+                    b.ToTable("Correcao Bloko K", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.DadoAdicionai", b =>
@@ -3310,7 +3310,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDosDadosAdicionais")
                         .HasName("Seqüência dos Dados Adicionais");
 
-                    b.ToTable("Dados Adicionais");
+                    b.ToTable("Dados Adicionais", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.DeclaracaoDeImportacao", b =>
@@ -3387,7 +3387,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "SequenciaDaNotaFiscal", "SequenciaProdutoNotaFiscal" }, "Seq NF e Seq Prod NF"), 90);
 
-                    b.ToTable("Declarações de Importação");
+                    b.ToTable("Declarações de Importação", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Despesa", b =>
@@ -3512,7 +3512,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SeqüênciaSubGrupoDespesa", "SeqüênciaGrupoDespesa");
 
-                    b.ToTable("Despesas");
+                    b.ToTable("Despesas", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.DespesaDaLicitacao", b =>
@@ -3561,7 +3561,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDaDespesa");
 
-                    b.ToTable("Despesas da Licitação");
+                    b.ToTable("Despesas da Licitação", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.DespesaDoMovimentoContabil", b =>
@@ -3625,7 +3625,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDaDespesa");
 
-                    b.ToTable("Despesas do Movimento Contábil");
+                    b.ToTable("Despesas do Movimento Contábil", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.DespesaDoMovimentoEstoque", b =>
@@ -3678,7 +3678,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDaDespesa");
 
-                    b.ToTable("Despesas do Movimento Estoque");
+                    b.ToTable("Despesas do Movimento Estoque", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.DespesaDoNovoPedido", b =>
@@ -3727,7 +3727,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDaDespesa");
 
-                    b.ToTable("Despesas do Novo Pedido");
+                    b.ToTable("Despesas do Novo Pedido", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.DespesaDoPedidoCompra", b =>
@@ -3772,7 +3772,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("IdDaDespesa");
 
-                    b.ToTable("Despesas do Pedido Compra");
+                    b.ToTable("Despesas do Pedido Compra", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.DespesaEVenda", b =>
@@ -3816,7 +3816,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDaSimulacao")
                         .HasName("Seq_simula");
 
-                    b.ToTable("Despesas e vendas");
+                    b.ToTable("Despesas e vendas", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.DespesaMvtoContabilNovo", b =>
@@ -3888,7 +3888,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDaDespesa");
 
-                    b.ToTable("Despesas Mvto Contábil Novo");
+                    b.ToTable("Despesas Mvto Contábil Novo", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.DivirgenciaNfe", b =>
@@ -3924,7 +3924,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("CodigoDaDivirgencia")
                         .HasName("Codigo da Divirgencia");
 
-                    b.ToTable("Divirgencias NFe");
+                    b.ToTable("Divirgencias NFe", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.DuplicataDescontada", b =>
@@ -3983,7 +3983,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SeqDaDuplicata")
                         .HasName("Seq da Duplicata");
 
-                    b.ToTable("Duplicatas Descontadas");
+                    b.ToTable("Duplicatas Descontadas", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Emitente", b =>
@@ -4301,7 +4301,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SeqüênciaSubGrupoDespesa", "SeqüênciaGrupoDespesa");
 
-                    b.ToTable("Entrada Contas");
+                    b.ToTable("Entrada Contas", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.FinalidadeNfe", b =>
@@ -4323,7 +4323,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("Codigo")
                         .HasName("Codigo");
 
-                    b.ToTable("Finalidade NFe");
+                    b.ToTable("Finalidade NFe", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.FollowUpVenda", b =>
@@ -4417,7 +4417,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SeqFollowUp")
                         .HasName("Seq Follow Up");
 
-                    b.ToTable("Follow Up Vendas");
+                    b.ToTable("Follow Up Vendas", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Geral", b =>
@@ -4667,7 +4667,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                         .HasDefaultValue("")
                         .HasColumnName("Home Page");
 
-                    b.Property<bool>("ImportouNoZap")
+                    b.Property<bool>("WhatsAppSincronizado")
                         .HasColumnType("bit")
                         .HasColumnName("Importou no Zap");
 
@@ -4833,7 +4833,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaMunicipioCobranca");
 
-                    b.ToTable("Geral");
+                    b.ToTable("Geral", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.GrupoDaDespesa", b =>
@@ -4859,7 +4859,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaGrupoDespesa")
                         .HasName("Seqüência Grupo Despesa");
 
-                    b.ToTable("Grupo da Despesa");
+                    b.ToTable("Grupo da Despesa", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.GrupoDoProduto", b =>
@@ -4886,7 +4886,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDoGrupoProduto")
                         .HasName("Seqüência do Grupo Produto");
 
-                    b.ToTable("Grupo do Produto");
+                    b.ToTable("Grupo do Produto", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.GrupoUsuario", b =>
@@ -4978,7 +4978,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SeqDoHidroturbo")
                         .HasName("Seq_hidro_ven");
 
-                    b.ToTable("Hidroturbos Vendidos");
+                    b.ToTable("Hidroturbos Vendidos", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.HistoricoContabil", b =>
@@ -5004,7 +5004,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("CodigoDoHistorico")
                         .HasName("Codigo do Historico");
 
-                    b.ToTable("Historico Contabil");
+                    b.ToTable("Historico Contabil", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.HistoricoDaContaCorrente", b =>
@@ -5027,7 +5027,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDoHistorico")
                         .HasName("Seqüência do Histórico");
 
-                    b.ToTable("Histórico da Conta Corrente");
+                    b.ToTable("Histórico da Conta Corrente", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Icm", b =>
@@ -5068,7 +5068,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "Uf" }, "UF do ICMS"), 90);
 
-                    b.ToTable("ICMS");
+                    b.ToTable("ICMS", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Importacao", b =>
@@ -5221,7 +5221,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                         .HasColumnType("int")
                         .HasColumnName("Último Vendedor");
 
-                    b.ToTable("Importação");
+                    b.ToTable("Importação", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ImportacaoConjuntoEstoque", b =>
@@ -5247,7 +5247,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaImportacaoEstoque", "SequenciaImportacaoItem")
                         .HasName("Seq Importação Estoque Seq Con");
 
-                    b.ToTable("Importação Conjuntos Estoque");
+                    b.ToTable("Importação Conjuntos Estoque", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ImportacaoEstoque", b =>
@@ -5270,7 +5270,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaImportacaoEstoque")
                         .HasName("Seqüência Importação Estoque");
 
-                    b.ToTable("Importação Estoque");
+                    b.ToTable("Importação Estoque", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ImportacaoProdutoEstoque", b =>
@@ -5298,7 +5298,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoProduto");
 
-                    b.ToTable("Importação Produtos Estoque");
+                    b.ToTable("Importação Produtos Estoque", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.InutilizacaoNfe", b =>
@@ -5339,7 +5339,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDaInutilizacao")
                         .HasName("Seqüência da Inutilização");
 
-                    b.ToTable("Inutilização NFe");
+                    b.ToTable("Inutilização NFe", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.InventarioPdf", b =>
@@ -5397,7 +5397,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("CodigoDoPdf")
                         .HasName("Codigo do Pdf");
 
-                    b.ToTable("Inventario Pdf");
+                    b.ToTable("Inventario Pdf", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ItenDaCorrecao", b =>
@@ -5425,7 +5425,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDaCorrecao", "SequenciaDoProduto")
                         .HasName("SeqCorrecao_Item");
 
-                    b.ToTable("Itens da Correcao");
+                    b.ToTable("Itens da Correcao", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ItenDaLicitacao", b =>
@@ -5493,7 +5493,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("Produto");
 
-                    b.ToTable("Itens da Licitacao");
+                    b.ToTable("Itens da Licitacao", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ItenDaOrdem", b =>
@@ -5532,7 +5532,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("IdDaOrdem", "SequenciaDoItem")
                         .HasName("Id da Ordem");
 
-                    b.ToTable("Itens da Ordem");
+                    b.ToTable("Itens da Ordem", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ItenDaProducao", b =>
@@ -5690,7 +5690,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDaProducao", "SequenciaDoItem")
                         .HasName("seq_e_item_producao");
 
-                    b.ToTable("Itens da Produção");
+                    b.ToTable("Itens da Produção", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ItenDaRequisicao", b =>
@@ -5736,7 +5736,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDaRequisicao", "SequenciaProdutoRequisicao")
                         .HasName("Seq Req e Seq Prod Requisição");
 
-                    b.ToTable("Itens da Requisição");
+                    b.ToTable("Itens da Requisição", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ItenDaViagem", b =>
@@ -5765,7 +5765,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SeqDaViagem", "SequenciaDoItem")
                         .HasName("Seq_e_Item_Viagem");
 
-                    b.ToTable("Itens da Viagem");
+                    b.ToTable("Itens da Viagem", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ItenDoConjunto", b =>
@@ -5795,7 +5795,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoProduto");
 
-                    b.ToTable("Itens do Conjunto");
+                    b.ToTable("Itens do Conjunto", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ItenPendente", b =>
@@ -5841,7 +5841,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDoOrcamento", "SequenciaDoItem")
                         .HasName("Seq_orcc_e_item");
 
-                    b.ToTable("Itens pendentes");
+                    b.ToTable("Itens pendentes", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ItenSaidaBalcao", b =>
@@ -5871,7 +5871,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDaSaida", "SequenciaDoItem")
                         .HasName("Seq_B_Item");
 
-                    b.ToTable("Itens Saidas Balcao");
+                    b.ToTable("Itens Saidas Balcao", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.IvaFromUf", b =>
@@ -5907,7 +5907,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("IdMva", "Uf", "Ncm")
                         .HasName("ID MVA");
 
-                    b.ToTable("IVA From UFs");
+                    b.ToTable("IVA From UFs", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.LancamentoBancarioBb", b =>
@@ -6017,7 +6017,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex(new[] { "Processado" }, "IX_LancamentoBB_Processado");
 
-                    b.ToTable("LancamentoBancarioBB");
+                    b.ToTable("LancamentoBancarioBB", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.LancamentoContabil", b =>
@@ -6077,7 +6077,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("IdDoLancamento")
                         .HasName("Id do Lançamento");
 
-                    b.ToTable("Lançamentos Contabil");
+                    b.ToTable("Lançamentos Contabil", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.LanceDoPivo", b =>
@@ -6153,7 +6153,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("ModeloDoLance", "DescricaoDoLance")
                         .HasName("Modelo do Lance");
 
-                    b.ToTable("Lances do Pivo");
+                    b.ToTable("Lances do Pivo", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Licitacao", b =>
@@ -6310,7 +6310,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDaLicitacao")
                         .HasName("Sequencia da Licitacao");
 
-                    b.ToTable("Licitacao");
+                    b.ToTable("Licitacao", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.LinhaDeProducao", b =>
@@ -6370,7 +6370,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("CodigoDoSetor");
 
-                    b.ToTable("Linha de Produção");
+                    b.ToTable("Linha de Produção", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.LogAuditoria", b =>
@@ -6557,7 +6557,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex(new[] { "Nivel" }, "IX_LogIntegracao_Nivel");
 
-                    b.ToTable("LogProcessamentoIntegracao");
+                    b.ToTable("LogProcessamentoIntegracao", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ManutencaoConta", b =>
@@ -6786,7 +6786,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SeqüênciaSubGrupoDespesa", "SeqüênciaGrupoDespesa");
 
-                    b.ToTable("Manutenção Contas");
+                    b.ToTable("Manutenção Contas", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ManutencaoHidroturbo", b =>
@@ -6815,7 +6815,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SeqDoHidroturbo", "SequenciaDoItem")
                         .HasName("SeqH_e_Item");
 
-                    b.ToTable("Manutenção Hidroturbo");
+                    b.ToTable("Manutenção Hidroturbo", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ManutencaoPivo", b =>
@@ -6844,7 +6844,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SeqDoPivo", "SequenciaDoItem")
                         .HasName("SeqPivo_e_Item");
 
-                    b.ToTable("Manutenção Pivo");
+                    b.ToTable("Manutenção Pivo", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.MapaDaVazao", b =>
@@ -6888,7 +6888,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDoProjeto", "SequenciaDoItem")
                         .HasName("Projeto_Vazao");
 
-                    b.ToTable("Mapa da Vazao");
+                    b.ToTable("Mapa da Vazao", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.MateriaPrima", b =>
@@ -6910,7 +6910,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoProduto");
 
-                    b.ToTable("Matéria Prima");
+                    b.ToTable("Matéria Prima", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.MateriaPrimaOrcamento", b =>
@@ -6967,7 +6967,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDaExpedicao")
                         .HasName("Seqexpedicao");
 
-                    b.ToTable("Materia prima orçamento");
+                    b.ToTable("Materia prima orçamento", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.MaterialExpedicao", b =>
@@ -7017,7 +7017,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDaExpedicao")
                         .HasName("Sequencia da Expedição");
 
-                    b.ToTable("Material Expedição");
+                    b.ToTable("Material Expedição", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Motorista", b =>
@@ -7121,7 +7121,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("CodigoDoMotorista")
                         .HasName("Codigo do Motorista");
 
-                    b.ToTable("Motoristas");
+                    b.ToTable("Motoristas", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.MovimentacaoDaContaCorrente", b =>
@@ -7250,7 +7250,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SeqüênciaDaAgência", "SeqüênciaDaCcDaAgência");
 
-                    b.ToTable("Movimentação da Conta Corrente");
+                    b.ToTable("Movimentação da Conta Corrente", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.MovimentoContabilNovo", b =>
@@ -7394,7 +7394,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDoMovimento")
                         .HasName("Seq Mvto Contabil Novo");
 
-                    b.ToTable("Movimento Contábil Novo");
+                    b.ToTable("Movimento Contábil Novo", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.MovimentoDoEstoque", b =>
@@ -7603,7 +7603,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SeqüênciaSubGrupoDespesa", "SeqüênciaGrupoDespesa");
 
-                    b.ToTable("Movimento do Estoque");
+                    b.ToTable("Movimento do Estoque", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.MovimentoDoEstoqueContabil", b =>
@@ -7653,7 +7653,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoGeral");
 
-                    b.ToTable("Movimento do Estoque Contábil");
+                    b.ToTable("Movimento do Estoque Contábil", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Municipio", b =>
@@ -7742,7 +7742,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDaRevenda", "SequenciaDoItem", "IdDaConta")
                         .HasName("Seq_e_Revendedor");
 
-                    b.ToTable("Municipios dos Revendedores");
+                    b.ToTable("Municipios dos Revendedores", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Mva", b =>
@@ -7766,7 +7766,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("IdMva", "Uf")
                         .HasName("ID_UF");
 
-                    b.ToTable("MVA");
+                    b.ToTable("MVA", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.MvtoContaDoVendedor", b =>
@@ -7806,7 +7806,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("IdDoMovimento")
                         .HasName("Id do Movimento");
 
-                    b.ToTable("Mvto Conta do Vendedor");
+                    b.ToTable("Mvto Conta do Vendedor", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.NaturezaDeOperacao", b =>
@@ -7837,7 +7837,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDaNatureza")
                         .HasName("Seqüência da Natureza");
 
-                    b.ToTable("Natureza de Operação");
+                    b.ToTable("Natureza de Operação", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.NotaAutorizada", b =>
@@ -7868,7 +7868,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "SequenciaDaNotaFiscal" }, "Seq NF Notas"), 90);
 
-                    b.ToTable("Notas Autorizadas");
+                    b.ToTable("Notas Autorizadas", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.NotaFiscal", b =>
@@ -8373,7 +8373,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoVendedor");
 
-                    b.ToTable("Nota Fiscal");
+                    b.ToTable("Nota Fiscal", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.NovaLicitacao", b =>
@@ -8527,7 +8527,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoFornecedor");
 
-                    b.ToTable("Nova Licitação");
+                    b.ToTable("Nova Licitação", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.OcorrenciaGarantium", b =>
@@ -8588,7 +8588,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDoControle", "SequenciaDoItem")
                         .HasName("Seq_Prod_Controle");
 
-                    b.ToTable("Ocorrencias Garantia");
+                    b.ToTable("Ocorrencias Garantia", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Orcamento", b =>
@@ -9333,7 +9333,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "NumeroDaProforma" }, "Número da Proforma"), 90);
 
-                    b.ToTable("Orçamento");
+                    b.ToTable("Orçamento", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.OrcamentoDaCompra", b =>
@@ -9353,7 +9353,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("IdDoPedido", "SequenciaDoItem")
                         .HasName("Id_orc");
 
-                    b.ToTable("Orçamentos da compra");
+                    b.ToTable("Orçamentos da compra", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.OrdemDeMontagem", b =>
@@ -9438,7 +9438,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDaMontagem")
                         .HasName("Sequencia da Montagem");
 
-                    b.ToTable("Ordem de Montagem");
+                    b.ToTable("Ordem de Montagem", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.OrdemDeServico", b =>
@@ -9806,7 +9806,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoVendedor");
 
-                    b.ToTable("Ordem de Serviço");
+                    b.ToTable("Ordem de Serviço", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Paise", b =>
@@ -9836,7 +9836,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDoPais")
                         .HasName("Seqüência do País");
 
-                    b.ToTable("Paises");
+                    b.ToTable("Paises", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Parametro", b =>
@@ -9904,7 +9904,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                         .HasDefaultValue("")
                         .HasColumnName("Nome do Servidor");
 
-                    b.ToTable("Parametros");
+                    b.ToTable("Parametros", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ParametroDaContabilidade", b =>
@@ -9922,7 +9922,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                         .HasDefaultValue("")
                         .HasColumnName("Trimestre Contábil");
 
-                    b.ToTable("Parâmetros da Contabilidade");
+                    b.ToTable("Parâmetros da Contabilidade", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ParametroDaNfe", b =>
@@ -10051,7 +10051,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                         .HasDefaultValue("")
                         .HasColumnName("Testemunha 2");
 
-                    b.ToTable("Parâmetros da NFe");
+                    b.ToTable("Parâmetros da NFe", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ParametroDoProduto", b =>
@@ -10076,7 +10076,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                         .HasColumnType("decimal(5, 2)")
                         .HasColumnName("Percentual Acréscimo Produto");
 
-                    b.ToTable("Parâmetros do Produto");
+                    b.ToTable("Parâmetros do Produto", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ParametroDoSpedEcf", b =>
@@ -10176,7 +10176,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                         .HasDefaultValue("")
                         .HasColumnName("Versao sped");
 
-                    b.ToTable("Parametros do SPED ECF");
+                    b.ToTable("Parametros do SPED ECF", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ParcelaDaOrdem", b =>
@@ -10203,7 +10203,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDaMontagem", "NumeroDaParcela")
                         .HasName("Seq1_e_pc1");
 
-                    b.ToTable("Parcelas da Ordem");
+                    b.ToTable("Parcelas da Ordem", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ParcelaDaViagem", b =>
@@ -10230,7 +10230,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SeqDaViagem", "NumeroDaParcela")
                         .HasName("Seq_e_Pc");
 
-                    b.ToTable("Parcelas da Viagem");
+                    b.ToTable("Parcelas da Viagem", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ParcelaDoNovoPedido", b =>
@@ -10257,7 +10257,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("CodigoDoPedido", "NumeroDaParcela")
                         .HasName("CodPedido_e_Pc");
 
-                    b.ToTable("Parcelas do Novo Pedido");
+                    b.ToTable("Parcelas do Novo Pedido", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ParcelaDoProjeto", b =>
@@ -10292,7 +10292,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDoProjeto", "NumeroDaParcela")
                         .HasName("SeqProjeto_e_Parcela");
 
-                    b.ToTable("Parcelas do Projeto");
+                    b.ToTable("Parcelas do Projeto", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ParcelaEntradaConta", b =>
@@ -10325,7 +10325,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDaEntrada");
 
-                    b.ToTable("Parcelas Entrada Contas");
+                    b.ToTable("Parcelas Entrada Contas", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ParcelaMovimentoEstoque", b =>
@@ -10358,7 +10358,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoMovimento");
 
-                    b.ToTable("Parcelas Movimento Estoque");
+                    b.ToTable("Parcelas Movimento Estoque", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ParcelaMvtoContabil", b =>
@@ -10389,7 +10389,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDoMovimento", "NumeroDaParcela")
                         .HasName("Seqcon_e_pc");
 
-                    b.ToTable("Parcelas mvto contabil");
+                    b.ToTable("Parcelas mvto contabil", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ParcelaNotaFiscal", b =>
@@ -10416,7 +10416,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDaNotaFiscal", "NumeroDaParcela")
                         .HasName("Seq NF e PC");
 
-                    b.ToTable("Parcelas Nota Fiscal");
+                    b.ToTable("Parcelas Nota Fiscal", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ParcelaOrcamento", b =>
@@ -10460,7 +10460,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDoOrcamento", "NumeroDaParcela")
                         .HasName("Seq Orçamento e PC");
 
-                    b.ToTable("Parcelas Orçamento");
+                    b.ToTable("Parcelas Orçamento", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ParcelaOrdemDeServico", b =>
@@ -10487,7 +10487,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDaOrdemDeServico", "NumeroDaParcela")
                         .HasName("Seq Ordem e PC");
 
-                    b.ToTable("Parcelas Ordem de Serviço");
+                    b.ToTable("Parcelas Ordem de Serviço", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ParcelaPedCompraNovo", b =>
@@ -10521,7 +10521,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("IdDoPedido", "NumeroDaParcela")
                         .HasName("Id e Parcela");
 
-                    b.ToTable("Parcelas Ped Compra Novo");
+                    b.ToTable("Parcelas Ped Compra Novo", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ParcelaPedido", b =>
@@ -10548,7 +10548,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDoPedido", "NumeroDaParcela")
                         .HasName("Seq Pedido e PC");
 
-                    b.ToTable("Parcelas Pedido");
+                    b.ToTable("Parcelas Pedido", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.PecaDaNotaFiscal", b =>
@@ -10679,7 +10679,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoProduto");
 
-                    b.ToTable("Peças da Nota Fiscal");
+                    b.ToTable("Peças da Nota Fiscal", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.PecaDaOrdemDeServico", b =>
@@ -10774,7 +10774,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoProduto");
 
-                    b.ToTable("Peças da Ordem de Serviço");
+                    b.ToTable("Peças da Ordem de Serviço", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.PecaDoMovimentoEstoque", b =>
@@ -10869,7 +10869,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoProduto");
 
-                    b.ToTable("Peças do Movimento Estoque");
+                    b.ToTable("Peças do Movimento Estoque", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.PecaDoOrcamento", b =>
@@ -11008,7 +11008,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoProduto");
 
-                    b.ToTable("Peças do Orçamento");
+                    b.ToTable("Peças do Orçamento", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.PecaDoPedido", b =>
@@ -11107,7 +11107,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoProduto");
 
-                    b.ToTable("Peças do Pedido");
+                    b.ToTable("Peças do Pedido", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.PecaDoProjeto", b =>
@@ -11151,7 +11151,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDoProjeto", "SequenciaDoItem")
                         .HasName("SeqProjeto_e_Item");
 
-                    b.ToTable("Peças do Projeto");
+                    b.ToTable("Peças do Projeto", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Pedido", b =>
@@ -11350,7 +11350,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoVendedor");
 
-                    b.ToTable("Pedido");
+                    b.ToTable("Pedido", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.PedidoDeCompraNovo", b =>
@@ -11605,7 +11605,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("IdDoPedido")
                         .HasName("Id do Pedido");
 
-                    b.ToTable("Pedido de Compra Novo");
+                    b.ToTable("Pedido de Compra Novo", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.PermissoesTela", b =>
@@ -11664,7 +11664,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasIndex(new[] { "Grupo", "Tela" }, "IX_PermissoesTela_Grupo_Tela")
                         .IsUnique();
 
-                    b.ToTable("PermissoesTela");
+                    b.ToTable("PermissoesTela", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.PermissoesTemplate", b =>
@@ -11697,7 +11697,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasIndex(new[] { "Nome" }, "IX_PermissoesTemplate_Nome")
                         .IsUnique();
 
-                    b.ToTable("PermissoesTemplate");
+                    b.ToTable("PermissoesTemplate", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.PermissoesTemplateDetalhe", b =>
@@ -11741,7 +11741,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasIndex(new[] { "TemplateId", "Tela" }, "IX_PermissoesTemplateDetalhe_Template_Tela")
                         .IsUnique();
 
-                    b.ToTable("PermissoesTemplateDetalhe");
+                    b.ToTable("PermissoesTemplateDetalhe", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.PivoVendido", b =>
@@ -11791,7 +11791,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SeqDoPivo")
                         .HasName("SeqPivoAux");
 
-                    b.ToTable("Pivos Vendidos");
+                    b.ToTable("Pivos Vendidos", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.PlanilhaDeAdiantamento", b =>
@@ -11880,7 +11880,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("CodDoVendedor");
 
-                    b.ToTable("Planilha de Adiantamento");
+                    b.ToTable("Planilha de Adiantamento", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Pneu", b =>
@@ -11907,7 +11907,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDoPneu")
                         .HasName("Sequencia do Pneu");
 
-                    b.ToTable("Pneus");
+                    b.ToTable("Pneus", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.PrevisaoDePagto", b =>
@@ -11991,7 +11991,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDaPrevisao")
                         .HasName("Sequencia da Previsao");
 
-                    b.ToTable("Previsoes de Pagtos");
+                    b.ToTable("Previsoes de Pagtos", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Produto", b =>
@@ -12290,7 +12290,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoSubGrupoProduto", "SequenciaDoGrupoProduto");
 
-                    b.ToTable("Produtos");
+                    b.ToTable("Produtos", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ProdutoDaLicitacao", b =>
@@ -12343,7 +12343,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoProduto");
 
-                    b.ToTable("Produtos da Licitação");
+                    b.ToTable("Produtos da Licitação", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ProdutoDaNotaFiscal", b =>
@@ -12490,7 +12490,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoProduto");
 
-                    b.ToTable("Produtos da Nota Fiscal");
+                    b.ToTable("Produtos da Nota Fiscal", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ProdutoDaOrdemDeServico", b =>
@@ -12585,7 +12585,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoProduto");
 
-                    b.ToTable("Produtos da Ordem de Serviço");
+                    b.ToTable("Produtos da Ordem de Serviço", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ProdutoDoMovimentoContabil", b =>
@@ -12649,7 +12649,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoProduto");
 
-                    b.ToTable("Produtos do Movimento Contábil");
+                    b.ToTable("Produtos do Movimento Contábil", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ProdutoDoMovimentoEstoque", b =>
@@ -12748,7 +12748,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoProduto");
 
-                    b.ToTable("Produtos do Movimento Estoque");
+                    b.ToTable("Produtos do Movimento Estoque", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ProdutoDoNovoPedido", b =>
@@ -12797,7 +12797,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoProduto");
 
-                    b.ToTable("Produtos do Novo Pedido");
+                    b.ToTable("Produtos do Novo Pedido", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ProdutoDoOrcamento", b =>
@@ -12936,7 +12936,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoProduto");
 
-                    b.ToTable("Produtos do Orçamento");
+                    b.ToTable("Produtos do Orçamento", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ProdutoDoPedido", b =>
@@ -13035,7 +13035,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoProduto");
 
-                    b.ToTable("Produtos do Pedido");
+                    b.ToTable("Produtos do Pedido", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ProdutoDoPedidoCompra", b =>
@@ -13088,7 +13088,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("IdDoProduto");
 
-                    b.ToTable("Produtos do Pedido Compra");
+                    b.ToTable("Produtos do Pedido Compra", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ProdutoMvtoContabilNovo", b =>
@@ -13164,7 +13164,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoProduto");
 
-                    b.ToTable("Produtos Mvto Contábil Novo");
+                    b.ToTable("Produtos Mvto Contábil Novo", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ProjetoDeIrrigacao", b =>
@@ -13769,7 +13769,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDoProjeto")
                         .HasName("Sequencia do Projeto");
 
-                    b.ToTable("Projeto de Irrigação");
+                    b.ToTable("Projeto de Irrigação", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Propriedade", b =>
@@ -13869,7 +13869,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDaPropriedade")
                         .HasName("Seqüência da Propriedade");
 
-                    b.ToTable("Propriedades");
+                    b.ToTable("Propriedades", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.PropriedadeDoGeral", b =>
@@ -13902,7 +13902,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "SequenciaDoGeral", "SequenciaDaPropriedade" }, "Seq Geral e Seq Prop"), 90);
 
-                    b.ToTable("Propriedades do Geral");
+                    b.ToTable("Propriedades do Geral", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.PwGrupo", b =>
@@ -13916,7 +13916,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("PwNome")
                         .HasName("PW~Nome");
 
-                    b.ToTable("PW~Grupos");
+                    b.ToTable("PW~Grupos", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.PwTabela", b =>
@@ -13951,7 +13951,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("PwGrupo");
 
-                    b.ToTable("PW~Tabelas");
+                    b.ToTable("PW~Tabelas", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.PwUsuario", b =>
@@ -14008,7 +14008,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex(new[] { "PwGrupo" }, "PW~Grupo");
 
-                    b.ToTable("PW~Usuarios");
+                    b.ToTable("PW~Usuarios", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.RazaoAuxiliar", b =>
@@ -14046,7 +14046,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDoRazao")
                         .HasName("Sequencia do Razão");
 
-                    b.ToTable("Razão Auxiliar");
+                    b.ToTable("Razão Auxiliar", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ReceitaPrimarium", b =>
@@ -14133,7 +14133,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDoOrcamento", "SequenciaDoItem")
                         .HasName("Seq_e_materia");
 
-                    b.ToTable("Receita primaria");
+                    b.ToTable("Receita primaria", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.RegiaoDoVendedore", b =>
@@ -14156,7 +14156,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SeqDoVendedor")
                         .HasName("Seq do Vendedor");
 
-                    b.ToTable("Região dos Vendedores");
+                    b.ToTable("Região dos Vendedores", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.RelatorioDeViagem", b =>
@@ -14225,7 +14225,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoGeral");
 
-                    b.ToTable("Relatorio de Viagem");
+                    b.ToTable("Relatorio de Viagem", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Requisicao", b =>
@@ -14262,7 +14262,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoGeral");
 
-                    b.ToTable("Requisição");
+                    b.ToTable("Requisição", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ResumoAuxiliar", b =>
@@ -14325,7 +14325,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDoResumo")
                         .HasName("Sequencia do resumo");
 
-                    b.ToTable("Resumo auxiliar");
+                    b.ToTable("Resumo auxiliar", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Revendedore", b =>
@@ -14350,7 +14350,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("IdDaConta");
 
-                    b.ToTable("Revendedores");
+                    b.ToTable("Revendedores", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.SaidaDeBalcao", b =>
@@ -14407,7 +14407,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDaSaida")
                         .HasName("Sequencia da Saida");
 
-                    b.ToTable("Saida de Balcao");
+                    b.ToTable("Saida de Balcao", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.SerieGerador", b =>
@@ -14505,7 +14505,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "SerieDoGerador" }, "Serie do Gerador"), 90);
 
-                    b.ToTable("Serie Gerador");
+                    b.ToTable("Serie Gerador", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.SerieHidroturbo", b =>
@@ -14636,7 +14636,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "SerieDoHidroturbo" }, "Serie do Hidroturbo"), 90);
 
-                    b.ToTable("Serie Hidroturbo");
+                    b.ToTable("Serie Hidroturbo", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.SerieMotoBomba", b =>
@@ -14790,7 +14790,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "SerieDaMotoBomba" }, "Serie da Moto Bomba"), 90);
 
-                    b.ToTable("Serie Moto Bomba");
+                    b.ToTable("Serie Moto Bomba", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.SeriePivo", b =>
@@ -14927,7 +14927,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "SerieDoPivo" }, "Serie do Pivo"), 90);
 
-                    b.ToTable("Serie Pivos");
+                    b.ToTable("Serie Pivos", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.SerieRebocador", b =>
@@ -15011,7 +15011,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "SerieDoRebocador" }, "SerieRebocador"), 90);
 
-                    b.ToTable("Serie Rebocador");
+                    b.ToTable("Serie Rebocador", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Servico", b =>
@@ -15042,7 +15042,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDoServico")
                         .HasName("Seqüência do Serviço");
 
-                    b.ToTable("Serviços");
+                    b.ToTable("Serviços", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ServicoDaNotaFiscal", b =>
@@ -15078,7 +15078,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoServico");
 
-                    b.ToTable("Serviços da Nota Fiscal");
+                    b.ToTable("Serviços da Nota Fiscal", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ServicoDaOrdem", b =>
@@ -15113,7 +15113,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("IdDaOrdem", "SequenciaDoItem")
                         .HasName("Id_e_servico");
 
-                    b.ToTable("Serviços da Ordem");
+                    b.ToTable("Serviços da Ordem", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ServicoDaOrdemDeServico", b =>
@@ -15152,7 +15152,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoServico");
 
-                    b.ToTable("Serviços da Ordem de Serviço");
+                    b.ToTable("Serviços da Ordem de Serviço", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ServicoDoOrcamento", b =>
@@ -15192,7 +15192,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoServico");
 
-                    b.ToTable("Serviços do Orçamento");
+                    b.ToTable("Serviços do Orçamento", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ServicoDoPedido", b =>
@@ -15228,7 +15228,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoServico");
 
-                    b.ToTable("Serviços do Pedido");
+                    b.ToTable("Serviços do Pedido", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ServicoDoProjeto", b =>
@@ -15272,7 +15272,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDoProjeto", "SequenciaDoItem")
                         .HasName("seq_e_servico");
 
-                    b.ToTable("Serviços do Projeto");
+                    b.ToTable("Serviços do Projeto", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Setore", b =>
@@ -15296,7 +15296,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("CodigoDoSetor")
                         .HasName("Codigo do setor");
 
-                    b.ToTable("Setores");
+                    b.ToTable("Setores", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.SimulaEstoque", b =>
@@ -15359,7 +15359,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDaSimulacao")
                         .HasName("Sequencia da simulação");
 
-                    b.ToTable("Simula estoque");
+                    b.ToTable("Simula estoque", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.SituacaoDoPedido", b =>
@@ -15439,7 +15439,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDoOrcamento")
                         .HasName("Seqüência_orc_situacao");
 
-                    b.ToTable("Situação dos pedidos");
+                    b.ToTable("Situação dos pedidos", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Solicitante", b =>
@@ -15471,7 +15471,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("CodigoDoSolicitante", "SequenciaDoItem", "CodigoDoSetor")
                         .HasName("Codigo do solicitante");
 
-                    b.ToTable("Solicitantes");
+                    b.ToTable("Solicitantes", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.SpyBaixaConta", b =>
@@ -15561,7 +15561,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SeqDoSpy")
                         .HasName("Seq do Spy");
 
-                    b.ToTable("Spy Baixa Contas");
+                    b.ToTable("Spy Baixa Contas", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.StatuDoProcesso", b =>
@@ -15585,7 +15585,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("CodigoDoStatus")
                         .HasName("Codigo do Status");
 
-                    b.ToTable("Status do Processo");
+                    b.ToTable("Status do Processo", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.SubGrupoDespesa", b =>
@@ -15614,7 +15614,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaGrupoDespesa");
 
-                    b.ToTable("SubGrupo Despesa");
+                    b.ToTable("SubGrupo Despesa", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.SubGrupoDoProduto", b =>
@@ -15644,7 +15644,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoGrupoProduto");
 
-                    b.ToTable("SubGrupo do Produto");
+                    b.ToTable("SubGrupo do Produto", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.SySequencial", b =>
@@ -15733,7 +15733,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SysTabela", "SysCampo", "SysChave")
                         .HasName("Chave sequencial");
 
-                    b.ToTable("SYS~Sequencial");
+                    b.ToTable("SYS~Sequencial", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Tenant", b =>
@@ -15767,7 +15767,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasIndex(new[] { "Dominio" }, "IX_Tenants_Dominio")
                         .IsUnique();
 
-                    b.ToTable("Tenants");
+                    b.ToTable("Tenants", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.TipoDeAtividade", b =>
@@ -15794,7 +15794,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("CodigoDaAtividade")
                         .HasName("Codigo da Atividade");
 
-                    b.ToTable("Tipo de Atividades");
+                    b.ToTable("Tipo de Atividades", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.TipoDeCobranca", b =>
@@ -15821,7 +15821,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDaCobranca")
                         .HasName("Seqüência da Cobrança");
 
-                    b.ToTable("Tipo de Cobrança");
+                    b.ToTable("Tipo de Cobrança", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.TipoDeTitulo", b =>
@@ -15844,7 +15844,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SeqDoTitulo")
                         .HasName("Seq do Titulo");
 
-                    b.ToTable("Tipo de Titulos");
+                    b.ToTable("Tipo de Titulos", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.TransferenciaDeReceitum", b =>
@@ -15909,7 +15909,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SeqüênciaDoSubGrupoProduto", "SeqüênciaDoGrupoProduto");
 
-                    b.ToTable("Transferência de Receita");
+                    b.ToTable("Transferência de Receita", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Transporte.DespesaViagem", b =>
@@ -15973,7 +15973,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex(new[] { "ViagemId" }, "IX_DespesasViagem_ViagemId");
 
-                    b.ToTable("DespesasViagem");
+                    b.ToTable("DespesasViagem", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Transporte.ManutencaoPeca", b =>
@@ -16028,7 +16028,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex(new[] { "ManutencaoId" }, "IX_ManutencoesPeca_ManutencaoId");
 
-                    b.ToTable("ManutencoesPeca");
+                    b.ToTable("ManutencoesPeca", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Transporte.ManutencaoVeiculo", b =>
@@ -16100,7 +16100,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex(new[] { "VeiculoId" }, "IX_ManutencoesVeiculo_VeiculoId");
 
-                    b.ToTable("ManutencoesVeiculo");
+                    b.ToTable("ManutencoesVeiculo", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Transporte.Reboque", b =>
@@ -16178,7 +16178,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasIndex(new[] { "Placa" }, "IX_Reboques_Placa")
                         .IsUnique();
 
-                    b.ToTable("Reboques");
+                    b.ToTable("Reboques", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Transporte.ReceitaViagem", b =>
@@ -16234,7 +16234,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex(new[] { "ViagemId" }, "IX_ReceitasViagem_ViagemId");
 
-                    b.ToTable("ReceitasViagem");
+                    b.ToTable("ReceitasViagem", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Transporte.Veiculo", b =>
@@ -16324,7 +16324,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasIndex(new[] { "Placa" }, "IX_Veiculos_Placa")
                         .IsUnique();
 
-                    b.ToTable("Veiculos");
+                    b.ToTable("Veiculos", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Transporte.Viagem", b =>
@@ -16394,7 +16394,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex(new[] { "VeiculoId" }, "IX_Viagens_VeiculoId");
 
-                    b.ToTable("Viagens");
+                    b.ToTable("Viagens", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Unidade", b =>
@@ -16427,7 +16427,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDaUnidade")
                         .HasName("Seqüência da Unidade");
 
-                    b.ToTable("Unidades");
+                    b.ToTable("Unidades", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ValorAdicionai", b =>
@@ -16470,7 +16470,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDaManutencao");
 
-                    b.ToTable("Valores Adicionais");
+                    b.ToTable("Valores Adicionais", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.Vasilhame", b =>
@@ -16512,7 +16512,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("SequenciaDoVasilahme")
                         .HasName("Sequencia do Vasilahme");
 
-                    b.ToTable("Vasilhames");
+                    b.ToTable("Vasilhames", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.VeiculoDoMotoristum", b =>
@@ -16547,7 +16547,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                         .HasDefaultValue("")
                         .HasColumnName("Placa do Automovel");
 
-                    b.ToTable("Veiculos do Motorista");
+                    b.ToTable("Veiculos do Motorista", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.VendedorBloqueio", b =>
@@ -16578,7 +16578,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                     b.HasKey("CodigoDoVendedor")
                         .HasName("Codigo do Vendedor Blok");
 
-                    b.ToTable("Vendedores Bloqueio");
+                    b.ToTable("Vendedores Bloqueio", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.ViaDeTransporteDi", b =>
@@ -16595,7 +16595,7 @@ namespace SistemaEmpresas.Migrations.AppDb
                         .HasColumnType("varchar(30)")
                         .HasDefaultValue("");
 
-                    b.ToTable("Via de Transporte DI");
+                    b.ToTable("Via de Transporte DI", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.VinculaPedidoOrcamento", b =>
@@ -16637,7 +16637,7 @@ namespace SistemaEmpresas.Migrations.AppDb
 
                     b.HasIndex("SequenciaDoProduto");
 
-                    b.ToTable("VinculaPedidoOrcamento");
+                    b.ToTable("VinculaPedidoOrcamento", (string)null);
                 });
 
             modelBuilder.Entity("SistemaEmpresas.Models.AdicaoDaDeclaracao", b =>

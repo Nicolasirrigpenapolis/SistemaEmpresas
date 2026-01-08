@@ -8,16 +8,12 @@ import {
   Building2,
   Truck,
   UserCircle,
-  Filter,
-  X,
-  Phone,
-  Mail,
   MapPin,
   Eye,
   Lock,
   Loader2,
-  Search,
-  Briefcase
+  Briefcase,
+  RefreshCw,
 } from 'lucide-react';
 import { geralService } from '../../services/Geral/geralService';
 import type {
@@ -59,7 +55,6 @@ export default function GeralPage() {
   const [filtroTipo, setFiltroTipo] = useState<TipoEntidade>(tipoParam);
   const [filtroBusca, setFiltroBusca] = useState('');
   const [filtroIncluirInativos, setFiltroIncluirInativos] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
 
   // Paginação e Ordenação (gerenciados pelo DataTable, mas precisamos manter estado para API)
   const [pageNumber, setPageNumber] = useState(1);
@@ -197,25 +192,29 @@ export default function GeralPage() {
     {
       key: 'sequenciaDoGeral',
       header: 'Código',
-      width: '80px',
+      width: '100px',
+      sortable: true,
+      filterable: true,
+      searchPlaceholder: 'Buscar código...',
       render: (item) => (
-        <span className="text-sm font-mono text-[var(--text-muted)]">
-          {item.sequenciaDoGeral}
+        <span className="font-mono font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg text-xs">
+          #{item.sequenciaDoGeral}
         </span>
       )
     },
     {
       key: 'razaoSocial',
       header: 'Razão Social / Nome',
+      defaultSearch: true,
       render: (item) => (
-        <div>
-          <div className="text-sm font-medium text-[var(--text)]">
+        <div className="flex flex-col">
+          <span className="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
             {item.razaoSocial}
-          </div>
+          </span>
           {item.nomeFantasia && item.nomeFantasia !== item.razaoSocial && (
-            <div className="text-xs text-muted-foreground mt-0.5">
+            <span className="text-xs text-gray-500 mt-0.5 italic">
               {item.nomeFantasia}
-            </div>
+            </span>
           )}
         </div>
       )
@@ -225,7 +224,7 @@ export default function GeralPage() {
       header: 'CNPJ/CPF',
       width: '140px',
       render: (item) => (
-        <span className="text-sm text-muted-foreground font-mono">
+        <span className="text-sm text-gray-600 font-medium">
           {item.cpfECnpj || '-'}
         </span>
       )
@@ -235,47 +234,24 @@ export default function GeralPage() {
       header: 'Cidade/UF',
       render: (item) => (
         item.cidade ? (
-          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-            <MapPin className="w-3.5 h-3.5 opacity-80" />
+          <div className="flex items-center gap-1.5 text-sm text-gray-600">
+            <MapPin className="w-3.5 h-3.5 text-blue-500" />
             <span>{item.cidade}/{item.uf}</span>
           </div>
         ) : (
-          <span className="text-sm text-muted-foreground">-</span>
+          <span className="text-sm text-gray-400">-</span>
         )
       )
     },
     {
-      key: 'fone1',
-      header: 'Contato',
-      render: (item) => (
-        <div className="space-y-1.5">
-          {item.fone1 && (
-            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              <Phone className="w-3.5 h-3.5 opacity-80" />
-              <span>{item.fone1}</span>
-            </div>
-          )}
-          {item.email && (
-            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              <Mail className="w-3.5 h-3.5 opacity-80" />
-              <span className="truncate max-w-[150px]" title={item.email}>{item.email}</span>
-            </div>
-          )}
-          {!item.fone1 && !item.email && (
-            <span className="text-sm text-muted-foreground">-</span>
-          )}
-        </div>
-      )
-    },
-    {
-      key: 'tipos', // Chave virtual, não existe no DTO diretamente mas usamos para render
+      key: 'tipos',
       header: 'Tipos',
       render: (item) => (
         <div className="flex flex-wrap gap-1">
           {getTiposAtivos(item).map((tipo) => (
             <span
               key={tipo}
-              className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide ${TIPO_CORES[tipo as TipoEntidade]}`}
+              className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border ${TIPO_CORES[tipo as TipoEntidade]}`}
               title={TIPO_LABELS[tipo as TipoEntidade]}
             >
               {TIPO_SIGLAS[tipo as TipoEntidade]}
@@ -287,14 +263,16 @@ export default function GeralPage() {
     {
       key: 'inativo',
       header: 'Status',
-      width: '100px',
+      width: '120px',
       render: (item) => (
         item.inativo ? (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-100">
+            <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
             Inativo
           </span>
         ) : (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
             Ativo
           </span>
         )
@@ -342,86 +320,34 @@ export default function GeralPage() {
           podeIncluir && (
             <button
               onClick={() => navigate('/cadastros/geral/novo')}
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 font-medium"
+              className="flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 font-bold text-sm group"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4 group-hover:scale-110 transition-transform" />
               <span className="hidden sm:inline">Novo Cadastro</span>
               <span className="sm:hidden">Novo</span>
             </button>
           )
         }
       >
-        {/* Filtros */}
-        <div className="flex flex-col gap-4 w-full">
-          {/* Tabs de Tipo */}
-          <div className="flex gap-1 overflow-x-auto pb-2 scrollbar-hide">
-            {(['todos', 'cliente', 'fornecedor', 'transportadora', 'vendedor'] as TipoEntidade[]).map((tipo) => (
-              <button
-                key={tipo}
-                onClick={() => handleTipoChange(tipo)}
-                className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-all border ${filtroTipo === tipo
-                  ? 'bg-primary/10 text-primary border-primary/20'
-                  : 'bg-surface text-muted-foreground border-border hover:bg-surface-hover hover:text-foreground'
-                  }`}
-              >
-                {tipo !== 'todos' && (
-                  <span className={filtroTipo === tipo ? '' : 'opacity-60'}>
-                    {getTipoIcon(tipo)}
-                  </span>
-                )}
-                <span>{TIPO_LABELS[tipo]}</span>
-              </button>
-            ))}
-          </div>
-
-          <div className="flex flex-wrap gap-3 items-center">
-            <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input
-                type="text"
-                value={filtroBusca}
-                onChange={(e) => setFiltroBusca(e.target.value)}
-                placeholder="Buscar por nome, código, CPF/CNPJ..."
-                className="w-full pl-9 pr-3 py-2 bg-surface-muted border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-              />
-            </div>
-
+        {/* Tabs de Tipo */}
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+          {(['todos', 'cliente', 'fornecedor', 'transportadora', 'vendedor'] as TipoEntidade[]).map((tipo) => (
             <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-all border flex items-center gap-2 ${showFilters || filtroIncluirInativos
-                ? 'bg-primary/10 text-primary border-primary/20'
-                : 'bg-surface-muted text-muted-foreground border-border hover:bg-surface-hover'
+              key={tipo}
+              onClick={() => handleTipoChange(tipo)}
+              className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl whitespace-nowrap transition-all border ${filtroTipo === tipo
+                ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20'
+                : 'bg-white text-gray-500 border-gray-200 hover:border-blue-300 hover:text-blue-600'
                 }`}
             >
-              <Filter className="w-4 h-4" />
-              Filtros
+              {tipo !== 'todos' && (
+                <span className={filtroTipo === tipo ? 'text-white' : 'text-gray-400'}>
+                  {getTipoIcon(tipo)}
+                </span>
+              )}
+              <span className="uppercase tracking-wider">{TIPO_LABELS[tipo]}</span>
             </button>
-
-            {(filtroBusca || filtroIncluirInativos) && (
-              <button
-                onClick={handleClearFilters}
-                className="px-3 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors flex items-center gap-2"
-              >
-                <X className="w-4 h-4" />
-                Limpar
-              </button>
-            )}
-          </div>
-
-          {/* Filtros Expandidos */}
-          {showFilters && (
-            <div className="pt-2 animate-slide-down">
-              <label className="flex items-center gap-3 px-4 py-3 bg-surface-muted/50 border border-border rounded-xl cursor-pointer hover:bg-surface-muted transition-colors w-fit">
-                <input
-                  type="checkbox"
-                  checked={filtroIncluirInativos}
-                  onChange={(e) => setFiltroIncluirInativos(e.target.checked)}
-                  className="w-4 h-4 text-primary border-border rounded focus:ring-primary"
-                />
-                <span className="text-sm text-foreground font-medium">Incluir inativos</span>
-              </label>
-            </div>
-          )}
+          ))}
         </div>
       </CabecalhoPagina>
 
@@ -442,11 +368,36 @@ export default function GeralPage() {
           getRowKey={(item) => item.sequenciaDoGeral.toString()}
           loading={loading}
           totalItems={data?.totalCount || 0}
+          onFilterChange={(_, value) => {
+            setFiltroBusca(value);
+            setPageNumber(1);
+          }}
+          onClearFilters={handleClearFilters}
+          headerExtra={
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition-colors group">
+                <input
+                  type="checkbox"
+                  checked={filtroIncluirInativos}
+                  onChange={(e) => setFiltroIncluirInativos(e.target.checked)}
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 transition-colors"
+                />
+                <span className="text-xs text-gray-600 font-bold uppercase tracking-wider group-hover:text-gray-900">Incluir inativos</span>
+              </label>
+              <button
+                onClick={loadData}
+                className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl border border-transparent hover:border-blue-100 transition-all"
+                title="Atualizar"
+              >
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
+          }
           rowActions={(item) => (
-            <>
+            <div className="flex items-center justify-end gap-2">
               <button
                 onClick={() => handleView(item.sequenciaDoGeral)}
-                className="p-2 text-muted-foreground hover:text-primary hover:bg-surface-hover rounded-lg transition-colors"
+                className="p-2 text-blue-600 hover:bg-blue-50 rounded-xl border border-transparent hover:border-blue-100 transition-all"
                 title="Visualizar"
               >
                 <Eye className="h-4 w-4" />
@@ -454,7 +405,7 @@ export default function GeralPage() {
               {podeAlterar && (
                 <button
                   onClick={() => navigate(`/cadastros/geral/${item.sequenciaDoGeral}`)}
-                  className="p-2 text-muted-foreground hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                  className="p-2 text-amber-600 hover:bg-amber-50 rounded-xl border border-transparent hover:border-amber-100 transition-all"
                   title="Editar"
                 >
                   <Edit2 className="h-4 w-4" />
@@ -463,13 +414,13 @@ export default function GeralPage() {
               {podeExcluir && (
                 <button
                   onClick={() => handleDeleteClick(item.sequenciaDoGeral, item.razaoSocial)}
-                  className="p-2 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  className="p-2 text-red-600 hover:bg-red-50 rounded-xl border border-transparent hover:border-red-100 transition-all"
                   title="Inativar"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
               )}
-            </>
+            </div>
           )}
         />
 

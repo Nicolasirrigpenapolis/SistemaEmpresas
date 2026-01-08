@@ -1,48 +1,37 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Plus,
   Edit2,
   Trash2,
   Truck,
-  Filter,
-  X,
   Eye,
-  CheckCircle,
   XCircle,
+  RefreshCw,
 } from 'lucide-react';
 import { veiculoService } from '../../../services/Transporte/veiculoService';
 import type { VeiculoListDto, PagedResult, VeiculoFiltros } from '../../../types';
-import { TIPOS_VEICULO } from '../../../types';
 import { usePermissaoTela } from '../../../hooks/usePermissaoTela';
 import {
   ModalConfirmacao,
-  Paginacao,
-  EstadoVazio,
   EstadoCarregando,
   AlertaErro,
+  CabecalhoPagina,
+  DataTable,
+  type ColumnConfig
 } from '../../../components/common';
 
 export default function VeiculosPage() {
   const navigate = useNavigate();
   const { podeConsultar, podeIncluir, podeAlterar, podeExcluir, carregando: carregandoPermissoes } = usePermissaoTela('Veiculo');
 
-  // Estados
   const [data, setData] = useState<PagedResult<VeiculoListDto> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Filtros
   const [filtroBusca, setFiltroBusca] = useState('');
-  const [filtroTipo, setFiltroTipo] = useState('');
   const [filtroIncluirInativos, setFiltroIncluirInativos] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
-
-  // Paginação
   const [pageNumber, setPageNumber] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
-
-  // Modal de Exclusão
+  const [pageSize] = useState(25);
   const [deleteModal, setDeleteModal] = useState<{ open: boolean; id: number; placa: string; deleting: boolean }>({
     open: false,
     id: 0,
@@ -50,21 +39,16 @@ export default function VeiculosPage() {
     deleting: false,
   });
 
-  // Carregar dados
   const loadData = async () => {
     try {
       setLoading(true);
       setError(null);
-
       const filtros: VeiculoFiltros = {
         pageNumber,
         pageSize,
         incluirInativos: filtroIncluirInativos,
       };
-
       if (filtroBusca) filtros.busca = filtroBusca;
-      if (filtroTipo) filtros.tipoVeiculo = filtroTipo;
-
       const result = await veiculoService.listar(filtros);
       setData(result);
     } catch (err: any) {
@@ -79,25 +63,21 @@ export default function VeiculosPage() {
     if (!carregandoPermissoes && podeConsultar) {
       loadData();
     }
-  }, [pageNumber, pageSize, carregandoPermissoes, podeConsultar]);
+  }, [pageNumber, pageSize, carregandoPermissoes, podeConsultar, filtroIncluirInativos]);
 
-  const handleSearch = () => {
-    setPageNumber(1);
-    loadData();
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSearch();
-    }
-  };
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!carregandoPermissoes && podeConsultar) {
+        loadData();
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [filtroBusca]);
 
   const handleClearFilters = () => {
     setFiltroBusca('');
-    setFiltroTipo('');
     setFiltroIncluirInativos(false);
     setPageNumber(1);
-    setTimeout(() => loadData(), 0);
   };
 
   const handleDeleteClick = (id: number, placa: string) => {
@@ -117,263 +97,188 @@ export default function VeiculosPage() {
     }
   };
 
-  // Loading inicial
+  const columns: ColumnConfig<VeiculoListDto>[] = [
+    {
+      key: 'id',
+      header: 'Código',
+      width: '100px',
+      sortable: true,
+      filterable: true,
+      searchPlaceholder: 'Buscar código...',
+      render: (item) => (
+        <span className="font-mono font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg text-xs">
+          #{item.id}
+        </span>
+      )
+    },
+    {
+      key: 'placa',
+      header: 'Placa',
+      width: '150px',
+      filterable: true,
+      searchPlaceholder: 'Buscar placa...',
+      render: (item) => (
+        <span className="font-bold text-foreground tracking-wider uppercase whitespace-nowrap">
+          {item.placa}
+        </span>
+      )
+    },
+    {
+      key: 'marca',
+      header: 'Marca / Modelo',
+      filterable: true,
+      searchPlaceholder: 'Buscar marca/modelo...',
+      render: (item) => (
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 font-bold shadow-sm">
+            <Truck className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="font-bold text-gray-900">{item.marca} {item.modelo}</p>
+            <p className="text-xs text-gray-500">Frota Própria</p>
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'tipoVeiculo',
+      header: 'Tipo',
+      width: '120px',
+      render: (item) => (
+        <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs font-bold uppercase tracking-wider border border-blue-100">
+          {item.tipoVeiculo || '-'}
+        </span>
+      )
+    },
+    {
+      key: 'capacidadeCarga',
+      header: 'Capacidade',
+      width: '110px',
+      render: (item) => (
+        <div className="flex items-center gap-2 text-sm text-gray-600 font-medium">
+          <span className="text-gray-900 font-bold">{item.capacidadeCarga?.toLocaleString('pt-BR') || '-'}</span>
+          <span className="text-[10px] text-gray-400 uppercase font-bold">kg</span>
+        </div>
+      )
+    },
+    {
+      key: 'ativo',
+      header: 'Status',
+      width: '120px',
+      render: (item) => (
+        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${
+          item.ativo ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-red-50 text-red-700 border-red-100'
+        }`}>
+          <span className={`w-1.5 h-1.5 rounded-full ${item.ativo ? 'bg-emerald-500' : 'bg-red-500'}`} />
+          {item.ativo ? 'Ativo' : 'Inativo'}
+        </span>
+      )
+    }
+  ];
+
   if (carregandoPermissoes) {
     return <EstadoCarregando mensagem="Verificando permissões..." />;
   }
 
-  // Sem permissão
   if (!podeConsultar) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <XCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-primary/80">Acesso Negado</h2>
-          <p className="text-muted-foreground mt-2">Você não tem permissão para acessar esta tela.</p>
+          <h2 className="text-xl font-semibold text-gray-700">Acesso Negado</h2>
+          <p className="text-gray-500 mt-2">Você não tem permissão para acessar esta tela.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-primary flex items-center gap-2">
-            <Truck className="w-7 h-7 text-blue-600" />
-            Veículos
-          </h1>
-          <p className="text-muted-foreground mt-1">Gerencie a frota de veículos</p>
-        </div>
-        {podeIncluir && (
-          <button
-            onClick={() => navigate('/transporte/veiculos/novo')}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-colors"
-          >
-            <Plus className="w-5 h-5" />
-            Novo Veículo
-          </button>
+    <div className="space-y-6 pb-8">
+      <CabecalhoPagina
+        titulo="Veículos"
+        subtitulo="Gerencie a frota de veículos e caminhões"
+        icone={Truck}
+        acoes={
+          podeIncluir && (
+            <button
+              onClick={() => navigate('/transporte/veiculos/novo')}
+              className="group flex items-center gap-2 px-5 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-300 shadow-lg shadow-blue-500/25"
+            >
+              <Plus className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              <span className="font-bold text-sm uppercase tracking-wider">Novo Veículo</span>
+            </button>
+          )
+        }
+      />
+
+      <div className="px-6">
+        {error && (
+          <AlertaErro mensagem={error} fechavel onFechar={() => setError(null)} className="mb-6" />
         )}
-      </div>
 
-      {/* Filtros */}
-      <div className="bg-surface rounded-xl shadow-sm border border-border p-4">
-        <div className="flex flex-col lg:flex-row gap-4">
-          {/* Busca */}
-          <div className="flex-1">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Buscar por placa, marca ou modelo..."
-                value={filtroBusca}
-                onChange={(e) => setFiltroBusca(e.target.value)}
-                onKeyPress={handleKeyPress}
-                className="w-full pl-4 pr-10 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-          </div>
-
-          {/* Botões de filtro */}
-          <div className="flex gap-2">
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`inline-flex items-center gap-2 px-4 py-2 border rounded-lg transition-colors ${showFilters
-                ? 'bg-blue-50 border-blue-300 text-blue-700'
-                : 'border-input text-primary/80 hover:bg-surface-hover'
-                }`}
-            >
-              <Filter className="w-5 h-5" />
-              Filtros
-            </button>
-            <button
-              onClick={handleSearch}
-              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-colors"
-            >
-              Buscar
-            </button>
-            <button
-              onClick={handleClearFilters}
-              className="px-4 py-2 border border-input text-primary/80 rounded-lg hover:bg-surface-hover transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-
-        {/* Filtros expandidos */}
-        {showFilters && (
-          <div className="mt-4 pt-4 border-t border-border grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-primary/80 mb-1">
-                Tipo de Veículo
-              </label>
-              <select
-                value={filtroTipo}
-                onChange={(e) => setFiltroTipo(e.target.value)}
-                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">Todos</option>
-                {TIPOS_VEICULO.map((tipo) => (
-                  <option key={tipo} value={tipo}>
-                    {tipo}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="flex items-end">
-              <label className="flex items-center gap-2 cursor-pointer">
+        <DataTable
+          data={data?.items || []}
+          columns={columns}
+          getRowKey={(item) => item.id.toString()}
+          loading={loading}
+          totalItems={data?.totalCount || 0}
+          onFilterChange={(_, value) => {
+            setFiltroBusca(value);
+            setPageNumber(1);
+          }}
+          onClearFilters={handleClearFilters}
+          headerExtra={
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition-colors group">
                 <input
                   type="checkbox"
                   checked={filtroIncluirInativos}
                   onChange={(e) => setFiltroIncluirInativos(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 border-input rounded focus:ring-blue-500"
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
-                <span className="text-sm text-primary/80">Incluir inativos</span>
+                <span className="text-xs text-gray-600 font-bold uppercase tracking-wider group-hover:text-gray-900">Incluir inativos</span>
               </label>
+              <button
+                onClick={loadData}
+                className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl border border-transparent hover:border-blue-100 transition-all"
+                title="Atualizar"
+              >
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              </button>
             </div>
-          </div>
-        )}
-      </div>
-
-      {/* Erro */}
-      {error && (
-        <AlertaErro
-          mensagem={error}
-          fechavel
-          onFechar={() => setError(null)}
+          }
+          rowActions={(item) => (
+            <div className="flex items-center justify-end gap-2">
+              <button
+                onClick={() => navigate(`/transporte/veiculos/${item.id}`)}
+                className="p-2 text-blue-600 hover:bg-blue-50 rounded-xl border border-transparent hover:border-blue-100 transition-all"
+                title="Visualizar"
+              >
+                <Eye className="h-4 w-4" />
+              </button>
+              {podeAlterar && (
+                <button
+                  onClick={() => navigate(`/transporte/veiculos/${item.id}/editar`)}
+                  className="p-2 text-amber-600 hover:bg-amber-50 rounded-xl border border-transparent hover:border-amber-100 transition-all"
+                  title="Editar"
+                >
+                  <Edit2 className="h-4 w-4" />
+                </button>
+              )}
+              {podeExcluir && (
+                <button
+                  onClick={() => handleDeleteClick(item.id, item.placa)}
+                  className="p-2 text-red-600 hover:bg-red-50 rounded-xl border border-transparent hover:border-red-100 transition-all"
+                  title="Excluir"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+          )}
         />
-      )}
-
-      {/* Tabela */}
-      <div className="bg-surface rounded-xl shadow-sm border border-border overflow-hidden">
-        {loading ? (
-          <div className="p-8">
-            <EstadoCarregando mensagem="Carregando veículos..." />
-          </div>
-        ) : !data || !data.items || data.items.length === 0 ? (
-          <EstadoVazio
-            titulo="Nenhum veículo encontrado"
-            descricao="Não há veículos cadastrados ou que correspondam aos filtros."
-            icone={Truck}
-            acao={
-              podeIncluir
-                ? {
-                  texto: 'Cadastrar Veículo',
-                  onClick: () => navigate('/transporte/veiculos/novo'),
-                }
-                : undefined
-            }
-          />
-        ) : (
-          <>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-surface-hover">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Placa
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Marca / Modelo
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Tipo
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Capacidade (kg)
-                    </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Ações
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-surface divide-y divide-gray-200">
-                  {data.items.map((veiculo) => (
-                    <tr key={veiculo.id} className="group hover:bg-surface-hover">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-[var(--text)]">{veiculo.placa}</span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-[var(--text-muted)]">
-                        {veiculo.marca} {veiculo.modelo}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-muted-foreground">
-                        {veiculo.tipoVeiculo || '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-muted-foreground">
-                        {veiculo.capacidadeCarga?.toLocaleString('pt-BR') || '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center">
-                        {veiculo.ativo ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full">
-                            <CheckCircle className="w-3 h-3" />
-                            Ativo
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-full">
-                            <XCircle className="w-3 h-3" />
-                            Inativo
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button
-                            onClick={() => navigate(`/transporte/veiculos/${veiculo.id}`)}
-                            className="p-2 text-muted-foreground hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                            title="Visualizar"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          {podeAlterar && (
-                            <button
-                              onClick={() => navigate(`/transporte/veiculos/${veiculo.id}/editar`)}
-                              className="p-2 text-muted-foreground hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
-                              title="Editar"
-                            >
-                              <Edit2 className="w-4 h-4" />
-                            </button>
-                          )}
-                          {podeExcluir && (
-                            <button
-                              onClick={() => handleDeleteClick(veiculo.id, veiculo.placa)}
-                              className="p-2 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                              title="Excluir"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Paginação */}
-            <div className="px-6 py-4 border-t border-border">
-              <Paginacao
-                paginaAtual={data.pageNumber}
-                totalPaginas={data.totalPages}
-                totalItens={data.totalCount}
-                itensPorPagina={data.pageSize}
-                onMudarPagina={setPageNumber}
-                onMudarItensPorPagina={(size: number) => {
-                  setPageSize(size);
-                  setPageNumber(1);
-                }}
-              />
-            </div>
-          </>
-        )}
       </div>
 
-      {/* Modal de Exclusão */}
       <ModalConfirmacao
         aberto={deleteModal.open}
         onCancelar={() => setDeleteModal({ open: false, id: 0, placa: '', deleting: false })}

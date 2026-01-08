@@ -113,48 +113,53 @@ export function DataTable<T>({
 
       {/* Extra Header (contador, paginação, etc) */}
       {headerExtra && (
-        <div className="flex items-center justify-between">
-          {totalItems !== undefined && (
-            <p className="text-sm text-[var(--text-muted)]">
-              <span className="font-semibold text-[var(--text)]">{totalItems}</span> registro(s)
-              {hasActiveFilters && displayData.length < totalItems && (
-                <span className="text-blue-600 ml-1">
-                  ({displayData.length} filtrado(s))
-                </span>
-              )}
-            </p>
-          )}
-          {headerExtra}
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            {totalItems !== undefined && (
+              <p className="text-sm text-[var(--text-muted)]">
+                <span className="font-semibold text-[var(--text)]">{totalItems}</span> registro(s)
+                {hasActiveFilters && displayData.length < totalItems && (
+                  <span className="text-blue-600 ml-1">
+                    ({displayData.length} filtrado(s))
+                  </span>
+                )}
+              </p>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            {headerExtra}
+          </div>
         </div>
       )}
 
       {/* Tabela */}
-      <div className="bg-[var(--surface)] rounded-2xl shadow-[var(--shadow-soft)] overflow-hidden">
+      <div className="bg-surface rounded-2xl shadow-sm border border-border overflow-hidden transition-all hover:shadow-md">
         {loading ? (
-          <div className="flex items-center justify-center py-16">
+          <div className="flex items-center justify-center py-24">
             <div className="text-center">
-              <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
-              <p className="text-[var(--text-muted)]">Carregando...</p>
+              <div className="relative inline-block">
+                <div className="w-12 h-12 border-4 border-blue-600/10 rounded-full" />
+                <Loader2 className="h-12 w-12 animate-spin text-blue-600 absolute top-0 left-0" />
+              </div>
+              <p className="text-muted-foreground font-medium mt-4">Carregando dados...</p>
             </div>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full">
+            <table className="min-w-full divide-y divide-border">
               {/* Cabeçalho */}
-              <thead className="bg-[var(--surface-muted)] sticky top-0 z-10">
+              <thead className="bg-surface-muted/50">
                 <tr>
                   {columns.map((column) => (
                     <ColumnHeader
                       key={column.key}
                       column={column}
                       isFilterColumn={state.filterColumn === column.key}
-                      isSortColumn={state.sortBy === column.key}
-                      sortDirection={state.sortDirection}
                       onClick={() => handleColumnClick(column)}
                     />
                   ))}
                   {rowActions && (
-                    <th className="px-4 py-4 text-right text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+                    <th className="px-6 py-4 text-right text-xs font-bold text-muted-foreground uppercase tracking-wider align-middle">
                       Ações
                     </th>
                   )}
@@ -162,7 +167,7 @@ export function DataTable<T>({
               </thead>
 
               {/* Corpo */}
-              <tbody className="bg-[var(--surface)]">
+              <tbody className="bg-surface divide-y divide-border">
                 {displayData.length === 0 ? (
                   <tr>
                     <td colSpan={columns.length + (rowActions ? 1 : 0)}>
@@ -186,8 +191,8 @@ export function DataTable<T>({
                       <tr
                         key={key}
                         className={`
-                          group transition-colors
-                          ${isHighlighted ? 'bg-blue-50/50' : 'hover:bg-blue-50/30'}
+                          group transition-all duration-200
+                          ${isHighlighted ? 'bg-blue-600/5' : 'hover:bg-gray-50/80'}
                           ${isClickable ? 'cursor-pointer' : ''}
                         `}
                         onClick={isClickable ? () => onRowClick(item) : undefined}
@@ -202,7 +207,7 @@ export function DataTable<T>({
                           return (
                             <td
                               key={column.key}
-                              className={`px-4 py-4 ${alignClass}`}
+                              className={`px-6 py-4 text-sm ${alignClass} text-foreground align-middle`}
                               style={{ width: column.width }}
                             >
                               {column.render
@@ -212,9 +217,9 @@ export function DataTable<T>({
                           );
                         })}
                         {rowActions && (
-                          <td className="px-4 py-4 text-right">
+                          <td className="px-6 py-4 text-right align-middle">
                             <div
-                              className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200 transform translate-x-2 group-hover:translate-x-0"
                               onClick={(e) => e.stopPropagation()}
                             >
                               {rowActions(item)}

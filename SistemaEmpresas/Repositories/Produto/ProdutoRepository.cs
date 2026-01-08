@@ -46,9 +46,12 @@ public class ProdutoRepository : IProdutoRepository
         if (!string.IsNullOrWhiteSpace(filtro.Busca))
         {
             var busca = filtro.Busca.ToLower();
+            bool isNumeric = int.TryParse(busca, out int codigo);
+
             query = query.Where(p => 
                 p.Descricao.ToLower().Contains(busca) ||
                 p.CodigoDeBarras.Contains(busca) ||
+                (isNumeric && p.SequenciaDoProduto == codigo) ||
                 p.SequenciaDoProduto.ToString().Contains(busca));
         }
 
@@ -92,8 +95,8 @@ public class ProdutoRepository : IProdutoRepository
                 GrupoProduto = p.SequenciaDoGrupoProdutoNavigation.Descricao,
                 SubGrupoProduto = p.SubGrupoDoProduto != null ? p.SubGrupoDoProduto.Descricao : "",
                 Unidade = p.SequenciaDaUnidadeNavigation.Descricao,
-                QuantidadeNoEstoque = p.QuantidadeNoEstoque, // DEPRECATED
-                QuantidadeContabil = p.QuantidadeContabil, // Estoque Contábil (correto)
+                QuantidadeNoEstoque = p.QuantidadeNoEstoque, // Descontinuado
+                QuantidadeContabil = p.QuantidadeContabil, // Estoque Contabil (correto)
                 QuantidadeMinima = p.QuantidadeMinima,
                 ValorDeCusto = p.ValorDeCusto,
                 ValorTotal = p.ValorTotal,
@@ -214,6 +217,14 @@ public class ProdutoRepository : IProdutoRepository
 
     public async Task<ProdutoModel> CriarAsync(ProdutoCreateUpdateDto dto, string usuario)
     {
+        // Cálculo do Valor Total (Preço de Venda) no Backend
+        // Seguindo a lógica do sistema legado: Valor Total = Valor de Custo * Margem de Lucro
+        decimal valorTotal = dto.ValorTotal;
+        if (dto.ValorDeCusto > 0 && dto.MargemDeLucro > 0)
+        {
+            valorTotal = dto.ValorDeCusto * dto.MargemDeLucro;
+        }
+
         // SequenciaDoProduto é IDENTITY no SQL Server, não precisa definir
         var produto = new ProdutoModel
         {
@@ -227,7 +238,7 @@ public class ProdutoRepository : IProdutoRepository
             Localizacao = dto.Localizacao ?? "",
             ValorDeCusto = dto.ValorDeCusto,
             MargemDeLucro = dto.MargemDeLucro,
-            ValorTotal = dto.ValorTotal,
+            ValorTotal = valorTotal,
             ValorDeLista = dto.ValorDeLista,
             EMateriaPrima = dto.EMateriaPrima,
             TipoDoProduto = dto.TipoDoProduto,
@@ -289,6 +300,14 @@ public class ProdutoRepository : IProdutoRepository
         if (produto == null)
             return null;
 
+        // Cálculo do Valor Total (Preço de Venda) no Backend
+        // Seguindo a lógica do sistema legado: Valor Total = Valor de Custo * Margem de Lucro
+        decimal valorTotal = dto.ValorTotal;
+        if (dto.ValorDeCusto > 0 && dto.MargemDeLucro > 0)
+        {
+            valorTotal = dto.ValorDeCusto * dto.MargemDeLucro;
+        }
+
         produto.Descricao = dto.Descricao;
         produto.CodigoDeBarras = dto.CodigoDeBarras ?? "";
         produto.SequenciaDoGrupoProduto = dto.SequenciaDoGrupoProduto;
@@ -299,7 +318,7 @@ public class ProdutoRepository : IProdutoRepository
         produto.Localizacao = dto.Localizacao ?? "";
         produto.ValorDeCusto = dto.ValorDeCusto;
         produto.MargemDeLucro = dto.MargemDeLucro;
-        produto.ValorTotal = dto.ValorTotal;
+        produto.ValorTotal = valorTotal;
         produto.ValorDeLista = dto.ValorDeLista;
         produto.EMateriaPrima = dto.EMateriaPrima;
         produto.TipoDoProduto = dto.TipoDoProduto;
@@ -373,9 +392,12 @@ public class ProdutoRepository : IProdutoRepository
         if (!string.IsNullOrWhiteSpace(busca))
         {
             var buscaLower = busca.ToLower();
+            bool isNumeric = int.TryParse(busca, out int codigo);
+
             query = query.Where(p => 
                 p.Descricao.ToLower().Contains(buscaLower) ||
                 p.CodigoDeBarras.Contains(busca) ||
+                (isNumeric && p.SequenciaDoProduto == codigo) ||
                 p.SequenciaDoProduto.ToString().Contains(busca));
         }
 

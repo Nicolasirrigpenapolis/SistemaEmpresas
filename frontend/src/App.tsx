@@ -10,8 +10,10 @@ import { UsuariosPage } from './pages/Usuarios';
 import { LogsPage } from './pages/Logs';
 import { GeralPage, GeralFormPage } from './pages/Geral';
 import { ProdutosPage, ProdutoFormPage } from './pages/Produtos';
+import MovimentoContabilPage from './pages/MovimentoContabil/MovimentoContabilPage';
 import { NotaFiscalListPage, NotaFiscalFormPage } from './pages/NotaFiscal';
 import { EmitentePage } from './pages/Emitente';
+import { EntradaEstoquePage } from './pages/EntradaEstoque';
 import { 
   VeiculosPage, VeiculoFormPage,
   ReboquesPage, ReboqueFormPage,
@@ -47,6 +49,7 @@ function App() {
             <Route path="/ordens-servico" element={<div className="text-xl font-semibold text-gray-900">Ordens de Serviço</div>} />
             <Route path="/producao" element={<div className="text-xl font-semibold text-gray-900">Produção</div>} />
             <Route path="/estoque" element={<div className="text-xl font-semibold text-gray-900">Controle de Estoque</div>} />
+            <Route path="/estoque/entrada" element={<EntradaEstoquePage />} />
             <Route path="/compras" element={<div className="text-xl font-semibold text-gray-900">Pedidos de Compra</div>} />
             
             {/* Transporte */}
@@ -108,6 +111,10 @@ function App() {
             <Route path="/cadastros/produtos/:id" element={<ProdutoFormPage />} />
             <Route path="/cadastros/produtos/:id/editar" element={<ProdutoFormPage />} />
             <Route path="/produtos" element={<Navigate to="/cadastros/produtos" replace />} />
+            
+            {/* Movimento Contábil / Ajuste de Estoque */}
+            <Route path="/estoque/movimento-contabil" element={<MovimentoContabilPage />} />
+            <Route path="/estoque/inventario" element={<Navigate to="/estoque/movimento-contabil" replace />} />
             
             <Route path="/classificacao-fiscal" element={<ClassificacaoFiscalPage />} />
             <Route path="/classificacao-fiscal/:id" element={<ClassificacaoFiscalFormPage />} />

@@ -117,7 +117,9 @@ export const geralService = {
    * Consulta dados de empresa pelo CNPJ
    */
   async consultarCnpj(cnpj: string): Promise<CnpjResponse> {
-    const response = await api.get<CnpjResponse>(`/geral/consulta-cnpj/${cnpj}`);
+    // Remove formatação do CNPJ antes de enviar (evita problemas com a barra na URL)
+    const cnpjLimpo = cnpj.replace(/\D/g, '');
+    const response = await api.get<CnpjResponse>(`/geral/consulta-cnpj/${cnpjLimpo}`);
     return response.data;
   },
 
@@ -125,7 +127,17 @@ export const geralService = {
    * Consulta endereço pelo CEP
    */
   async consultarCep(cep: string): Promise<CepResponse> {
-    const response = await api.get<CepResponse>(`/geral/consulta-cep/${cep}`);
+    // Remove formatação do CEP antes de enviar
+    const cepLimpo = cep.replace(/\D/g, '');
+    const response = await api.get<CepResponse>(`/geral/consulta-cep/${cepLimpo}`);
+    return response.data;
+  },
+
+  /**
+   * Valida Inscrição Estadual por UF
+   */
+  async validarIe(uf: string, ie: string): Promise<{ isValid: boolean; mensagem?: string }> {
+    const response = await api.get<{ isValid: boolean; mensagem?: string }>(`/geral/validar-ie?uf=${uf}&ie=${ie}`);
     return response.data;
   },
 };

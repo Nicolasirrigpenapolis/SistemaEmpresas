@@ -31,7 +31,7 @@ export default function ClassTribSelector({
 
   // Debounce para pesquisa
   useEffect(() => {
-    if (!searchTerm || searchTerm.length < 2) {
+    if (!searchTerm || searchTerm.length < 1) {
       setOptions([]);
       return;
     }
@@ -144,7 +144,7 @@ export default function ClassTribSelector({
 
   // Destacar termo pesquisado no texto
   const highlightMatch = (text: string, term: string) => {
-    if (!term || term.length < 2) return text;
+    if (!term || term.length < 1) return text;
     const regex = new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
     const parts = text.split(regex);
     return parts.map((part, i) => 
@@ -218,7 +218,7 @@ export default function ClassTribSelector({
               <FileText className="h-3.5 w-3.5" />
               {loading ? 'Buscando tributações...' : 
                options.length > 0 ? `${options.length} resultado${options.length > 1 ? 's' : ''} encontrado${options.length > 1 ? 's' : ''}` :
-               searchTerm.length >= 2 ? 'Nenhum resultado' : 'Digite para pesquisar'}
+               searchTerm.length >= 1 ? 'Nenhum resultado' : 'Digite para pesquisar'}
             </p>
           </div>
 
@@ -268,7 +268,7 @@ export default function ClassTribSelector({
                   </li>
                 ))}
               </ul>
-            ) : searchTerm.length >= 2 ? (
+            ) : searchTerm.length >= 1 ? (
               <div className="p-6 text-center">
                 <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
                   <Search className="h-6 w-6 text-gray-400" />

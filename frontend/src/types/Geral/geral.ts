@@ -101,6 +101,7 @@ export interface GeralCreateDto {
   codigoContabil: number;
   codigoAdiantamento: number;
   salBruto: number;
+  whatsAppSincronizado: boolean;
 }
 
 /**
@@ -272,4 +273,5 @@ export const GERAL_DEFAULT: GeralCreateDto = {
   codigoContabil: 0,
   codigoAdiantamento: 0,
   salBruto: 0,
+  whatsAppSincronizado: false,
 };

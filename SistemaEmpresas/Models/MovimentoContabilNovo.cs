@@ -26,9 +26,10 @@ public partial class MovimentoContabilNovo
     [Column("Seqüência do Geral")]
     public int SequenciaDoGeral { get; set; }
 
-    [Column(TypeName = "text")]
+    [Column("Observação", TypeName = "text")]
     public string Observacao { get; set; } = null!;
 
+    [Column("Devolução")]
     public bool Devolucao { get; set; }
 
     [Column("Seq Prod Propria")]

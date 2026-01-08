@@ -12,5 +12,6 @@ export * from './NotaFiscal/notaFiscal';
 export * from './Seguranca/permissoes';
 export * from './Seguranca/usuarios';
 export * from './Produto/produto';
+export * from './Estoque/movimentoContabil';
 export * from './Transporte/transporte';
 export * from './enums';

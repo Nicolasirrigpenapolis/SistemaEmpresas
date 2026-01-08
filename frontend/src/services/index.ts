@@ -8,6 +8,7 @@ export { default as classTribService } from './Fiscal/classTribService';
 export { default as dashboardService } from './Dashboard/dashboardService';
 export { default as emitenteService } from './Emitentes/emitenteService';
 export { default as geralService } from './Geral/geralService';
+export { default as movimentoContabilService } from './MovimentoContabil/movimentoContabilService';
 export { default as logsService } from './Logs/logsService';
 export { default as notaFiscalService } from './NotaFiscal/notaFiscalService';
 export { default as permissoesTelaService } from './Seguranca/permissoesTelaService';

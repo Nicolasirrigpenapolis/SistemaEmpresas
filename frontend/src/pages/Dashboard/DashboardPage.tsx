@@ -353,21 +353,21 @@ export default function DashboardPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left py-4 px-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Nº</th>
-                  <th className="text-left py-4 px-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Cliente</th>
-                  <th className="text-left py-4 px-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Data</th>
-                  <th className="text-left py-4 px-4 text-xs font-bold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Vendedor</th>
-                  <th className="text-left py-4 px-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Status</th>
-                  <th className="text-right py-4 px-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Ação</th>
+                  <th className="text-left py-4 px-4 text-xs font-bold text-muted-foreground uppercase tracking-wider align-middle">Nº</th>
+                  <th className="text-left py-4 px-4 text-xs font-bold text-muted-foreground uppercase tracking-wider align-middle">Cliente</th>
+                  <th className="text-left py-4 px-4 text-xs font-bold text-muted-foreground uppercase tracking-wider align-middle">Data</th>
+                  <th className="text-left py-4 px-4 text-xs font-bold text-muted-foreground uppercase tracking-wider hidden sm:table-cell align-middle">Vendedor</th>
+                  <th className="text-left py-4 px-4 text-xs font-bold text-muted-foreground uppercase tracking-wider align-middle">Status</th>
+                  <th className="text-right py-4 px-4 text-xs font-bold text-muted-foreground uppercase tracking-wider align-middle">Ação</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {orcamentosRecentes.map((orc) => (
                   <tr key={orc.sequenciaDoOrcamento} className="group hover:bg-surface-hover transition-colors">
-                    <td className="py-4 px-4 text-sm font-bold text-primary">
+                    <td className="py-4 px-4 text-sm font-bold text-primary align-middle">
                       #{orc.sequenciaDoOrcamento}
                     </td>
-                    <td className="py-4 px-4">
+                    <td className="py-4 px-4 align-middle">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white text-xs font-bold shadow-sm">
                           {orc.nomeCliente.charAt(0)}
@@ -377,21 +377,20 @@ export default function DashboardPage() {
                         </span>
                       </div>
                     </td>
-                    <td className="py-4 px-4 text-sm text-muted-foreground">
+                    <td className="py-4 px-4 text-sm text-muted-foreground align-middle">
                       {formatDate(orc.dataDeEmissao)}
                     </td>
-                    <td className="py-4 px-4 text-sm text-muted-foreground hidden sm:table-cell">
-                      {orc.nomeVendedor || '-'}
+                    <td className="py-4 px-4 hidden sm:table-cell align-middle">
+                      <span className="text-sm text-muted-foreground">{orc.nomeVendedor}</span>
                     </td>
-                    <td className="py-4 px-4">
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold rounded-full ring-1 ring-inset ${getStatusColor(orc)}`}>
-                        <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                    <td className="py-4 px-4 align-middle">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${getStatusColor(orc)}`}>
                         {getStatusLabel(orc)}
                       </span>
                     </td>
-                    <td className="py-4 px-4 text-right">
-                      <button className="text-xs font-medium text-secondary hover:text-secondary/80 bg-secondary/10 hover:bg-secondary/20 px-3 py-1.5 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
-                        Detalhes
+                    <td className="py-4 px-4 text-right align-middle">
+                      <button className="p-2 text-muted-foreground hover:text-primary hover:bg-surface-muted rounded-lg transition-all">
+                        <ArrowUpRight className="w-4 h-4" />
                       </button>
                     </td>
                   </tr>

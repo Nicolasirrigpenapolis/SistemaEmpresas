@@ -512,7 +512,7 @@ public partial class Orcamento
 
     [ForeignKey("SequenciaDoPais")]
     [InverseProperty("Orcamentos")]
-    public virtual Paise SequenciaDoPaisNavigation { get; set; } = null!;
+    public virtual Pais SequenciaDoPaisNavigation { get; set; } = null!;
 
     [ForeignKey("SequenciaDoVendedor")]
     [InverseProperty("OrcamentoSequenciaDoVendedorNavigations")]

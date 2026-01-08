@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react';
+﻿import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -17,7 +17,6 @@ import {
   Calculator,
   Layers,
   FileText,
-  Image,
   DollarSign,
   Box,
   Ruler,
@@ -28,11 +27,20 @@ import {
   CheckCircle2,
   XCircle,
   ExternalLink,
+  Upload,
+  Trash2,
+  Camera,
+  ZoomIn,
+  Plus,
+  Search,
 } from 'lucide-react';
 import { produtoService } from '../../services/Produto/produtoService';
+import { classificacaoFiscalService } from '../../services/Fiscal/classificacaoFiscalService';
 import { SeletorComBusca } from '../../components/SeletorComBusca';
-import type { ProdutoCreateUpdateDto } from '../../types';
+import { ModalConfirmacao } from '../../components/common/ModalConfirmacao';
+import type { ProdutoCreateUpdateDto, ReceitaProdutoListDto, ProdutoComboDto } from '../../types';
 import type { GrupoProduto, SubGrupoProduto, Unidade } from '../../services/Produto/produtoService';
+import type { ClassificacaoFiscal } from '../../types/Fiscal/classificacaoFiscal';
 
 // ============================================================================
 // COMPONENTES DE UI REUTILIZÁVEIS
@@ -243,7 +251,7 @@ const PRODUTO_DEFAULT: ProdutoCreateUpdateDto = {
 // ============================================================================
 // COMPONENTE DE FORMULÁRIO
 // ============================================================================
-type TabType = 'dados' | 'receita' | 'contabilidade' | 'foto' | 'detalhes';
+type TabType = 'dados' | 'receita' | 'contabilidade' | 'detalhes';
 
 export default function ProdutoFormPage() {
   const navigate = useNavigate();
@@ -251,6 +259,9 @@ export default function ProdutoFormPage() {
   const { id } = useParams<{ id: string }>();
   const isEditing = id && id !== 'novo';
   const isViewMode = location.pathname.includes('/visualizar') || location.pathname.endsWith(`/${id}`);
+
+  // Ref para input de arquivo
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Estados
   const [loading, setLoading] = useState(false);
@@ -262,9 +273,44 @@ export default function ProdutoFormPage() {
   const [grupos, setGrupos] = useState<GrupoProduto[]>([]);
   const [subGrupos, setSubGrupos] = useState<SubGrupoProduto[]>([]);
   const [unidades, setUnidades] = useState<Unidade[]>([]);
+  const [classificacoesBusca, setClassificacoesBusca] = useState<ClassificacaoFiscal[]>([]);
+  const [buscandoClassificacoes, setBuscandoClassificacoes] = useState(false);
   const [loadingAuxiliares, setLoadingAuxiliares] = useState(false);
   
-  // Dados extras para visualização (somente leitura)
+  // Estado para foto do produto
+  const [fotoUrl, setFotoUrl] = useState<string | null>(null);
+  const [loadingFoto, setLoadingFoto] = useState(false);
+  const [fotoError, setFotoError] = useState(false);
+  const [uploadingFoto, setUploadingFoto] = useState(false);
+  const [fotoExpandida, setFotoExpandida] = useState(false);
+  
+  // Estados para Receita do Produto (Materia Prima)
+  const [itensReceita, setItensReceita] = useState<ReceitaProdutoListDto[]>([]);
+  const [loadingReceita, setLoadingReceita] = useState(false);
+  const [produtosBusca, setProdutosBusca] = useState<ProdutoComboDto[]>([]);
+  const [buscandoProdutos, setBuscandoProdutos] = useState(false);
+  const [termoBuscaProduto, setTermoBuscaProduto] = useState('');
+  const [produtoSelecionado, setProdutoSelecionado] = useState<ProdutoComboDto | null>(null);
+  const [quantidadeItem, setQuantidadeItem] = useState<string>('1');
+  const [editandoItem, setEditandoItem] = useState<number | null>(null);
+  const [quantidadeEdicao, setQuantidadeEdicao] = useState<string>('');
+  
+  // Estado para Modal de Confirmação
+  const [modalConfirmacao, setModalConfirmacao] = useState<{
+    aberto: boolean;
+    titulo: string;
+    mensagem: string;
+    nomeItem?: string;
+    onConfirmar: () => void;
+    variante?: 'danger' | 'warning';
+  }>({
+    aberto: false,
+    titulo: '',
+    mensagem: '',
+    onConfirmar: () => {},
+  });
+  
+  // Dados extras para visualizacao (somente leitura)
   const [dadosExtras, setDadosExtras] = useState<{
     grupoProduto?: string;
     subGrupoProduto?: string;
@@ -373,6 +419,13 @@ export default function ProdutoFormPage() {
         codigoClassTrib: data.codigoClassTrib,
         descricaoClassTrib: data.descricaoClassTrib,
       });
+      
+      // Busca a foto do produto
+      setLoadingFoto(true);
+      const foto = await produtoService.obterFoto(Number(id));
+      setFotoUrl(foto);
+      setFotoError(false);
+      setLoadingFoto(false);
     } catch (err: any) {
       console.error('Erro ao carregar dados:', err);
       setError(err.response?.data?.mensagem || 'Erro ao carregar dados');
@@ -398,6 +451,56 @@ export default function ProdutoFormPage() {
     } finally {
       setLoadingAuxiliares(false);
     }
+  };
+
+  // Upload de foto do produto
+  const handleUploadFoto = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !id) return;
+
+    try {
+      setUploadingFoto(true);
+      await produtoService.uploadFoto(Number(id), file);
+      
+      // Recarrega a foto
+      const novaFoto = await produtoService.obterFoto(Number(id));
+      setFotoUrl(novaFoto);
+      setFotoError(false);
+    } catch (err: any) {
+      console.error('Erro ao fazer upload:', err);
+      alert(err.response?.data?.mensagem || 'Erro ao fazer upload da foto');
+    } finally {
+      setUploadingFoto(false);
+      // Limpa o input para permitir selecionar o mesmo arquivo novamente
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  // Remover foto do produto
+  const handleRemoverFoto = async () => {
+    if (!id || !fotoUrl) return;
+    
+    setModalConfirmacao({
+      aberto: true,
+      titulo: 'Remover Foto',
+      mensagem: 'Deseja realmente remover a foto deste produto?',
+      variante: 'danger',
+      onConfirmar: async () => {
+        try {
+          setUploadingFoto(true);
+          setModalConfirmacao(prev => ({ ...prev, aberto: false }));
+          await produtoService.removerFoto(Number(id));
+          setFotoUrl(null);
+        } catch (err: any) {
+          console.error('Erro ao remover foto:', err);
+          alert(err.response?.data?.mensagem || 'Erro ao remover a foto');
+        } finally {
+          setUploadingFoto(false);
+        }
+      }
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -464,13 +567,195 @@ export default function ProdutoFormPage() {
           console.error('Erro ao carregar subgrupos:', error);
         }
       } else {
-        // Se não tem grupo selecionado, carrega todos os subgrupos ou limpa
+        // Se nao tem grupo selecionado, carrega todos os subgrupos ou limpa
         setSubGrupos([]);
       }
     };
     
     loadSubGruposFiltrados();
   }, [formData.sequenciaDoGrupoProduto]);
+
+  // ===== Funcoes de Receita do Produto =====
+  
+  // Carregar itens da receita
+  const carregarReceita = async () => {
+    if (!isEditing) return;
+    
+    try {
+      setLoadingReceita(true);
+      const itens = await produtoService.listarItensReceita(Number(id));
+      setItensReceita(itens);
+    } catch (err) {
+      console.error('Erro ao carregar receita:', err);
+    } finally {
+      setLoadingReceita(false);
+    }
+  };
+
+  // Carregar receita quando mudar para a aba
+  useEffect(() => {
+    if (activeTab === 'receita' && isEditing && itensReceita.length === 0) {
+      carregarReceita();
+    }
+  }, [activeTab, isEditing]);
+
+  // Buscar produtos para adicionar na receita
+  const buscarProdutos = async (termo: string) => {
+    if (!termo || termo.length < 1) {
+      setProdutosBusca([]);
+      return;
+    }
+
+    try {
+      setBuscandoProdutos(true);
+      const produtos = await produtoService.listarParaCombo(termo);
+      // Filtra para nao mostrar o proprio produto
+      setProdutosBusca(produtos.filter(p => p.sequenciaDoProduto !== Number(id)));
+    } catch (err) {
+      console.error('Erro ao buscar produtos:', err);
+    } finally {
+      setBuscandoProdutos(false);
+    }
+  };
+
+  // Buscar classificações fiscais (NCM)
+  const buscarClassificacoes = async (termo: string) => {
+    if (!termo || termo.length < 2) {
+      setClassificacoesBusca([]);
+      return;
+    }
+
+    try {
+      setBuscandoClassificacoes(true);
+      const result = await classificacaoFiscalService.pesquisar(termo);
+      setClassificacoesBusca(result);
+    } catch (err) {
+      console.error('Erro ao buscar classificações:', err);
+    } finally {
+      setBuscandoClassificacoes(false);
+    }
+  };
+
+  // Debounce para busca de produtos
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      buscarProdutos(termoBuscaProduto);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [termoBuscaProduto]);
+
+  // Adicionar item a receita
+  const adicionarItemReceita = async () => {
+    if (!produtoSelecionado || !id) return;
+
+    const qtd = parseFloat(quantidadeItem.replace(',', '.'));
+    if (isNaN(qtd) || qtd <= 0) {
+      alert('Quantidade invalida');
+      return;
+    }
+
+    try {
+      setLoadingReceita(true);
+      await produtoService.adicionarItemReceita(Number(id), {
+        sequenciaDaMateriaPrima: produtoSelecionado.sequenciaDoProduto,
+        quantidade: qtd,
+      });
+      
+      // Limpa campos e recarrega
+      setProdutoSelecionado(null);
+      setTermoBuscaProduto('');
+      setQuantidadeItem('1');
+      setProdutosBusca([]);
+      await carregarReceita();
+    } catch (err: any) {
+      alert(err.response?.data?.mensagem || 'Erro ao adicionar item');
+    } finally {
+      setLoadingReceita(false);
+    }
+  };
+
+  // Atualizar quantidade de um item
+  const atualizarItemReceita = async (materiaPrimaId: number) => {
+    if (!id) return;
+
+    const qtd = parseFloat(quantidadeEdicao.replace(',', '.'));
+    if (isNaN(qtd) || qtd <= 0) {
+      alert('Quantidade invalida');
+      return;
+    }
+
+    try {
+      setLoadingReceita(true);
+      await produtoService.atualizarItemReceita(Number(id), materiaPrimaId, {
+        sequenciaDaMateriaPrima: materiaPrimaId,
+        quantidade: qtd,
+      });
+      
+      setEditandoItem(null);
+      setQuantidadeEdicao('');
+      await carregarReceita();
+    } catch (err: any) {
+      alert(err.response?.data?.mensagem || 'Erro ao atualizar item');
+    } finally {
+      setLoadingReceita(false);
+    }
+  };
+
+  // Remover item da receita
+  const removerItemReceita = async (materiaPrimaId: number, descricao: string) => {
+    if (!id) return;
+    
+    setModalConfirmacao({
+      aberto: true,
+      titulo: 'Remover Item',
+      mensagem: 'Deseja realmente remover este item da receita?',
+      nomeItem: descricao,
+      variante: 'danger',
+      onConfirmar: async () => {
+        try {
+          setLoadingReceita(true);
+          setModalConfirmacao(prev => ({ ...prev, aberto: false }));
+          await produtoService.removerItemReceita(Number(id), materiaPrimaId);
+          await carregarReceita();
+        } catch (err: any) {
+          alert(err.response?.data?.mensagem || 'Erro ao remover item');
+        } finally {
+          setLoadingReceita(false);
+        }
+      }
+    });
+  };
+
+  // Limpar toda a receita
+  const limparReceita = async () => {
+    if (!id) return;
+    
+    setModalConfirmacao({
+      aberto: true,
+      titulo: 'Limpar Receita',
+      mensagem: 'Deseja realmente remover TODOS os itens da receita? Esta ação não pode ser desfeita.',
+      variante: 'danger',
+      onConfirmar: async () => {
+        try {
+          setLoadingReceita(true);
+          setModalConfirmacao(prev => ({ ...prev, aberto: false }));
+          await produtoService.limparReceita(Number(id));
+          setItensReceita([]);
+        } catch (err: any) {
+          alert(err.response?.data?.mensagem || 'Erro ao limpar receita');
+        } finally {
+          setLoadingReceita(false);
+        }
+      }
+    });
+  };
+
+  // Calcular totais da receita
+  const totaisReceita = {
+    custoTotal: itensReceita.reduce((acc, item) => acc + item.custoTotal, 0),
+    pesoTotal: itensReceita.reduce((acc, item) => acc + item.pesoTotal, 0),
+    totalItens: itensReceita.length,
+  };
 
   // Formatar valores
   const formatCurrency = (value: number) => {
@@ -516,8 +801,6 @@ export default function ProdutoFormPage() {
         return renderReceita();
       case 'contabilidade':
         return renderContabilidade();
-      case 'foto':
-        return renderFoto();
       case 'detalhes':
         return renderDetalhes();
       default:
@@ -853,12 +1136,28 @@ export default function ProdutoFormPage() {
       <SecaoCard titulo="Classificação Fiscal" subtitulo="NCM e IPI" icone={<ClipboardList className="w-5 h-5" />}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div className="flex gap-2 items-end">
-            <InputModerno
+            <SeletorComBusca
               label="NCM"
-              value={dadosExtras.ncm || ''}
-              onChange={() => {}}
-              disabled={true}
-              className="flex-1"
+              value={formData.sequenciaDaClassificacao}
+              descricao={dadosExtras.ncm || ''}
+              onSelect={(id, ncm) => {
+                const item = classificacoesBusca.find(c => c.sequenciaDaClassificacao === id);
+                handleChange('sequenciaDaClassificacao', id);
+                setDadosExtras(prev => ({ 
+                  ...prev, 
+                  ncm: ncm,
+                  classificacaoFiscal: item?.descricaoDoNcm,
+                  percentualIpi: item?.porcentagemDoIpi
+                }));
+              }}
+              onSearch={buscarClassificacoes}
+              items={classificacoesBusca}
+              getItemId={(item) => item.sequenciaDaClassificacao}
+              getItemDescricao={(item) => item.ncm.toString()}
+              getItemSecundario={(item) => item.descricaoDoNcm}
+              placeholder="Busque por NCM ou descrição..."
+              disabled={isViewMode}
+              loading={buscandoClassificacoes}
             />
             {formData.sequenciaDaClassificacao > 0 && (
               <button
@@ -1043,16 +1342,217 @@ export default function ProdutoFormPage() {
     </div>
   );
 
-  // Aba 2 - Receita (matérias primas)
+  // Aba 2 - Receita (materias primas)
   const renderReceita = () => (
-    <div className="p-6">
-      <SecaoCard titulo="Receita do Produto" subtitulo="Matérias primas utilizadas na fabricação" icone={<ClipboardList className="w-5 h-5" />}>
-        <div className="text-center py-12 text-gray-500">
-          <ClipboardList className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-          <p className="text-lg font-medium">Receita do Produto</p>
-          <p className="text-sm">A gestão de receitas será implementada em breve.</p>
-          <p className="text-xs mt-2 text-gray-400">F11 - Deleta Receita</p>
-        </div>
+    <div className="p-6 space-y-6">
+      {/* Adicionar item - somente em modo edicao */}
+      {isEditing && !isViewMode && (
+        <SecaoCard titulo="Adicionar Materia Prima" subtitulo="Busque e adicione produtos a receita" icone={<Plus className="w-5 h-5" />}>
+          <div className="flex flex-col md:flex-row gap-4">
+            {/* Busca de Produto */}
+            <div className="flex-1 relative">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  value={produtoSelecionado ? `${produtoSelecionado.sequenciaDoProduto} - ${produtoSelecionado.descricao}` : termoBuscaProduto}
+                  onChange={(e) => {
+                    setTermoBuscaProduto(e.target.value);
+                    setProdutoSelecionado(null);
+                  }}
+                  placeholder="Busque por código ou descrição..."
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none"
+                />
+                {buscandoProdutos && (
+                  <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 animate-spin text-blue-500" />
+                )}
+              </div>
+              
+              {/* Lista de resultados */}
+              {produtosBusca.length > 0 && !produtoSelecionado && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                  {produtosBusca.map((produto) => (
+                    <button
+                      key={produto.sequenciaDoProduto}
+                      type="button"
+                      onClick={() => {
+                        setProdutoSelecionado(produto);
+                        setTermoBuscaProduto('');
+                        setProdutosBusca([]);
+                      }}
+                      className="w-full px-4 py-2 text-left hover:bg-blue-50 flex justify-between items-center border-b border-gray-50 last:border-0"
+                    >
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-gray-900">{produto.descricao}</span>
+                        <span className="text-xs text-gray-500">Código: {produto.sequenciaDoProduto}</span>
+                      </div>
+                      <span className="text-xs font-semibold px-2 py-1 bg-gray-100 text-gray-600 rounded-md">{produto.unidade}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Quantidade */}
+            <div className="w-32">
+              <InputModerno
+                label="Quantidade"
+                value={quantidadeItem}
+                onChange={setQuantidadeItem}
+                type="text"
+              />
+            </div>
+
+            {/* Botao Adicionar */}
+            <button
+              type="button"
+              onClick={adicionarItemReceita}
+              disabled={!produtoSelecionado || loadingReceita}
+              className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {loadingReceita ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Plus className="w-4 h-4" />
+              )}
+              Adicionar
+            </button>
+          </div>
+        </SecaoCard>
+      )}
+
+      {/* Lista de itens da receita */}
+      <SecaoCard titulo="Receita do Produto" subtitulo={`${totaisReceita.totalItens} itens na composicao`} icone={<ClipboardList className="w-5 h-5" />}>
+        {loadingReceita ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+          </div>
+        ) : itensReceita.length === 0 ? (
+          <div className="text-center py-12 text-gray-500">
+            <ClipboardList className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+            <p className="text-lg font-medium">Nenhuma materia prima cadastrada</p>
+            <p className="text-sm">Adicione produtos para compor a receita</p>
+          </div>
+        ) : (
+          <>
+            {/* Tabela de itens */}
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200 bg-gray-50">
+                    <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase">Produto</th>
+                    <th className="text-right py-3 px-4 text-xs font-semibold text-gray-600 uppercase">Qtde</th>
+                    <th className="text-center py-3 px-4 text-xs font-semibold text-gray-600 uppercase">Un</th>
+                    <th className="text-right py-3 px-4 text-xs font-semibold text-gray-600 uppercase">Peso</th>
+                    <th className="text-right py-3 px-4 text-xs font-semibold text-gray-600 uppercase">Custo</th>
+                    <th className="text-right py-3 px-4 text-xs font-semibold text-gray-600 uppercase">Custo Total</th>
+                    <th className="text-right py-3 px-4 text-xs font-semibold text-gray-600 uppercase">Peso Total</th>
+                    {!isViewMode && <th className="text-center py-3 px-4 text-xs font-semibold text-gray-600 uppercase">Acoes</th>}
+                  </tr>
+                </thead>
+                <tbody>
+                  {itensReceita.map((item) => (
+                    <tr key={item.sequenciaDaMateriaPrima} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="py-3 px-4 text-sm text-gray-900">{item.descricaoDaMateriaPrima}</td>
+                      <td className="py-3 px-4 text-sm text-right">
+                        {editandoItem === item.sequenciaDaMateriaPrima ? (
+                          <input
+                            type="text"
+                            value={quantidadeEdicao}
+                            onChange={(e) => setQuantidadeEdicao(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') atualizarItemReceita(item.sequenciaDaMateriaPrima);
+                              if (e.key === 'Escape') { setEditandoItem(null); setQuantidadeEdicao(''); }
+                            }}
+                            className="w-20 px-2 py-1 border border-blue-400 rounded text-right focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            autoFocus
+                          />
+                        ) : (
+                          <span
+                            className={!isViewMode ? 'cursor-pointer hover:text-blue-600' : ''}
+                            onClick={() => {
+                              if (!isViewMode) {
+                                setEditandoItem(item.sequenciaDaMateriaPrima);
+                                setQuantidadeEdicao(item.quantidade.toString().replace('.', ','));
+                              }
+                            }}
+                          >
+                            {formatQuantity(item.quantidade)}
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4 text-sm text-center text-gray-500">{item.unidade}</td>
+                      <td className="py-3 px-4 text-sm text-right text-gray-500">{formatQuantity(item.peso)}</td>
+                      <td className="py-3 px-4 text-sm text-right text-gray-500">{formatCurrency(item.valorDeCusto)}</td>
+                      <td className="py-3 px-4 text-sm text-right font-medium text-gray-900">{formatCurrency(item.custoTotal)}</td>
+                      <td className="py-3 px-4 text-sm text-right text-gray-500">{formatQuantity(item.pesoTotal)}</td>
+                      {!isViewMode && (
+                        <td className="py-3 px-4 text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            {editandoItem === item.sequenciaDaMateriaPrima ? (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => atualizarItemReceita(item.sequenciaDaMateriaPrima)}
+                                  className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg"
+                                  title="Confirmar"
+                                >
+                                  <CheckCircle2 className="w-4 h-4" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => { setEditandoItem(null); setQuantidadeEdicao(''); }}
+                                  className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-lg"
+                                  title="Cancelar"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => removerItemReceita(item.sequenciaDaMateriaPrima, item.descricaoDaMateriaPrima)}
+                                className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg"
+                                title="Remover"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+                {/* Totalizadores */}
+                <tfoot>
+                  <tr className="bg-gray-100 font-semibold">
+                    <td className="py-3 px-4 text-sm text-gray-900">Total ({totaisReceita.totalItens} itens)</td>
+                    <td colSpan={4}></td>
+                    <td className="py-3 px-4 text-sm text-right text-blue-600">{formatCurrency(totaisReceita.custoTotal)}</td>
+                    <td className="py-3 px-4 text-sm text-right text-gray-700">{formatQuantity(totaisReceita.pesoTotal)}</td>
+                    {!isViewMode && <td></td>}
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+
+            {/* Botao limpar receita */}
+            {!isViewMode && itensReceita.length > 0 && (
+              <div className="mt-4 flex justify-end">
+                <button
+                  type="button"
+                  onClick={limparReceita}
+                  disabled={loadingReceita}
+                  className="px-4 py-2 text-red-600 border border-red-200 rounded-lg hover:bg-red-50 flex items-center gap-2 text-sm"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Limpar Receita (F11)
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </SecaoCard>
     </div>
   );
@@ -1154,20 +1654,7 @@ export default function ProdutoFormPage() {
     </div>
   );
 
-  // Aba 4 - Foto do Produto
-  const renderFoto = () => (
-    <div className="p-6">
-      <SecaoCard titulo="Foto do Produto" subtitulo="Imagem para identificação" icone={<Image className="w-5 h-5" />}>
-        <div className="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center">
-          <Image className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-          <p className="text-gray-500 font-medium">Nenhuma imagem cadastrada</p>
-          <p className="text-sm text-gray-400 mt-1">Funcionalidade de upload de imagens será implementada em breve.</p>
-        </div>
-      </SecaoCard>
-    </div>
-  );
-
-  // Aba 5 - Detalhes
+  // Aba 4 - Detalhes
   const renderDetalhes = () => (
     <div className="p-6">
       <SecaoCard titulo="Detalhes" subtitulo="Informações adicionais do produto" icone={<FileText className="w-5 h-5" />}>
@@ -1187,7 +1674,7 @@ export default function ProdutoFormPage() {
       {/* Header */}
       <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ${
         isViewMode 
-          ? 'bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-500 -mx-4 sm:-mx-6 -mt-4 sm:-mt-6 px-4 sm:px-6 py-4 rounded-t-xl' 
+          ? 'bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-500 -mx-4 sm:-mx-6 px-4 sm:px-6 py-4 rounded-xl' 
           : ''
       }`}>
         <div className="flex items-center gap-3 sm:gap-4">
@@ -1285,19 +1772,151 @@ export default function ProdutoFormPage() {
           </div>
         )}
 
-        {/* Descrição - Campo Principal - Igual VB6 */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-          {/* Cabeçalho com Descrição e Status agrupados */}
-          <div className="grid gap-4 lg:grid-cols-3 mb-4">
-            <div className="lg:col-span-2">
-              <InputModerno
-                label="Descrição"
-                value={formData.descricao}
-                onChange={(v) => handleChange('descricao', v)}
-                required
-                disabled={isViewMode}
-                icone={<Package className="w-4 h-4" />}
-              />
+        {/* Cabeçalho Principal - Card com Foto e Informações */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="p-6">
+            <div className="flex gap-6">
+              {/* Foto do Produto - Compacta com hover actions (só em edição) */}
+              {(isEditing || isViewMode) && (
+                <div className="flex-shrink-0">
+                  <div className="relative group">
+                    {/* Container da Foto */}
+                    <div 
+                      className={`w-32 h-32 rounded-xl border-2 border-gray-200 overflow-hidden bg-white shadow-sm ${fotoUrl && !fotoError ? 'cursor-pointer' : ''}`}
+                      onClick={() => fotoUrl && !fotoError && setFotoExpandida(true)}
+                    >
+                      {loadingFoto || uploadingFoto ? (
+                        <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50">
+                          <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+                          <span className="text-[10px] text-gray-400 mt-1">
+                            {uploadingFoto ? 'Enviando...' : 'Carregando...'}
+                          </span>
+                        </div>
+                      ) : fotoUrl && !fotoError ? (
+                        <img
+                          src={fotoUrl}
+                          alt={`Foto do produto ${formData.descricao}`}
+                          className="w-full h-full object-cover"
+                          onError={() => setFotoError(true)}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 bg-gray-50">
+                          <Camera className="w-8 h-8" />
+                          <span className="text-[10px] mt-1">Sem foto</span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Overlay de ações no hover */}
+                    {!uploadingFoto && fotoUrl && !fotoError && (
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center gap-2">
+                        {/* Botão expandir - sempre visível */}
+                        <button
+                          type="button"
+                          onClick={() => setFotoExpandida(true)}
+                          className="p-2 bg-white rounded-lg hover:bg-gray-100 transition-colors shadow-sm"
+                          title="Expandir foto"
+                        >
+                          <ZoomIn className="w-4 h-4 text-gray-600" />
+                        </button>
+                        
+                        {/* Botões de edição - apenas no modo edição */}
+                        {!isViewMode && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => fileInputRef.current?.click()}
+                              className="p-2 bg-white rounded-lg hover:bg-gray-100 transition-colors shadow-sm"
+                              title="Alterar foto"
+                            >
+                              <Upload className="w-4 h-4 text-blue-600" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleRemoverFoto}
+                              className="p-2 bg-white rounded-lg hover:bg-gray-100 transition-colors shadow-sm"
+                              title="Remover foto"
+                            >
+                              <Trash2 className="w-4 h-4 text-red-600" />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* Overlay apenas para alterar foto quando não tem foto - modo edição */}
+                    {!isViewMode && !uploadingFoto && (!fotoUrl || fotoError) && (
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center">
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="p-2 bg-white rounded-lg hover:bg-gray-100 transition-colors shadow-sm"
+                          title="Adicionar foto"
+                        >
+                          <Upload className="w-4 h-4 text-blue-600" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Input de arquivo oculto - apenas no modo edição */}
+                  {!isViewMode && (
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleUploadFoto}
+                      className="hidden"
+                    />
+                  )}
+                </div>
+              )}
+              
+              {/* Informações do Produto - Lado Direito */}
+              <div className="flex-1 flex flex-col justify-center gap-4">
+                {/* Linha 1: Descrição */}
+                <InputModerno
+                  label="Descrição"
+                  value={formData.descricao}
+                  onChange={(v) => handleChange('descricao', v)}
+                  required
+                  disabled={isViewMode}
+                  icone={<Package className="w-4 h-4" />}
+                />
+                
+                {/* Linha 2: Badges informativos */}
+                <div className="flex flex-wrap items-center gap-3">
+                  {/* Código */}
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 rounded-lg">
+                    <Hash className="w-3.5 h-3.5 text-blue-500" />
+                    <span className="text-sm font-medium text-blue-700">Código: {id}</span>
+                  </div>
+                  
+                  {/* Status Inativo */}
+                  {formData.inativo && (
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 rounded-lg">
+                      <XCircle className="w-3.5 h-3.5 text-red-500" />
+                      <span className="text-sm font-medium text-red-600">Inativo</span>
+                    </div>
+                  )}
+                  
+                  {/* Status Obsoleto */}
+                  {formData.obsoleto && (
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 rounded-lg">
+                      <AlertCircle className="w-3.5 h-3.5 text-orange-500" />
+                      <span className="text-sm font-medium text-orange-600">Obsoleto</span>
+                    </div>
+                  )}
+                  
+                  {/* Matéria Prima */}
+                  {formData.eMateriaPrima && (
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 rounded-lg">
+                      <Box className="w-3.5 h-3.5 text-green-500" />
+                      <span className="text-sm font-medium text-green-600">Matéria Prima</span>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1309,7 +1928,6 @@ export default function ProdutoFormPage() {
               { id: 'dados' as TabType, label: '1 - Dados Principais', icon: FileText },
               { id: 'receita' as TabType, label: '2 - Receita', icon: ClipboardList },
               { id: 'contabilidade' as TabType, label: '3 - Contabilidade', icon: Calculator },
-              { id: 'foto' as TabType, label: 'Foto do Produto', icon: Image },
               { id: 'detalhes' as TabType, label: 'Detalhes', icon: FileText },
             ].map((tab) => (
               <button
@@ -1335,6 +1953,52 @@ export default function ProdutoFormPage() {
           {renderTabContent()}
         </div>
       </form>
+
+      {/* Modal de Foto Expandida */}
+      {fotoExpandida && fotoUrl && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
+          onClick={() => setFotoExpandida(false)}
+        >
+          <div className="relative max-w-4xl max-h-[90vh] p-4">
+            {/* Botão fechar */}
+            <button
+              type="button"
+              onClick={() => setFotoExpandida(false)}
+              className="absolute -top-2 -right-2 z-10 p-2 bg-white rounded-full shadow-lg hover:bg-gray-100 transition-colors"
+              title="Fechar"
+            >
+              <X className="w-5 h-5 text-gray-600" />
+            </button>
+            
+            {/* Imagem expandida */}
+            <img
+              src={fotoUrl}
+              alt={`Foto do produto ${formData.descricao}`}
+              className="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+            
+            {/* Legenda */}
+            <div className="absolute bottom-0 left-4 right-4 p-4 bg-gradient-to-t from-black/70 to-transparent rounded-b-xl">
+              <p className="text-white font-medium text-center">{formData.descricao}</p>
+              <p className="text-white/70 text-sm text-center">Código: {id}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Confirmação */}
+      <ModalConfirmacao
+        aberto={modalConfirmacao.aberto}
+        titulo={modalConfirmacao.titulo}
+        mensagem={modalConfirmacao.mensagem}
+        nomeItem={modalConfirmacao.nomeItem}
+        variante={modalConfirmacao.variante}
+        onConfirmar={modalConfirmacao.onConfirmar}
+        onCancelar={() => setModalConfirmacao(prev => ({ ...prev, aberto: false }))}
+        processando={loadingReceita}
+      />
     </div>
   );
 }

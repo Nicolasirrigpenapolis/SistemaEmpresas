@@ -27,6 +27,7 @@ import {
   Landmark,
   Banknote,
   BadgeCheck,
+  MessageSquare,
   X,
 } from 'lucide-react';
 import { geralService } from '../../services/Geral/geralService';
@@ -272,6 +273,11 @@ export default function GeralFormPage() {
   const [cnpjEncontrado, setCnpjEncontrado] = useState(false);
   const [cepEncontrado, setCepEncontrado] = useState(false);
 
+  // Estados de Validação
+  const [erros, setErros] = useState<Record<string, string>>({});
+  const [validandoIe, setValidandoIe] = useState(false);
+  const [ieValida, setIeValida] = useState<boolean | null>(null);
+
   // Dados extras para visualização
   const [dadosExtras, setDadosExtras] = useState<{
     municipioNome?: string;
@@ -350,6 +356,7 @@ export default function GeralFormPage() {
         codigoContabil: data.codigoContabil,
         codigoAdiantamento: data.codigoAdiantamento,
         salBruto: data.salBruto,
+        whatsAppSincronizado: data.whatsAppSincronizado,
       });
 
       // Guarda dados extras para visualização
@@ -378,6 +385,11 @@ export default function GeralFormPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validarFormulario()) {
+      setError('Por favor, corrija os erros no formulário antes de salvar.');
+      return;
+    }
 
     try {
       setSaving(true);
@@ -485,6 +497,47 @@ export default function GeralFormPage() {
     }
   };
 
+  const validarFormulario = (): boolean => {
+    const novosErros: Record<string, string> = {};
+
+    if (!formData.razaoSocial.trim()) {
+      novosErros.razaoSocial = 'Razão Social é obrigatória';
+    }
+
+    if (formData.tipo === 1 && !formData.nomeFantasia.trim()) {
+      novosErros.nomeFantasia = 'Nome Fantasia é obrigatório para Pessoa Jurídica';
+    }
+
+    if (!formData.cpfECnpj.trim()) {
+      novosErros.cpfECnpj = formData.tipo === 0 ? 'CPF é obrigatório' : 'CNPJ é obrigatório';
+    }
+
+    setErros(novosErros);
+    return Object.keys(novosErros).length === 0;
+  };
+
+  const handleValidarIe = async () => {
+    if (!formData.rgEIe || !dadosExtras.municipioUf) return;
+
+    try {
+      setValidandoIe(true);
+      const result = await geralService.validarIe(dadosExtras.municipioUf, formData.rgEIe);
+      setIeValida(result.isValid);
+      if (!result.isValid) {
+        setErros(prev => ({ ...prev, rgEIe: result.mensagem || 'Inscrição Estadual inválida' }));
+      } else {
+        setErros(prev => {
+          const { rgEIe, ...rest } = prev;
+          return rest;
+        });
+      }
+    } catch (err) {
+      console.error('Erro ao validar IE:', err);
+    } finally {
+      setValidandoIe(false);
+    }
+  };
+
   // ============================================================================
   // EFFECTS
   // ============================================================================
@@ -492,6 +545,18 @@ export default function GeralFormPage() {
     loadData();
     loadVendedores();
   }, [id]);
+
+  // Validação de IE quando muda o RG/IE ou o Município (UF)
+  useEffect(() => {
+    if (formData.tipo === 1 && formData.rgEIe && dadosExtras.municipioUf) {
+      const timer = setTimeout(() => {
+        handleValidarIe();
+      }, 800);
+      return () => clearTimeout(timer);
+    } else {
+      setIeValida(null);
+    }
+  }, [formData.rgEIe, dadosExtras.municipioUf, formData.tipo]);
 
   // ============================================================================
   // RENDER
@@ -732,12 +797,16 @@ export default function GeralFormPage() {
                 cepEncontrado={cepEncontrado}
                 isViewMode={isViewMode}
                 dadosExtras={dadosExtras}
+                erros={erros}
+                validandoIe={validandoIe}
+                ieValida={ieValida}
               />
             ) : (
               <TabCobrancaConta
                 formData={formData}
                 onChange={handleChange}
                 isViewMode={isViewMode}
+                erros={erros}
               />
             )}
           </div>
@@ -767,6 +836,9 @@ interface TabProps {
     vendedorNome?: string;
     dataDoCadastro?: string;
   };
+  erros?: Record<string, string>;
+  validandoIe?: boolean;
+  ieValida?: boolean | null;
 }
 
 function TabDadosPrincipais({
@@ -780,8 +852,14 @@ function TabDadosPrincipais({
   cnpjEncontrado,
   cepEncontrado,
   isViewMode,
-  // dadosExtras não é usado nesta aba atualmente
+  dadosExtras,
+  erros = {},
+  validandoIe,
+  ieValida,
 }: TabProps) {
+
+  // Log para evitar erro de lint se não for usado em algum lugar específico
+  if (dadosExtras) { /* apenas para uso */ }
 
   return (
     <div className="space-y-6">
@@ -818,6 +896,7 @@ function TabDadosPrincipais({
             placeholder={formData.tipo === 0 ? '000.000.000-00' : '00.000.000/0000-00'}
             icone={<Hash className="w-4 h-4" />}
             sucesso={cnpjEncontrado}
+            erro={erros.cpfECnpj}
             acaoDireita={
               formData.tipo === 1 && !isViewMode && (
                 <button
@@ -845,6 +924,15 @@ function TabDadosPrincipais({
             onChange={(v) => onChange('rgEIe', v)}
             disabled={isViewMode}
             icone={<FileText className="w-4 h-4" />}
+            sucesso={ieValida === true}
+            erro={erros.rgEIe}
+            acaoDireita={
+              validandoIe && (
+                <div className="p-2">
+                  <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+                </div>
+              )
+            }
           />
 
           <InputModerno
@@ -871,6 +959,7 @@ function TabDadosPrincipais({
             disabled={isViewMode}
             required
             icone={<Building2 className="w-4 h-4" />}
+            erro={erros.razaoSocial}
           />
 
           <InputModerno
@@ -879,6 +968,7 @@ function TabDadosPrincipais({
             onChange={(v) => onChange('nomeFantasia', v)}
             disabled={isViewMode}
             icone={<Building2 className="w-4 h-4" />}
+            erro={erros.nomeFantasia}
           />
         </div>
       </SecaoCard>
@@ -1137,7 +1227,7 @@ function TabDadosPrincipais({
 // ============================================================================
 // ABA 2 - COBRANÇA E CONTA CORRENTE
 // ============================================================================
-function TabCobrancaConta({ formData, onChange, isViewMode }: TabProps) {
+function TabCobrancaConta({ formData, onChange, isViewMode, erros = {} }: TabProps) {
   return (
     <div className="space-y-6">
       {/* Endereço de Cobrança */}
@@ -1154,6 +1244,7 @@ function TabCobrancaConta({ formData, onChange, isViewMode }: TabProps) {
               onChange={(v) => onChange('enderecoDeCobranca', v)}
               disabled={isViewMode}
               icone={<MapPin className="w-4 h-4" />}
+              erro={erros.enderecoDeCobranca}
             />
           </div>
           <div className="md:col-span-2">
@@ -1318,6 +1409,25 @@ function TabCobrancaConta({ formData, onChange, isViewMode }: TabProps) {
             type="number"
             icone={<Banknote className="w-4 h-4" />}
           />
+        </div>
+
+        <div className="mt-4 pt-4 border-t border-gray-100">
+          <label className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors w-fit">
+            <input
+              type="checkbox"
+              checked={formData.whatsAppSincronizado}
+              onChange={(e) => onChange('whatsAppSincronizado', e.target.checked)}
+              disabled={isViewMode}
+              className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+            />
+            <div className="flex items-center gap-2">
+              <MessageSquare className="w-4 h-4 text-green-600" />
+              <span className="text-sm font-medium text-gray-700">Sincronizado com WhatsApp</span>
+            </div>
+          </label>
+          <p className="mt-1 ml-10 text-xs text-gray-500">
+            Indica se este contato já foi exportado para a lista de transmissão do WhatsApp.
+          </p>
         </div>
       </SecaoCard>
     </div>

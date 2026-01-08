@@ -71,6 +71,8 @@ coverage/
 # ==========================================
 wwwroot/
 !SistemaEmpresas/wwwroot/
+publish/
+**/publish/
 
 # ==========================================
 # Temporary files
@@ -106,3 +108,12 @@ certificado/*.p12
 ehthumbs.db
 Thumbs.db
 desktop.ini
+
+# ==========================================
+# Arquivos de teste e temporários
+# ==========================================
+*_teste*.xml
+teste_*.xml
+nota_real.xml
+fix-*.ps1
+start-https.*

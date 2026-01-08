@@ -1,295 +1,326 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Plus,
   Edit2,
-  Trash2,
-  User,
-  Filter,
-  X,
   Eye,
-  Search,
+  User,
   Phone,
+  MapPin,
+  Trash2,
+  RefreshCw,
 } from 'lucide-react';
 import { motoristaService } from '../../../services/Transporte/motoristaService';
 import type { MotoristaListDto, PagedResult, MotoristaFiltros } from '../../../types';
-import { UFS_BRASIL } from '../../../types';
-import { usePermissaoTela } from '../../../hooks/usePermissaoTela';
+
+// Componentes reutilizáveis
 import {
   ModalConfirmacao,
-  Paginacao,
-  EstadoVazio,
-  EstadoCarregando,
   AlertaErro,
+  DataTable,
+  CabecalhoPagina,
+  type ColumnConfig
 } from '../../../components/common';
 import { formatarCPF, formatarTelefone } from '../../../utils/formatters';
 
 export default function MotoristasPage() {
   const navigate = useNavigate();
-  const { podeIncluir, podeAlterar, podeExcluir, carregando: carregandoPermissoes } = usePermissaoTela('Motorista');
 
-  const [motoristas, setMotoristas] = useState<MotoristaListDto[]>([]);
+  // Estados
+  const [data, setData] = useState<PagedResult<MotoristaListDto> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [totalItems, setTotalItems] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
 
   // Filtros
-  const [filtros, setFiltros] = useState<MotoristaFiltros>({
-    busca: '',
-    uf: '',
-    pagina: 1,
-    tamanhoPagina: 10,
+  const [filtroBusca, setFiltroBusca] = useState('');
+  const [filtroUF, setFiltroUF] = useState<string | undefined>(undefined);
+
+  // Paginação
+  const [pageNumber, setPageNumber] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+
+  // Modal de exclusão (se necessário, mas seguindo o layout de produtos que tem inativação)
+  const [deleteModal, setDeleteModal] = useState<{ open: boolean; id: number; nome: string; deleting: boolean }>({
+    open: false,
+    id: 0,
+    nome: '',
+    deleting: false,
   });
-  const [mostrarFiltros, setMostrarFiltros] = useState(false);
-  const [buscaTemp, setBuscaTemp] = useState('');
 
-  // Exclusão
-  const [motoristaExcluir, setMotoristaExcluir] = useState<MotoristaListDto | null>(null);
-  const [excluindo, setExcluindo] = useState(false);
-
-  const carregarMotoristas = useCallback(async () => {
+  // Carregar dados
+  const loadData = async () => {
     try {
       setLoading(true);
       setError(null);
-      const resultado: PagedResult<MotoristaListDto> = await motoristaService.listar(filtros);
-      setMotoristas(resultado.items);
-      setTotalItems(resultado.totalCount);
-      setTotalPages(resultado.totalPages);
+
+      const filtro: MotoristaFiltros = {
+        pagina: pageNumber,
+        tamanhoPagina: pageSize,
+        busca: filtroBusca || undefined,
+        uf: filtroUF || undefined,
+      };
+
+      const result = await motoristaService.listar(filtro);
+      setData(result);
     } catch (err: any) {
       console.error('Erro ao carregar motoristas:', err);
       setError(err.response?.data?.mensagem || 'Erro ao carregar motoristas');
     } finally {
       setLoading(false);
     }
-  }, [filtros]);
+  };
 
   useEffect(() => {
-    carregarMotoristas();
-  }, [carregarMotoristas]);
+    loadData();
+  }, [pageNumber, pageSize, filtroBusca, filtroUF]);
 
-  const handleBuscar = () => {
-    setFiltros((prev) => ({ ...prev, busca: buscaTemp, pagina: 1 }));
+  const handleView = (id: number) => {
+    navigate(`/transporte/motoristas/${id}/visualizar`);
   };
 
-  const handleLimparFiltros = () => {
-    setBuscaTemp('');
-    setFiltros({ busca: '', uf: '', pagina: 1, tamanhoPagina: 10 });
+  const handleEdit = (id: number) => {
+    navigate(`/transporte/motoristas/${id}/editar`);
   };
 
-  const handleExcluir = async () => {
-    if (!motoristaExcluir) return;
+  const handleNew = () => {
+    navigate('/transporte/motoristas/novo');
+  };
 
+  const handleDeleteClick = (id: number, nome: string) => {
+    setDeleteModal({ open: true, id, nome, deleting: false });
+  };
+
+  const handleDeleteConfirm = async () => {
+    setDeleteModal((prev) => ({ ...prev, deleting: true }));
     try {
-      setExcluindo(true);
-      await motoristaService.excluir(motoristaExcluir.codigoDoMotorista);
-      setMotoristaExcluir(null);
-      carregarMotoristas();
+      await motoristaService.excluir(deleteModal.id);
+      setDeleteModal({ open: false, id: 0, nome: '', deleting: false });
+      await loadData();
     } catch (err: any) {
+      console.error('Erro ao excluir:', err);
       setError(err.response?.data?.mensagem || 'Erro ao excluir motorista');
-    } finally {
-      setExcluindo(false);
+      setDeleteModal((prev) => ({ ...prev, deleting: false }));
     }
   };
 
-  if (carregandoPermissoes) {
-    return <EstadoCarregando mensagem="Verificando permissões..." />;
-  }
-
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-primary flex items-center gap-2">
-            <User className="w-7 h-7 text-blue-600" />
-            Motoristas
-          </h1>
-          <p className="text-muted-foreground mt-1">Gerencie os motoristas/condutores do sistema</p>
-        </div>
-        {podeIncluir && (
-          <button
-            onClick={() => navigate('/transporte/motoristas/novo')}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-colors"
-          >
-            <Plus className="w-5 h-5" />
-            Novo Motorista
-          </button>
-        )}
-      </div>
-
-      {/* Barra de Busca e Filtros */}
-      <div className="bg-surface rounded-xl shadow-sm border border-border p-4">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground/70 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="Buscar por nome ou CPF..."
-              value={buscaTemp}
-              onChange={(e) => setBuscaTemp(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleBuscar()}
-              className="w-full pl-10 pr-4 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={handleBuscar}
-              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700"
-            >
-              Buscar
-            </button>
-            <button
-              onClick={() => setMostrarFiltros(!mostrarFiltros)}
-              className={`p-2 rounded-lg border ${mostrarFiltros ? 'bg-blue-100 border-blue-500' : 'border-input hover:bg-surface-hover'}`}
-            >
-              <Filter className="w-5 h-5" />
-            </button>
-            {(filtros.busca || filtros.uf) && (
-              <button
-                onClick={handleLimparFiltros}
-                className="p-2 rounded-lg border border-input hover:bg-surface-hover text-muted-foreground"
-              >
-                <X className="w-5 h-5" />
-              </button>
+  // Definição das colunas
+  const columns: ColumnConfig<MotoristaListDto>[] = [
+    {
+      key: 'codigoDoMotorista',
+      header: 'Código',
+      width: '100px',
+      sortable: true,
+      filterable: true,
+      searchPlaceholder: 'Buscar código...',
+      render: (item) => (
+        <span className="font-mono font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg text-xs">
+          #{item.codigoDoMotorista}
+        </span>
+      )
+    },
+    {
+      key: 'nomeDoMotorista',
+      header: 'Motorista',
+      sortable: true,
+      render: (item) => (
+        <div className="flex flex-col gap-0.5">
+          <span className="font-bold text-foreground leading-tight">{item.nomeDoMotorista}</span>
+          <div className="flex items-center gap-3">
+            <span className="text-[11px] text-muted-foreground flex items-center gap-1 font-medium">
+              <User className="h-3 w-3 opacity-70" />
+              {formatarCPF(item.cpf)}
+            </span>
+            {item.rg && (
+              <span className="text-[11px] text-muted-foreground flex items-center gap-1 font-medium">
+                RG: {item.rg}
+              </span>
             )}
           </div>
         </div>
+      )
+    },
+    {
+      key: 'cel',
+      header: 'Contato',
+      render: (item) => (
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg">
+            <Phone className="h-3.5 w-3.5" />
+          </div>
+          <span className="text-sm font-medium text-foreground">
+            {formatarTelefone(item.cel) || 'Não informado'}
+          </span>
+        </div>
+      )
+    },
+    {
+      key: 'uf',
+      header: 'UF',
+      align: 'center',
+      render: (item) => (
+        <div className="flex items-center justify-center gap-1.5">
+          <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+          <span className="text-sm font-bold text-foreground">{item.uf}</span>
+        </div>
+      )
+    }
+  ];
 
-        {/* Filtros expandidos */}
-        {mostrarFiltros && (
-          <div className="mt-4 pt-4 border-t border-border">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">UF</label>
-                <select
-                  value={filtros.uf || ''}
-                  onChange={(e) => setFiltros((prev) => ({ ...prev, uf: e.target.value, pagina: 1 }))}
-                  className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-blue-500"
+  return (
+    <div className="space-y-6 pb-8">
+      <CabecalhoPagina
+        titulo="Motoristas"
+        subtitulo="Gerenciamento de motoristas e condutores"
+        icone={User}
+        acoes={
+          <button
+            onClick={handleNew}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all font-medium shadow-lg shadow-blue-600/25 active:scale-95"
+          >
+            <Plus className="w-5 h-5" />
+            <span>Novo Motorista</span>
+          </button>
+        }
+      />
+
+      <div className="px-6">
+        {error && <AlertaErro mensagem={error} fechavel onFechar={() => setError(null)} />}
+
+        <DataTable
+          data={data?.items || []}
+          columns={columns}
+          getRowKey={(item) => item.codigoDoMotorista}
+          loading={loading}
+          totalItems={data?.totalCount}
+          
+          // Filtros Server-Side
+          onFilterChange={(_, value) => {
+            setFiltroBusca(value);
+            setPageNumber(1);
+          }}
+          onClearFilters={() => {
+            setFiltroBusca('');
+            setFiltroUF(undefined);
+            setPageNumber(1);
+          }}
+          headerExtra={
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center bg-surface border border-border p-1 rounded-xl shadow-sm">
+                <button
+                  onClick={() => {
+                    setFiltroUF(undefined);
+                    setPageNumber(1);
+                  }}
+                  className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${!filtroUF
+                    ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-surface-hover'
+                    }`}
                 >
-                  <option value="">Todas</option>
-                  {UFS_BRASIL.map((uf) => (
-                    <option key={uf} value={uf}>{uf}</option>
-                  ))}
-                </select>
+                  Todos
+                </button>
+                <button
+                  onClick={() => {
+                    setFiltroUF('SP');
+                    setPageNumber(1);
+                  }}
+                  className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${filtroUF === 'SP'
+                    ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-surface-hover'
+                    }`}
+                >
+                  São Paulo
+                </button>
               </div>
+
+              <button
+                onClick={() => loadData()}
+                className="p-2 text-muted-foreground hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
+                title="Atualizar lista"
+              >
+                <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
+          }
+          // Ações de Linha
+          rowActions={(item) => (
+            <div className="flex items-center justify-end gap-2">
+              <button
+                onClick={() => handleView(item.codigoDoMotorista)}
+                className="p-2 text-blue-600 hover:bg-blue-50 rounded-xl transition-all border border-transparent hover:border-blue-100"
+                title="Visualizar"
+              >
+                <Eye className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => handleEdit(item.codigoDoMotorista)}
+                className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all border border-transparent hover:border-emerald-100"
+                title="Editar"
+              >
+                <Edit2 className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => handleDeleteClick(item.codigoDoMotorista, item.nomeDoMotorista)}
+                className="p-2 text-red-600 hover:bg-red-50 rounded-xl transition-all border border-transparent hover:border-red-100"
+                title="Excluir"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+        />
+
+        {/* Paginação */}
+        {!loading && data && data.totalPages > 0 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border mt-4">
+            <div className="flex items-center gap-4">
+              <div className="text-sm text-muted-foreground">
+                Página <span className="font-medium text-primary">{pageNumber}</span> de <span className="font-medium text-primary">{data.totalPages}</span>
+              </div>
+              <select
+                value={pageSize}
+                onChange={(e) => {
+                  setPageSize(Number(e.target.value));
+                  setPageNumber(1);
+                }}
+                className="px-2 py-1 text-sm border border-border rounded-lg bg-surface text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              >
+                <option value={10}>10 por página</option>
+                <option value={25}>25 por página</option>
+                <option value={50}>50 por página</option>
+                <option value={100}>100 por página</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setPageNumber(prev => Math.max(1, prev - 1))}
+                disabled={pageNumber === 1}
+                className="px-3 py-1.5 text-sm font-medium border border-border rounded-lg hover:bg-surface-hover disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Anterior
+              </button>
+              <button
+                onClick={() => setPageNumber(prev => Math.min(data.totalPages, prev + 1))}
+                disabled={pageNumber === data.totalPages}
+                className="px-3 py-1.5 text-sm font-medium border border-border rounded-lg hover:bg-surface-hover disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Próxima
+              </button>
             </div>
           </div>
         )}
       </div>
 
-      {/* Alerta de Erro */}
-      {error && <AlertaErro mensagem={error} fechavel onFechar={() => setError(null)} />}
-
-      {/* Tabela */}
-      <div className="bg-surface rounded-xl shadow-sm border border-border overflow-hidden">
-        {loading ? (
-          <EstadoCarregando mensagem="Carregando motoristas..." />
-        ) : !motoristas || motoristas.length === 0 ? (
-          <EstadoVazio
-            icone={User}
-            titulo="Nenhum motorista encontrado"
-            descricao={filtros.busca || filtros.uf ? 'Tente ajustar os filtros' : 'Adicione seu primeiro motorista'}
-            acao={podeIncluir ? { texto: 'Novo Motorista', onClick: () => navigate('/transporte/motoristas/novo') } : undefined}
-          />
-        ) : (
-          <>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-surface-hover">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Código</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Nome</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">CPF</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">RG</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Celular</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">UF</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase">Ações</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-surface divide-y divide-gray-200">
-                  {motoristas?.map((m) => (
-                    <tr key={m.codigoDoMotorista} className="group hover:bg-surface-hover">
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-[var(--text-muted)]">
-                        {m.codigoDoMotorista}
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-[var(--text)]">
-                        {m.nomeDoMotorista}
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground">
-                        {formatarCPF(m.cpf)}
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground">
-                        {m.rg || '-'}
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Phone className="w-4 h-4 text-muted-foreground/70" />
-                          {formatarTelefone(m.cel) || '-'}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground">
-                        {m.uf || '-'}
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-right text-sm">
-                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button
-                            onClick={() => navigate(`/transporte/motoristas/${m.codigoDoMotorista}/visualizar`)}
-                            className="p-1.5 text-muted-foreground hover:text-blue-600 hover:bg-blue-50 rounded-lg"
-                            title="Visualizar"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          {podeAlterar && (
-                            <button
-                              onClick={() => navigate(`/transporte/motoristas/${m.codigoDoMotorista}/editar`)}
-                              className="p-1.5 text-muted-foreground hover:text-blue-600 hover:bg-blue-50 rounded-lg"
-                              title="Editar"
-                            >
-                              <Edit2 className="w-4 h-4" />
-                            </button>
-                          )}
-                          {podeExcluir && (
-                            <button
-                              onClick={() => setMotoristaExcluir(m)}
-                              className="p-1.5 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-lg"
-                              title="Excluir"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Paginação */}
-            <div className="px-4 py-3 border-t border-border">
-              <Paginacao
-                paginaAtual={filtros.pagina || 1}
-                totalPaginas={totalPages}
-                totalItens={totalItems}
-                itensPorPagina={filtros.tamanhoPagina || 10}
-                onMudarPagina={(p) => setFiltros((prev) => ({ ...prev, pagina: p }))}
-              />
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* Modal de Confirmação de Exclusão */}
       <ModalConfirmacao
-        aberto={!!motoristaExcluir}
+        aberto={deleteModal.open}
         titulo="Excluir Motorista"
-        mensagem={`Tem certeza que deseja excluir o motorista "${motoristaExcluir?.nomeDoMotorista}"? Esta ação não pode ser desfeita.`}
+        mensagem={`Deseja realmente excluir o motorista "${deleteModal.nome}"? Esta ação não poderá ser desfeita.`}
         textoBotaoConfirmar="Excluir"
+        textoBotaoCancelar="Cancelar"
         variante="danger"
-        processando={excluindo}
-        onConfirmar={handleExcluir}
-        onCancelar={() => setMotoristaExcluir(null)}
+        processando={deleteModal.deleting}
+        onConfirmar={handleDeleteConfirm}
+        onCancelar={() => setDeleteModal({ open: false, id: 0, nome: '', deleting: false })}
       />
     </div>
   );

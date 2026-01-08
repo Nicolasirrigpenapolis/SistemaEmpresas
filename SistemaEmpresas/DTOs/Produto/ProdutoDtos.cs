@@ -9,8 +9,8 @@ public class ProdutoListDto
     public string GrupoProduto { get; set; } = string.Empty;
     public string SubGrupoProduto { get; set; } = string.Empty;
     public string Unidade { get; set; } = string.Empty;
-    public decimal QuantidadeNoEstoque { get; set; } // DEPRECATED: Usar QuantidadeContabil
-    public decimal QuantidadeContabil { get; set; } // Estoque Contábil (correto)
+    public decimal QuantidadeNoEstoque { get; set; } // Descontinuado: Usar QuantidadeContabil
+    public decimal QuantidadeContabil { get; set; } // Estoque Contabil (correto)
     public decimal QuantidadeMinima { get; set; }
     public decimal ValorDeCusto { get; set; }
     public decimal ValorTotal { get; set; }

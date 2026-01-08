@@ -91,7 +91,7 @@ export const classTribService = {
    * Autocomplete para seleção de ClassTrib
    */
   async autocomplete(termo: string, limite: number = 20): Promise<ClassTribAutocomplete[]> {
-    if (!termo || termo.length < 2) return [];
+    if (!termo || termo.length < 1) return [];
     
     const response = await api.get<ClassTribAutocomplete[]>(
       `/classtrib/autocomplete?q=${encodeURIComponent(termo)}&limite=${limite}`

@@ -109,7 +109,7 @@ public static class DbInitializer
             new { Modulo = "Fiscal", Tela = "NotaFiscal", NomeTela = "Notas Fiscais", Rota = "/notas-fiscais" },
             new { Modulo = "Fiscal", Tela = "ClassificacaoFiscal", NomeTela = "Classificação Fiscal", Rota = "/classificacao-fiscal" },
             new { Modulo = "Fiscal", Tela = "ClassTrib", NomeTela = "Classificação Tributária (IBS/CBS)", Rota = "/classtrib" },
-            new { Modulo = "Sistema", Tela = "DadosEmitente", NomeTela = "Dados do Emitente", Rota = "/emitente" },
+            new { Modulo = "Sistema", Tela = "DadosEmitente", NomeTela = "Configurações do Sistema", Rota = "/emitente" },
             new { Modulo = "Sistema", Tela = "Usuarios", NomeTela = "Usuários e Permissões", Rota = "/usuarios" },
             new { Modulo = "Sistema", Tela = "Logs", NomeTela = "Logs de Auditoria", Rota = "/logs" },
         };

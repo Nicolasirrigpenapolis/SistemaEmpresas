@@ -34,7 +34,6 @@ import {
   Sparkles,
   Lock,
   Unlock,
-  Calendar,
   TrendingUp,
   Filter,
   Grid3X3,
@@ -738,7 +737,7 @@ export default function UsuariosPage() {
       )}
 
       {/* Header Premium */}
-      <div className="sticky top-0 z-40 bg-surface/80 backdrop-blur-xl border-b border-border/50 shadow-sm">
+      <div className="sticky top-16 md:top-20 z-40 bg-surface/80 backdrop-blur-xl border-b border-border/50 shadow-sm">
         <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-4 md:py-5">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 md:gap-5">
@@ -958,10 +957,10 @@ export default function UsuariosPage() {
                           setUsuarioForm({ nome: '', senha: '', confirmarSenha: '', grupo: '', observacoes: '', ativo: true });
                           setModalAberto('criar-usuario');
                         }}
-                        className="group flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30"
+                        className="group flex items-center gap-2 px-5 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-300 shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30"
                       >
                         <UserPlus className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                        <span className="font-medium">Novo Usuário</span>
+                        <span className="font-bold text-sm uppercase tracking-wider">Novo Usuário</span>
                       </button>
                     )}
                   </div>
@@ -983,62 +982,62 @@ export default function UsuariosPage() {
                 {/* Grid ou Table View */}
                 {viewMode === 'grid' ? (
                   /* Grid View - Cards de Usuários */
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {usuariosFiltrados.length === 0 ? (
-                      <div className="col-span-full flex flex-col items-center justify-center py-16 text-muted-foreground">
-                        <div className="w-20 h-20 bg-surface-hover rounded-full flex items-center justify-center mb-4">
+                      <div className="col-span-full flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-gray-200 shadow-sm">
+                        <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
                           <User className="w-10 h-10 text-gray-300" />
                         </div>
-                        <p className="text-lg font-medium">Nenhum usuário encontrado</p>
-                        <p className="text-sm text-muted-foreground/70">Tente ajustar os filtros de busca</p>
+                        <p className="text-lg font-bold text-gray-900">Nenhum usuário encontrado</p>
+                        <p className="text-sm text-gray-500 mt-1">Tente ajustar os filtros de busca</p>
                       </div>
                     ) : (
-                      usuariosFiltrados.map((usuario) => (
+                      usuariosFiltrados.map((usuario, index) => (
                         <div
                           key={usuario.nome}
-                          className={`group relative bg-surface rounded-2xl border border-border p-5 hover:shadow-xl hover:border-secondary/50 transition-all duration-300 ${!usuario.ativo ? 'opacity-70' : ''}`}
+                          className={`group relative bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-xl hover:shadow-blue-500/10 hover:border-blue-200 transition-all duration-300 ${!usuario.ativo ? 'opacity-75' : ''}`}
                         >
-                          <div className="flex items-start justify-between">
+                          <div className="flex items-start justify-between mb-6">
                             <div className="flex items-center gap-4">
-                              <div className={`relative w-14 h-14 rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-lg bg-gradient-to-br ${getAvatarColor(usuario.nome)}`}>
+                              <div className={`relative w-14 h-14 rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-lg bg-gradient-to-br ${getAvatarColor(usuario.nome)} transform group-hover:scale-110 transition-transform duration-300`}>
                                 {usuario.nome.charAt(0).toUpperCase()}
-                                <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${usuario.ativo ? 'bg-emerald-500' : 'bg-gray-400'}`} />
+                                <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${usuario.ativo ? 'bg-emerald-500' : 'bg-red-500'}`} />
                               </div>
                               <div>
-                                <h3 className="font-semibold text-primary">{usuario.nome}</h3>
-                                <span className="inline-flex items-center gap-1 text-xs text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full mt-1">
+                                <h3 className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{usuario.nome}</h3>
+                                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-100 mt-1">
                                   <Shield className="w-3 h-3" />
                                   {usuario.grupo}
                                 </span>
                               </div>
                             </div>
                             <DropdownMenu
-                              triggerClassName="p-2 text-muted-foreground/70 hover:text-muted-foreground hover:bg-surface-hover rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                              triggerClassName="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl border border-transparent hover:border-blue-100 transition-all shadow-sm opacity-0 group-hover:opacity-100"
                               menuWidth="w-48"
                               items={[
                                 ...(podeAlterar ? [
                                   {
                                     label: 'Editar',
-                                    icon: <Edit3 className="w-4 h-4 text-muted-foreground" />,
+                                    icon: <Edit3 className="w-4 h-4" />,
                                     onClick: () => abrirEdicao(usuario),
                                   },
                                   {
                                     label: 'Alterar Senha',
-                                    icon: <Key className="w-4 h-4 text-muted-foreground" />,
+                                    icon: <Key className="w-4 h-4" />,
                                     onClick: () => abrirAlterarSenha(usuario),
                                   },
                                   {
                                     label: usuario.ativo ? 'Inativar' : 'Ativar',
                                     icon: usuario.ativo
-                                      ? <UserX className="w-4 h-4 text-orange-500" />
-                                      : <UserCheck className="w-4 h-4 text-emerald-500" />,
+                                      ? <UserX className="w-4 h-4" />
+                                      : <UserCheck className="w-4 h-4" />,
                                     onClick: () => handleToggleAtivo(usuario),
                                   },
                                 ] : []),
                                 ...(podeExcluir ? [
                                   {
                                     label: 'Excluir',
-                                    icon: <Trash2 className="w-4 h-4 text-red-500" />,
+                                    icon: <Trash2 className="w-4 h-4" />,
                                     textColor: 'text-red-600',
                                     dividerBefore: podeAlterar,
                                     onClick: () => handleExcluirUsuario(usuario.nome),
@@ -1047,20 +1046,33 @@ export default function UsuariosPage() {
                               ]}
                             />
                           </div>
-                          {usuario.observacoes && (
-                            <p className="mt-3 text-sm text-muted-foreground truncate">{usuario.observacoes}</p>
-                          )}
-                          <div className="mt-4 pt-4 border-t border-border flex items-center justify-between">
-                            <button
-                              onClick={() => podeAlterar && handleToggleAtivo(usuario)}
-                              disabled={!podeAlterar}
-                              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${usuario.ativo
-                                ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                                : 'bg-surface-hover text-muted-foreground hover:bg-gray-200'
-                                } ${!podeAlterar ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                            >
-                              {usuario.ativo ? <><BadgeCheck className="w-3.5 h-3.5" /> Ativo</> : <><UserX className="w-3.5 h-3.5" /> Inativo</>}
-                            </button>
+                          
+                          <div className="space-y-4">
+                            <div className="p-3 bg-gray-50 rounded-xl border border-gray-100 group-hover:bg-blue-50/30 group-hover:border-blue-100 transition-colors">
+                              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Observações</p>
+                              <p className="text-sm text-gray-600 line-clamp-2 min-h-[40px]">
+                                {usuario.observacoes || <span className="text-gray-400 italic">Sem observações</span>}
+                              </p>
+                            </div>
+
+                            <div className="flex items-center justify-between pt-2">
+                              <div className="flex items-center gap-2">
+                                <span className="font-mono font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg text-[10px]">
+                                  #{index + 1}
+                                </span>
+                              </div>
+                              <button
+                                onClick={() => podeAlterar && handleToggleAtivo(usuario)}
+                                disabled={!podeAlterar}
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 border ${usuario.ativo
+                                  ? 'bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100'
+                                  : 'bg-red-50 text-red-700 border-red-100 hover:bg-red-100'
+                                  } ${!podeAlterar ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                              >
+                                <span className={`w-1.5 h-1.5 rounded-full ${usuario.ativo ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                                {usuario.ativo ? 'Ativo' : 'Inativo'}
+                              </button>
+                            </div>
                           </div>
                         </div>
                       ))
@@ -1068,15 +1080,16 @@ export default function UsuariosPage() {
                   </div>
                 ) : (
                   /* Table View - Lista de Usuários */
-                  <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm overflow-x-auto">
+                  <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm overflow-x-auto">
                     <table className="w-full min-w-[720px]">
-                      <thead className="bg-surface-hover sticky top-0 z-10">
+                      <thead className="bg-gray-50 sticky top-0 z-10 border-b border-gray-200">
                         <tr>
-                          <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Usuário</th>
-                          <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Grupo</th>
-                          <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden lg:table-cell">Observações</th>
-                          <th className="text-center px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
-                          <th className="text-center px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider w-24">Ações</th>
+                          <th className="text-left px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider w-24 align-middle">Código</th>
+                          <th className="text-left px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider align-middle">Usuário</th>
+                          <th className="text-left px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider align-middle">Grupo</th>
+                          <th className="text-left px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider hidden lg:table-cell align-middle">Observações</th>
+                          <th className="text-center px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider align-middle">Status</th>
+                          <th className="text-center px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider w-24 align-middle">Ações</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
@@ -1084,56 +1097,58 @@ export default function UsuariosPage() {
                           <tr>
                             <td colSpan={5} className="px-6 py-16 text-center">
                               <div className="flex flex-col items-center">
-                                <div className="w-20 h-20 bg-surface-hover rounded-full flex items-center justify-center mb-4">
+                                <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
                                   <User className="w-10 h-10 text-gray-300" />
                                 </div>
-                                <p className="text-lg font-medium text-primary">Nenhum usuário encontrado</p>
-                                <p className="text-sm text-muted-foreground mt-1">Tente ajustar os filtros de busca</p>
+                                <p className="text-lg font-bold text-gray-900">Nenhum usuário encontrado</p>
+                                <p className="text-sm text-gray-500 mt-1">Tente ajustar os filtros de busca</p>
                               </div>
                             </td>
                           </tr>
                         ) : (
                           usuariosFiltrados.map((usuario, index) => (
-                            <tr key={usuario.nome} className="group hover:bg-surface-hover transition-colors">
-                              <td className="px-6 py-4">
+                            <tr key={usuario.nome} className="group hover:bg-gray-50/80 transition-colors">
+                              <td className="px-6 py-4 align-middle">
+                                <span className="font-mono font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg text-xs">
+                                  #{index + 1}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 align-middle">
                                 <div className="flex items-center gap-4">
-                                  <div className={`relative w-12 h-12 rounded-xl flex items-center justify-center text-white font-semibold text-lg shadow-md bg-gradient-to-br ${getAvatarColor(usuario.nome)} transform group-hover:scale-105 transition-transform`}>
+                                  <div className={`relative w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-md bg-gradient-to-br ${getAvatarColor(usuario.nome)} transform group-hover:scale-105 transition-transform`}>
                                     {usuario.nome.charAt(0).toUpperCase()}
                                   </div>
                                   <div>
-                                    <p className="font-semibold text-primary">{usuario.nome}</p>
-                                    <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                                      <Calendar className="w-3 h-3" />
-                                      Usuário #{index + 1}
-                                    </p>
+                                    <p className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{usuario.nome}</p>
                                   </div>
                                 </div>
                               </td>
-                              <td className="px-6 py-4">
-                                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-gradient-to-r from-violet-50 to-purple-50 text-violet-700 border border-violet-100">
+                              <td className="px-6 py-4 align-middle">
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-100">
                                   {usuario.grupo}
                                 </span>
                               </td>
-                              <td className="px-6 py-4 hidden lg:table-cell">
-                                <span className="text-sm text-muted-foreground truncate max-w-[200px] block">
-                                  {usuario.observacoes || <span className="text-muted-foreground/70 italic">Sem observações</span>}
+                              <td className="px-6 py-4 hidden lg:table-cell align-middle">
+                                <span className="text-sm text-gray-600 truncate max-w-[200px] block">
+                                  {usuario.observacoes || <span className="text-gray-400 italic">Sem observações</span>}
                                 </span>
                               </td>
-                              <td className="px-6 py-4 text-center">
+                              <td className="px-6 py-4 text-center align-middle">
                                 <button
                                   onClick={() => podeAlterar && handleToggleAtivo(usuario)}
                                   disabled={!podeAlterar}
-                                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 ${usuario.ativo
-                                    ? 'bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 border border-emerald-200 hover:shadow-md hover:shadow-emerald-100'
-                                    : 'bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border border-red-200 hover:shadow-md hover:shadow-red-100'
+                                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 border ${usuario.ativo
+                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100'
+                                    : 'bg-red-50 text-red-700 border-red-100 hover:bg-red-100'
                                     } ${!podeAlterar ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                                 >
-                                  {usuario.ativo ? <><UserCheck className="w-3.5 h-3.5" /> Ativo</> : <><UserX className="w-3.5 h-3.5" /> Inativo</>}
+                                  <span className={`w-1.5 h-1.5 rounded-full ${usuario.ativo ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                                  {usuario.ativo ? 'Ativo' : 'Inativo'}
                                 </button>
                               </td>
-                              <td className="px-6 py-4 text-center">
+                              <td className="px-6 py-4 text-center align-middle">
                                 <DropdownMenu
-                                  triggerClassName="p-2 text-muted-foreground/70 hover:text-muted-foreground hover:bg-surface rounded-lg transition-all shadow-sm opacity-0 group-hover:opacity-100"
+                                  triggerClassName="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl border border-transparent hover:border-blue-100 transition-all shadow-sm opacity-0 group-hover:opacity-100"
                                   items={[
                                     ...(podeAlterar ? [
                                       {

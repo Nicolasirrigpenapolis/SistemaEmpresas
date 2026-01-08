@@ -10,6 +10,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { emitenteService } from '../../services/Emitentes/emitenteService';
+import { ModalConfirmacao } from '../common';
 
 interface CertificadoInfo {
   subject: string;
@@ -48,6 +49,7 @@ export default function CertificadoSection({
   const [success, setSuccess] = useState<string | null>(null);
   const [certificadoInfo, setCertificadoInfo] = useState<CertificadoInfo | null>(null);
   const [mostrarInfo, setMostrarInfo] = useState(false);
+  const [modalRemoverAberto, setModalRemoverAberto] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -117,14 +119,15 @@ export default function CertificadoSection({
     }
   };
 
-  const handleRemover = async () => {
-    if (!confirm('Tem certeza que deseja remover o certificado digital?')) {
-      return;
-    }
+  const handleRemover = () => {
+    setModalRemoverAberto(true);
+  };
 
+  const confirmarRemover = async () => {
     try {
       setRemoving(true);
       setError(null);
+      setModalRemoverAberto(false);
 
       await emitenteService.removerCertificado(emitenteId);
 
@@ -361,6 +364,15 @@ export default function CertificadoSection({
           )}
         </button>
       </div>
+
+      <ModalConfirmacao
+        aberto={modalRemoverAberto}
+        titulo="Remover Certificado"
+        mensagem="Tem certeza que deseja remover o certificado digital? Esta ação impedirá a emissão de notas fiscais até que um novo certificado seja carregado."
+        onConfirmar={confirmarRemover}
+        onCancelar={() => setModalRemoverAberto(false)}
+        processando={removing}
+      />
     </div>
   );
 }

@@ -39,7 +39,7 @@ export interface ClassTribAutocomplete {
  */
 export interface ClassTribPagedResult {
   items: ClassTribDto[];
-  totalItems: number;
+  totalCount: number;
   pageNumber: number;
   pageSize: number;
   totalPages: number;

@@ -8,7 +8,7 @@ import {
   BarChart3,
   Eye,
   X,
-
+  Printer,
   FileText,
   Percent,
   Tag,
@@ -113,7 +113,7 @@ export default function ClassTribManagementPage() {
       // Aqui estamos mantendo a chamada original
       const response = await classTribService.listar(page, pageSize, cstParams);
       setClassTribs(response.items);
-      setTotal(response.totalItems);
+      setTotal(response.totalCount);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Erro ao carregar dados');
     } finally {
@@ -182,6 +182,198 @@ export default function ClassTribManagementPage() {
     a.click();
   };
 
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const content = `
+      <html>
+        <head>
+          <title>Relatório de Classificações Tributárias</title>
+          <style>
+            @page { size: landscape; margin: 1cm; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; color: #333; }
+            .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #3b82f6; padding-bottom: 10px; margin-bottom: 20px; }
+            .header h1 { margin: 0; color: #1e40af; font-size: 24px; }
+            .header-info { text-align: right; font-size: 12px; color: #666; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+            th, td { border: 1px solid #e5e7eb; padding: 10px; text-align: left; font-size: 11px; }
+            th { background-color: #f8fafc; color: #475569; font-weight: bold; text-transform: uppercase; }
+            tr:nth-child(even) { background-color: #f1f5f9; }
+            .badge { padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 10px; }
+            .badge-blue { background-color: #dbeafe; color: #1e40af; }
+            .badge-green { background-color: #dcfce7; color: #166534; }
+            .badge-gray { background-color: #f1f5f9; color: #475569; }
+            .text-right { text-align: right; }
+            .footer { margin-top: 30px; border-top: 1px solid #e5e7eb; padding-top: 10px; font-size: 10px; color: #94a3b8; text-align: center; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div>
+              <h1>Relatório de Classificações Tributárias</h1>
+              <p style="margin: 5px 0 0 0; font-size: 14px; color: #64748b;">Gestão de ClassTrib - Reforma Tributária</p>
+            </div>
+            <div class="header-info">
+              <strong>Data de Emissão:</strong> ${new Date().toLocaleString()}<br>
+              <strong>Total de Registros:</strong> ${classTribs.length} de ${total || stats?.totalClassificacoes || classTribs.length}
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th width="80">Código</th>
+                <th width="60">CST</th>
+                <th>Descrição</th>
+                <th width="100" class="text-right">Red. IBS (%)</th>
+                <th width="100" class="text-right">Red. CBS (%)</th>
+                <th width="120">Tipo Alíquota</th>
+                <th width="80">Válido NFe</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${classTribs.map(ct => `
+                <tr>
+                  <td><span class="badge badge-blue">#${ct.codigoClassTrib}</span></td>
+                  <td><strong>${ct.codigoSituacaoTributaria}</strong></td>
+                  <td>${ct.descricaoClassTrib}</td>
+                  <td class="text-right" style="color: #059669; font-weight: bold;">${ct.percentualReducaoIBS.toFixed(2)}%</td>
+                  <td class="text-right" style="color: #059669; font-weight: bold;">${ct.percentualReducaoCBS.toFixed(2)}%</td>
+                  <td>${ct.tipoAliquota || '-'}</td>
+                  <td>
+                    <span class="badge ${ct.validoParaNFe ? 'badge-green' : 'badge-gray'}">
+                      ${ct.validoParaNFe ? 'Sim' : 'Não'}
+                    </span>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+
+          <div class="footer">
+            Sistema de Gestão Empresarial - Relatório Gerado em ${new Date().toLocaleDateString()} às ${new Date().toLocaleTimeString()}
+          </div>
+
+          <script>
+            window.onload = () => {
+              setTimeout(() => {
+                window.print();
+                // window.close(); // Opcional: fechar após imprimir
+              }, 500);
+            };
+          </script>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(content);
+    printWindow.document.close();
+  };
+
+  const handlePrintSingle = (ct: ClassTribDto) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const content = `
+      <html>
+        <head>
+          <title>Detalhes da Classificação Tributária - #${ct.codigoClassTrib}</title>
+          <style>
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; color: #333; }
+            .card { border: 2px solid #e5e7eb; border-radius: 12px; padding: 30px; max-width: 800px; margin: 0 auto; }
+            .header { border-bottom: 2px solid #3b82f6; padding-bottom: 15px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
+            .header h1 { margin: 0; color: #1e40af; font-size: 22px; }
+            .section { margin-bottom: 25px; }
+            .section-title { font-size: 12px; font-weight: bold; color: #64748b; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #f1f5f9; padding-bottom: 5px; }
+            .grid { display: grid; grid-template-cols: 1fr 1fr; gap: 20px; }
+            .label { font-size: 11px; color: #94a3b8; margin-bottom: 4px; }
+            .value { font-size: 16px; font-weight: bold; color: #1e293b; }
+            .badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; }
+            .badge-blue { background-color: #dbeafe; color: #1e40af; }
+            .footer { margin-top: 40px; text-align: center; font-size: 10px; color: #94a3b8; }
+          </style>
+        </head>
+        <body>
+          <div class="card">
+            <div class="header">
+              <h1>Detalhes da Classificação Tributária</h1>
+              <span class="badge badge-blue">#${ct.codigoClassTrib}</span>
+            </div>
+
+            <div class="section">
+              <div class="section-title">Informações Gerais</div>
+              <div class="grid">
+                <div>
+                  <div class="label">Código ClassTrib</div>
+                  <div class="value">${ct.codigoClassTrib}</div>
+                </div>
+                <div>
+                  <div class="label">CST</div>
+                  <div class="value">${ct.codigoSituacaoTributaria}</div>
+                </div>
+              </div>
+              <div style="margin-top: 15px;">
+                <div class="label">Descrição</div>
+                <div class="value">${ct.descricaoClassTrib}</div>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="section-title">Percentuais de Redução</div>
+              <div class="grid">
+                <div style="background: #f0fdf4; padding: 15px; border-radius: 8px;">
+                  <div class="label" style="color: #166534;">Redução IBS</div>
+                  <div class="value" style="color: #15803d; font-size: 24px;">${ct.percentualReducaoIBS.toFixed(2)}%</div>
+                </div>
+                <div style="background: #f0fdf4; padding: 15px; border-radius: 8px;">
+                  <div class="label" style="color: #166534;">Redução CBS</div>
+                  <div class="value" style="color: #15803d; font-size: 24px;">${ct.percentualReducaoCBS.toFixed(2)}%</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="section-title">Status e Regras</div>
+              <div class="grid">
+                <div>
+                  <div class="label">Válido para NFe</div>
+                  <div class="value">${ct.validoParaNFe ? 'Sim' : 'Não'}</div>
+                </div>
+                <div>
+                  <div class="label">Tributação Regular</div>
+                  <div class="value">${ct.tributacaoRegular ? 'Sim' : 'Não'}</div>
+                </div>
+                <div>
+                  <div class="label">Tipo de Alíquota</div>
+                  <div class="value">${ct.tipoAliquota || 'Não informado'}</div>
+                </div>
+                <div>
+                  <div class="label">Crédito Presumido</div>
+                  <div class="value">${ct.creditoPresumidoOperacoes ? 'Sim' : 'Não'}</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="footer">
+              Relatório gerado em ${new Date().toLocaleString()}
+            </div>
+          </div>
+          <script>
+            window.onload = () => {
+              setTimeout(() => {
+                window.print();
+              }, 500);
+            };
+          </script>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(content);
+    printWindow.document.close();
+  };
+
   // ============================================================================
   // EFFECTS
   // ============================================================================
@@ -201,21 +393,22 @@ export default function ClassTribManagementPage() {
     {
       key: 'codigoClassTrib',
       header: 'Código',
-      width: '80px',
+      width: '100px',
       sortable: true,
+      filterable: true,
+      searchPlaceholder: 'Buscar código...',
       render: (item) => (
-        <span className="font-mono font-medium text-[var(--text-muted)]">
-          {item.codigoClassTrib}
+        <span className="font-mono font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg text-xs">
+          #{item.codigoClassTrib}
         </span>
       )
     },
     {
       key: 'codigoSituacaoTributaria',
       header: 'CST',
-      width: '80px',
-      sortable: true,
+      width: '100px',
       render: (item) => (
-        <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-lg border border-blue-100">
+        <span className="inline-flex items-center px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-lg border border-blue-100">
           {item.codigoSituacaoTributaria}
         </span>
       )
@@ -223,9 +416,8 @@ export default function ClassTribManagementPage() {
     {
       key: 'descricaoClassTrib',
       header: 'Descrição',
-      sortable: true,
       render: (item) => (
-        <span className="font-medium text-primary line-clamp-1" title={item.descricaoClassTrib}>
+        <span className="text-sm font-bold text-gray-900 line-clamp-1 group-hover:text-blue-600 transition-colors" title={item.descricaoClassTrib}>
           {item.descricaoClassTrib}
         </span>
       )
@@ -234,9 +426,9 @@ export default function ClassTribManagementPage() {
       key: 'percentualReducaoIBS',
       header: 'Red. IBS',
       align: 'center',
-      width: '100px',
+      width: '120px',
       render: (item) => (
-        <span className="font-bold text-emerald-600">
+        <span className="text-sm font-bold text-emerald-600">
           {item.percentualReducaoIBS.toFixed(2)}%
         </span>
       )
@@ -245,9 +437,9 @@ export default function ClassTribManagementPage() {
       key: 'percentualReducaoCBS',
       header: 'Red. CBS',
       align: 'center',
-      width: '100px',
+      width: '120px',
       render: (item) => (
-        <span className="font-bold text-emerald-600">
+        <span className="text-sm font-bold text-emerald-600">
           {item.percentualReducaoCBS.toFixed(2)}%
         </span>
       )
@@ -256,9 +448,9 @@ export default function ClassTribManagementPage() {
       key: 'tipoAliquota',
       header: 'Tipo Alíq.',
       align: 'center',
-      width: '120px',
+      width: '140px',
       render: (item) => (
-        <span className="text-xs text-muted-foreground font-medium">
+        <span className="text-xs text-gray-500 font-bold uppercase tracking-wider">
           {item.tipoAliquota || '-'}
         </span>
       )
@@ -267,12 +459,18 @@ export default function ClassTribManagementPage() {
       key: 'validoParaNFe',
       header: 'NFe',
       align: 'center',
-      width: '80px',
+      width: '100px',
       render: (item) => (
         item.validoParaNFe ? (
-          <CheckCircle className="h-5 w-5 text-emerald-500 mx-auto" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
+            <CheckCircle className="h-3.5 w-3.5" />
+            Sim
+          </span>
         ) : (
-          <AlertCircle className="h-5 w-5 text-gray-300 mx-auto" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-gray-50 text-gray-400 border border-gray-100">
+            <XCircle className="h-3.5 w-3.5" />
+            Não
+          </span>
         )
       )
     }
@@ -307,14 +505,23 @@ export default function ClassTribManagementPage() {
         subtitulo="Gerenciar classificações tributárias da Reforma Tributária IBS/CBS"
         icone={BookOpen}
         acoes={
-          <button
-            disabled={true}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-surface-muted text-muted-foreground rounded-xl cursor-not-allowed opacity-60 border border-border"
-            title="Dados já sincronizados"
-          >
-            <CheckCircle className="h-4 w-4" />
-            <span className="hidden sm:inline">Sincronizado</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handlePrint}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-surface text-primary border border-border rounded-xl hover:bg-surface-hover transition-all shadow-sm"
+            >
+              <Printer className="h-4 w-4" />
+              <span className="hidden sm:inline">Imprimir</span>
+            </button>
+            <button
+              disabled={true}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-surface-muted text-muted-foreground rounded-xl cursor-not-allowed opacity-60 border border-border"
+              title="Dados já sincronizados"
+            >
+              <CheckCircle className="h-4 w-4" />
+              <span className="hidden sm:inline">Sincronizado</span>
+            </button>
+          </div>
         }
       >
         {/* Filtros Rápidos */}
@@ -331,6 +538,14 @@ export default function ClassTribManagementPage() {
             {(filter.csts.length > 0 || filter.descricao || filter.tipoAliquota) && (
               <span className="w-2 h-2 bg-secondary rounded-full animate-pulse"></span>
             )}
+          </button>
+
+          <button
+            onClick={handlePrint}
+            className="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 flex items-center gap-2"
+          >
+            <Printer className="w-4 h-4" />
+            Imprimir Relatório
           </button>
 
           {showFilters && (
@@ -404,6 +619,13 @@ export default function ClassTribManagementPage() {
                   >
                     <Download className="w-4 h-4" />
                     Exportar CSV
+                  </button>
+                  <button
+                    onClick={handlePrint}
+                    className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors flex items-center gap-2"
+                  >
+                    <Printer className="w-4 h-4" />
+                    Imprimir Relatório
                   </button>
                 </div>
               </div>
@@ -520,7 +742,7 @@ export default function ClassTribManagementPage() {
 
       {/* Modal de Detalhes */}
       {showModal && classTribSelecionado && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
+        <div className="fixed inset-0 z-[100] overflow-y-auto">
           <div
             className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity animate-fade-in"
             onClick={fecharModal}
@@ -625,7 +847,14 @@ export default function ClassTribManagementPage() {
               </div>
 
               {/* Footer */}
-              <div className="px-6 py-4 border-t border-border bg-surface-muted/30 rounded-b-2xl flex justify-end">
+              <div className="px-6 py-4 border-t border-border bg-surface-muted/30 rounded-b-2xl flex justify-end gap-3">
+                <button
+                  onClick={() => handlePrintSingle(classTribSelecionado)}
+                  className="px-6 py-2 bg-surface text-primary border border-border rounded-xl hover:bg-surface-hover transition-all font-medium flex items-center gap-2"
+                >
+                  <Printer className="h-4 w-4" />
+                  Imprimir
+                </button>
                 <button
                   onClick={fecharModal}
                   className="px-6 py-2 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-all font-medium shadow-lg shadow-primary/20"

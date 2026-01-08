@@ -241,7 +241,7 @@ public partial class Geral
     public decimal SalBruto { get; set; }
 
     [Column("Importou no Zap")]
-    public bool ImportouNoZap { get; set; }
+    public bool WhatsAppSincronizado { get; set; }
 
     [InverseProperty("SequenciaDoGeralNavigation")]
     public virtual ICollection<AdicaoDaDeclaracao> AdicoesDaDeclaracaos { get; set; } = new List<AdicaoDaDeclaracao>();
@@ -321,7 +321,7 @@ public partial class Geral
 
     [ForeignKey("SequenciaDoPais")]
     [InverseProperty("Gerals")]
-    public virtual Paise SequenciaDoPaisNavigation { get; set; } = null!;
+    public virtual Pais SequenciaDoPaisNavigation { get; set; } = null!;
 
     [ForeignKey("SequenciaDoVendedor")]
     [InverseProperty("InverseSequenciaDoVendedorNavigation")]

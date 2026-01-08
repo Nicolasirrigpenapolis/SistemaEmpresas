@@ -1,26 +1,19 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Search,
-  Plus,
-  Eye,
-  Edit2,
   FileText,
+  Plus,
   Filter,
-  X,
+  RefreshCw,
+  Eye,
+  Edit,
   Calendar,
   Building2,
-  Ban,
-  CheckCircle2,
-  Clock,
-  AlertCircle,
-  Download,
-  Printer,
-  RefreshCw,
-  Copy,
   Loader2,
   Lock,
-  ChevronDown,
+  Copy,
+  Download,
+  Printer,
 } from 'lucide-react';
 import { notaFiscalService } from '../../services/NotaFiscal/notaFiscalService';
 import type {
@@ -35,11 +28,12 @@ import {
   CabecalhoPagina,
   DataTable,
   type ColumnConfig,
-  AlertaErro
+  AlertaErro,
+  ModalConfirmacao
 } from '../../components/common';
 import { usePermissaoTela } from '../../hooks/usePermissaoTela';
 
-export default function NotaFiscalListPage() {
+export function NotaFiscalListPage() {
   const navigate = useNavigate();
 
   // Permissões da tela
@@ -66,11 +60,15 @@ export default function NotaFiscalListPage() {
   const [naturezas, setNaturezas] = useState<NaturezaOperacaoComboDto[]>([]);
 
   // Paginação
-  const [pageNumber, setPageNumber] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(25);
 
   // Estado para duplicação
   const [duplicating, setDuplicating] = useState<number | null>(null);
+  const [modalDuplicar, setModalDuplicar] = useState({
+    aberto: false,
+    id: 0
+  });
 
   // Carregar combos
   useEffect(() => {
@@ -96,7 +94,7 @@ export default function NotaFiscalListPage() {
       setError(null);
 
       const filtro: NotaFiscalFiltroDto = {
-        pageNumber,
+        pageNumber: page,
         pageSize,
       };
 
@@ -118,7 +116,7 @@ export default function NotaFiscalListPage() {
       setLoading(false);
     }
   }, [
-    pageNumber,
+    page,
     pageSize,
     filtroBusca,
     filtroDataInicial,
@@ -135,17 +133,6 @@ export default function NotaFiscalListPage() {
   }, [loadData]);
 
   // Handlers
-  const handleSearch = () => {
-    setPageNumber(1);
-    loadData();
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSearch();
-    }
-  };
-
   const handleClearFilters = () => {
     setFiltroBusca('');
     setFiltroDataInicial('');
@@ -153,9 +140,13 @@ export default function NotaFiscalListPage() {
     setFiltroPropriedade(undefined);
     setFiltroNatureza(undefined);
     setFiltroTipoNota(undefined);
-    setFiltroCanceladas(undefined);
     setFiltroAutorizadas(undefined);
-    setPageNumber(1);
+    setFiltroCanceladas(undefined);
+    setPage(1);
+  };
+
+  const handleNew = () => {
+    navigate('/faturamento/notas-fiscais/nova');
   };
 
   const handleView = (id: number) => {
@@ -166,25 +157,22 @@ export default function NotaFiscalListPage() {
     navigate(`/faturamento/notas-fiscais/${id}/editar`);
   };
 
-  const handleNew = () => {
-    navigate('/faturamento/notas-fiscais/nova');
+  const handleDuplicate = (id: number) => {
+    setModalDuplicar({ aberto: true, id });
   };
 
-  const handleDuplicate = async (id: number) => {
+  const confirmarDuplicacao = async () => {
+    const id = modalDuplicar.id;
+    setModalDuplicar({ aberto: false, id: 0 });
+    
     if (duplicating) return;
-
-    if (!confirm('Deseja duplicar esta nota fiscal? Uma nova nota será criada com os mesmos dados.')) {
-      return;
-    }
 
     try {
       setDuplicating(id);
       const novaNota = await notaFiscalService.duplicar(id);
-      alert(`Nota fiscal duplicada com sucesso! Nova nota: ${novaNota.numeroDaNotaFiscal}`);
-      navigate(`/faturamento/notas-fiscais/${novaNota.sequenciaDaNotaFiscal}/editar`);
+      navigate(`/notas-fiscais/editar/${novaNota.sequenciaDaNotaFiscal}`);
     } catch (err: any) {
-      console.error('Erro ao duplicar nota fiscal:', err);
-      alert(err.response?.data?.mensagem || 'Erro ao duplicar nota fiscal');
+      setError(err.response?.data?.mensagem || 'Erro ao duplicar nota fiscal');
     } finally {
       setDuplicating(null);
     }
@@ -221,22 +209,22 @@ export default function NotaFiscalListPage() {
     const color = getStatusNfeColor(nota);
 
     const bgColors: Record<string, string> = {
-      red: 'bg-red-100 text-red-800 border-red-200',
-      green: 'bg-green-100 text-green-800 border-green-200',
-      blue: 'bg-blue-100 text-blue-800 border-blue-200',
-      gray: 'bg-gray-100 text-gray-800 border-gray-200',
+      red: 'bg-red-50 text-red-700 border-red-100',
+      green: 'bg-emerald-50 text-emerald-700 border-emerald-100',
+      blue: 'bg-blue-50 text-blue-700 border-blue-100',
+      gray: 'bg-gray-50 text-gray-600 border-gray-200',
     };
 
-    const icons: Record<string, React.ReactNode> = {
-      red: <Ban className="h-3.5 w-3.5" />,
-      green: <CheckCircle2 className="h-3.5 w-3.5" />,
-      blue: <Clock className="h-3.5 w-3.5" />,
-      gray: <AlertCircle className="h-3.5 w-3.5" />,
+    const dotColors: Record<string, string> = {
+      red: 'bg-red-500',
+      green: 'bg-emerald-500',
+      blue: 'bg-blue-500',
+      gray: 'bg-gray-400',
     };
 
     return (
-      <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium uppercase rounded-full border ${bgColors[color]}`}>
-        {icons[color]}
+      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold uppercase rounded-full border ${bgColors[color]}`}>
+        <span className={`w-1.5 h-1.5 rounded-full ${dotColors[color]}`} />
         {status}
       </span>
     );
@@ -257,12 +245,14 @@ export default function NotaFiscalListPage() {
   const columns: ColumnConfig<NotaFiscalListDto>[] = [
     {
       key: 'sequenciaDaNotaFiscal',
-      header: 'Seq',
-      width: '70px',
-      align: 'center',
+      header: 'Código',
+      width: '100px',
+      sortable: true,
+      filterable: true,
+      searchPlaceholder: 'Buscar código...',
       render: (item) => (
-        <span className="inline-flex items-center justify-center min-w-[32px] h-6 bg-primary/10 text-primary text-xs rounded px-1.5">
-          {item.sequenciaDaNotaFiscal}
+        <span className="font-mono font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg text-xs">
+          #{item.sequenciaDaNotaFiscal}
         </span>
       )
     },
@@ -271,25 +261,25 @@ export default function NotaFiscalListPage() {
       header: 'Número / Data',
       render: (item) => (
         <div className="flex flex-col">
-          <span className="text-sm font-medium text-[var(--text)]">
+          <span className="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
             {item.numeroDaNfe > 0 ? (
               <>NFe {item.numeroDaNfe}</>
             ) : (
               <>Nº {item.numeroDaNotaFiscal}</>
             )}
           </span>
-          <span className="text-xs text-muted-foreground flex items-center gap-1">
-            <Calendar className="w-3 h-3" />
+          <span className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
+            <Calendar className="w-3 h-3 text-blue-500" />
             {formatDate(item.dataDeEmissao)}
           </span>
-          <div className="flex gap-1 mt-1">
+          <div className="flex gap-1 mt-1.5">
             {item.nfeComplementar && (
-              <span className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium uppercase bg-purple-100 text-purple-700 rounded">
+              <span className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-bold uppercase bg-purple-50 text-purple-700 border border-purple-100 rounded">
                 Comp
               </span>
             )}
             {item.notaDeDevolucao && (
-              <span className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium uppercase bg-orange-100 text-orange-700 rounded">
+              <span className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-bold uppercase bg-orange-50 text-orange-700 border border-orange-100 rounded">
                 Dev
               </span>
             )}
@@ -302,10 +292,10 @@ export default function NotaFiscalListPage() {
       header: 'Cliente',
       render: (item) => (
         <div className="flex flex-col">
-          <span className="text-sm font-medium text-foreground truncate max-w-[200px]" title={item.nomeDoCliente}>
+          <span className="text-sm font-bold text-gray-900 truncate max-w-[200px]" title={item.nomeDoCliente}>
             {item.nomeDoCliente}
           </span>
-          <span className="text-xs text-muted-foreground font-mono">
+          <span className="text-xs text-gray-500 font-medium mt-0.5">
             {formatCpfCnpj(item.documentoCliente)}
           </span>
         </div>
@@ -316,10 +306,10 @@ export default function NotaFiscalListPage() {
       header: 'Natureza',
       render: (item) => (
         <div className="flex flex-col">
-          <span className="text-sm text-foreground truncate max-w-[180px]" title={item.descricaoNatureza}>
+          <span className="text-sm font-bold text-gray-900 truncate max-w-[180px]" title={item.descricaoNatureza}>
             {item.descricaoNatureza}
           </span>
-          <span className="text-xs text-muted-foreground">
+          <span className="text-xs text-gray-500 mt-0.5">
             {(TIPOS_NOTA as Record<number, string>)[item.tipoDeNota] || 'Outro'}
           </span>
         </div>
@@ -330,7 +320,7 @@ export default function NotaFiscalListPage() {
       header: 'Valor Total',
       align: 'right',
       render: (item) => (
-        <span className="text-sm font-medium text-[var(--text)]">
+        <span className="text-sm font-bold text-gray-900">
           {formatCurrency(item.valorTotalDaNotaFiscal)}
         </span>
       )
@@ -339,7 +329,7 @@ export default function NotaFiscalListPage() {
       key: 'status', // Virtual key
       header: 'Status',
       align: 'center',
-      width: '120px',
+      width: '140px',
       render: (item) => <StatusBadge nota={item} />
     }
   ];
@@ -380,200 +370,142 @@ export default function NotaFiscalListPage() {
           podeIncluir && (
             <button
               onClick={handleNew}
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 font-medium"
+              className="flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 font-bold text-sm group"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4 group-hover:scale-110 transition-transform" />
               <span className="hidden sm:inline">Nova Nota Fiscal</span>
               <span className="sm:hidden">Nova</span>
             </button>
           )
         }
       >
-        {/* Filtros */}
-        <div className="flex flex-col gap-4 w-full">
-          <div className="flex flex-wrap gap-3 items-center">
-            <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input
-                type="text"
-                value={filtroBusca}
-                onChange={(e) => setFiltroBusca(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Buscar por número, cliente, chave..."
-                className="w-full pl-9 pr-3 py-2 bg-surface-muted border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-              />
+        {/* Filtros Expandidos */}
+        {showFilters && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pt-6 border-t border-gray-100 animate-in fade-in slide-in-from-top-2 duration-300">
+            {/* Data Inicial */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">
+                Data Inicial
+              </label>
+              <div className="relative">
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  type="date"
+                  value={filtroDataInicial}
+                  onChange={(e) => setFiltroDataInicial(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
+                />
+              </div>
             </div>
 
-            <button
-              onClick={handleSearch}
-              className="px-4 py-2 bg-surface-muted text-foreground border border-border hover:bg-surface-hover rounded-lg transition-colors font-medium text-sm flex items-center gap-2"
-            >
-              <Search className="w-4 h-4" />
-              Buscar
-            </button>
-
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-all border flex items-center gap-2 ${showFilters || hasActiveFilters
-                ? 'bg-primary/10 text-primary border-primary/20'
-                : 'bg-surface-muted text-muted-foreground border-border hover:bg-surface-hover'
-                }`}
-            >
-              <Filter className="w-4 h-4" />
-              Filtros
-              {hasActiveFilters && (
-                <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-              )}
-              <ChevronDown className={`w-3 h-3 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
-            </button>
-
-            <button
-              onClick={loadData}
-              className="p-2 text-muted-foreground hover:text-primary hover:bg-surface-hover rounded-lg transition-colors"
-              title="Atualizar"
-            >
-              <RefreshCw className="w-4 h-4" />
-            </button>
-
-            {hasActiveFilters && (
-              <button
-                onClick={handleClearFilters}
-                className="px-3 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors flex items-center gap-2"
-              >
-                <X className="w-4 h-4" />
-                Limpar
-              </button>
-            )}
-          </div>
-
-          {/* Filtros Expandidos */}
-          {showFilters && (
-            <div className="pt-4 border-t border-border grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-slide-down">
-              {/* Data Inicial */}
-              <div>
-                <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">
-                  Data Inicial
-                </label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <input
-                    type="date"
-                    value={filtroDataInicial}
-                    onChange={(e) => setFiltroDataInicial(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 bg-surface-muted border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                  />
-                </div>
+            {/* Data Final */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">
+                Data Final
+              </label>
+              <div className="relative">
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  type="date"
+                  value={filtroDataFinal}
+                  onChange={(e) => setFiltroDataFinal(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
+                />
               </div>
+            </div>
 
-              {/* Data Final */}
-              <div>
-                <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">
-                  Data Final
-                </label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <input
-                    type="date"
-                    value={filtroDataFinal}
-                    onChange={(e) => setFiltroDataFinal(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 bg-surface-muted border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                  />
-                </div>
-              </div>
-
-              {/* Propriedade */}
-              <div>
-                <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">
-                  Empresa/Filial
-                </label>
-                <div className="relative">
-                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <select
-                    value={filtroPropriedade || ''}
-                    onChange={(e) => setFiltroPropriedade(e.target.value ? Number(e.target.value) : undefined)}
-                    className="w-full pl-9 pr-3 py-2 bg-surface-muted border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary appearance-none"
-                  >
-                    <option value="">Todas</option>
-                    {propriedades.map((p) => (
-                      <option key={p.sequenciaDaPropriedade} value={p.sequenciaDaPropriedade}>
-                        {p.nome}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Natureza */}
-              <div>
-                <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">
-                  Natureza de Operação
-                </label>
+            {/* Propriedade */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">
+                Empresa/Filial
+              </label>
+              <div className="relative">
+                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <select
-                  value={filtroNatureza || ''}
-                  onChange={(e) => setFiltroNatureza(e.target.value ? Number(e.target.value) : undefined)}
-                  className="w-full px-3 py-2 bg-surface-muted border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  value={filtroPropriedade || ''}
+                  onChange={(e) => setFiltroPropriedade(e.target.value ? Number(e.target.value) : undefined)}
+                  className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none appearance-none"
                 >
                   <option value="">Todas</option>
-                  {naturezas.map((n) => (
-                    <option key={n.sequenciaDaNatureza} value={n.sequenciaDaNatureza}>
-                      {n.cfop} - {n.descricao}
+                  {propriedades.map((p) => (
+                    <option key={p.sequenciaDaPropriedade} value={p.sequenciaDaPropriedade}>
+                      {p.nome}
                     </option>
                   ))}
-                </select>
-              </div>
-
-              {/* Tipo de Nota */}
-              <div>
-                <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">
-                  Tipo de Nota
-                </label>
-                <select
-                  value={filtroTipoNota ?? ''}
-                  onChange={(e) => setFiltroTipoNota(e.target.value !== '' ? Number(e.target.value) : undefined)}
-                  className="w-full px-3 py-2 bg-surface-muted border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                >
-                  <option value="">Todos</option>
-                  {Object.entries(TIPOS_NOTA).map(([key, value]) => (
-                    <option key={key} value={key}>
-                      {value}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Status NFe */}
-              <div>
-                <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">
-                  Status NFe
-                </label>
-                <select
-                  value={
-                    filtroCanceladas === true
-                      ? 'canceladas'
-                      : filtroAutorizadas === true
-                        ? 'autorizadas'
-                        : filtroAutorizadas === false
-                          ? 'pendentes'
-                          : ''
-                  }
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setFiltroCanceladas(value === 'canceladas' ? true : undefined);
-                    setFiltroAutorizadas(
-                      value === 'autorizadas' ? true : value === 'pendentes' ? false : undefined
-                    );
-                  }}
-                  className="w-full px-3 py-2 bg-surface-muted border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                >
-                  <option value="">Todos</option>
-                  <option value="autorizadas">Autorizadas</option>
-                  <option value="pendentes">Pendentes</option>
-                  <option value="canceladas">Canceladas</option>
                 </select>
               </div>
             </div>
-          )}
-        </div>
+
+            {/* Natureza */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">
+                Natureza de Operação
+              </label>
+              <select
+                value={filtroNatureza || ''}
+                onChange={(e) => setFiltroNatureza(e.target.value ? Number(e.target.value) : undefined)}
+                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none appearance-none"
+              >
+                <option value="">Todas</option>
+                {naturezas.map((n) => (
+                  <option key={n.sequenciaDaNatureza} value={n.sequenciaDaNatureza}>
+                    {n.cfop} - {n.descricao}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Tipo de Nota */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">
+                Tipo de Nota
+              </label>
+              <select
+                value={filtroTipoNota ?? ''}
+                onChange={(e) => setFiltroTipoNota(e.target.value !== '' ? Number(e.target.value) : undefined)}
+                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none appearance-none"
+              >
+                <option value="">Todos</option>
+                {Object.entries(TIPOS_NOTA).map(([key, value]) => (
+                  <option key={key} value={key}>
+                    {value}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Status NFe */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">
+                Status NFe
+              </label>
+              <select
+                value={
+                  filtroCanceladas === true
+                    ? 'canceladas'
+                    : filtroAutorizadas === true
+                      ? 'autorizadas'
+                      : filtroAutorizadas === false
+                        ? 'pendentes'
+                        : ''
+                }
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setFiltroCanceladas(value === 'canceladas' ? true : undefined);
+                  setFiltroAutorizadas(
+                    value === 'autorizadas' ? true : value === 'pendentes' ? false : undefined
+                  );
+                }}
+                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none appearance-none"
+              >
+                <option value="">Todos</option>
+                <option value="autorizadas">Autorizadas</option>
+                <option value="pendentes">Pendentes</option>
+                <option value="canceladas">Canceladas</option>
+              </select>
+            </div>
+          </div>
+        )}
       </CabecalhoPagina>
 
       <div className="px-6">
@@ -593,99 +525,100 @@ export default function NotaFiscalListPage() {
           getRowKey={(item) => item.sequenciaDaNotaFiscal.toString()}
           loading={loading}
           totalItems={data?.totalCount || 0}
+          onFilterChange={(_, value) => {
+            setFiltroBusca(value);
+          }}
+          onClearFilters={handleClearFilters}
+          headerExtra={
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all border flex items-center gap-2 ${showFilters || hasActiveFilters
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20'
+                  : 'bg-white text-gray-500 border-gray-200 hover:border-blue-300 hover:text-blue-600'
+                  }`}
+              >
+                <Filter className="w-4 h-4" />
+                Filtros Avançados
+                {hasActiveFilters && (
+                  <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
+                )}
+              </button>
+
+              <button
+                onClick={loadData}
+                className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl border border-transparent hover:border-blue-100 transition-all"
+                title="Atualizar"
+              >
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
+          }
           rowActions={(item) => (
-            <>
+            <div className="flex items-center justify-end gap-2">
               <button
                 onClick={() => handleView(item.sequenciaDaNotaFiscal)}
-                className="p-2 text-muted-foreground hover:text-primary hover:bg-surface-hover rounded-lg transition-colors"
+                className="p-2 text-blue-600 hover:bg-blue-50 rounded-xl border border-transparent hover:border-blue-100 transition-all"
                 title="Visualizar"
               >
                 <Eye className="h-4 w-4" />
               </button>
-              {podeAlterar && !item.notaCancelada && !item.autorizado && (
+
+              {podeAlterar && (
                 <button
                   onClick={() => handleEdit(item.sequenciaDaNotaFiscal)}
-                  className="p-2 text-muted-foreground hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                  className="p-2 text-amber-600 hover:bg-amber-50 rounded-xl border border-transparent hover:border-amber-100 transition-all"
                   title="Editar"
                 >
-                  <Edit2 className="h-4 w-4" />
+                  <Edit className="h-4 w-4" />
                 </button>
               )}
-              {podeIncluir && !item.notaCancelada && (
-                <button
-                  onClick={() => handleDuplicate(item.sequenciaDaNotaFiscal)}
-                  disabled={duplicating === item.sequenciaDaNotaFiscal}
-                  className="p-2 text-muted-foreground hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  title="Duplicar nota fiscal"
-                >
-                  {duplicating === item.sequenciaDaNotaFiscal ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Copy className="h-4 w-4" />
-                  )}
-                </button>
-              )}
-              {item.autorizado && item.chaveDeAcessoDaNfe && (
+
+              <button
+                onClick={() => handleDuplicate(item.sequenciaDaNotaFiscal)}
+                disabled={duplicating === item.sequenciaDaNotaFiscal}
+                className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-xl border border-transparent hover:border-indigo-100 transition-all disabled:opacity-50"
+                title="Duplicar"
+              >
+                <Copy className="h-4 w-4" />
+              </button>
+
+              {item.autorizado && (
                 <>
                   <button
-                    className="p-2 text-muted-foreground hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors hidden sm:inline-flex"
-                    title="Download XML"
-                  >
-                    <Download className="h-4 w-4" />
-                  </button>
-                  <button
-                    className="p-2 text-muted-foreground hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors hidden sm:inline-flex"
+                    onClick={() => window.open(`${import.meta.env.VITE_API_URL}/notafiscal/${item.sequenciaDaNotaFiscal}/danfe`, '_blank')}
+                    className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-xl border border-transparent hover:border-emerald-100 transition-all"
                     title="Imprimir DANFE"
                   >
                     <Printer className="h-4 w-4" />
                   </button>
+                  <button
+                    onClick={() => window.open(`${import.meta.env.VITE_API_URL}/notafiscal/${item.sequenciaDaNotaFiscal}/xml`, '_blank')}
+                    className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-xl border border-transparent hover:border-emerald-100 transition-all"
+                    title="Baixar XML"
+                  >
+                    <Download className="h-4 w-4" />
+                  </button>
                 </>
               )}
-            </>
+            </div>
           )}
         />
 
-        {/* Paginação Manual (já que a API é paginada) */}
-        {!loading && data && data.totalCount > 0 && (
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border mt-4">
-            <div className="flex items-center gap-4">
-              <div className="text-sm text-muted-foreground">
-                Página <span className="font-medium text-primary">{pageNumber}</span> de <span className="font-medium text-primary">{Math.ceil(data.totalCount / pageSize)}</span>
-              </div>
-              <select
-                value={pageSize}
-                onChange={(e) => {
-                  setPageSize(Number(e.target.value));
-                  setPageNumber(1);
-                }}
-                className="px-2 py-1 text-sm border border-border rounded-lg bg-surface text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary"
-              >
-                <option value={10}>10 por página</option>
-                <option value={25}>25 por página</option>
-                <option value={50}>50 por página</option>
-                <option value={100}>100 por página</option>
-              </select>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setPageNumber(prev => Math.max(1, prev - 1))}
-                disabled={pageNumber === 1}
-                className="px-3 py-1.5 text-sm font-medium border border-border rounded-lg hover:bg-surface-hover disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Anterior
-              </button>
-              <button
-                onClick={() => setPageNumber(prev => Math.min(Math.ceil(data.totalCount / pageSize), prev + 1))}
-                disabled={pageNumber === Math.ceil(data.totalCount / pageSize)}
-                className="px-3 py-1.5 text-sm font-medium border border-border rounded-lg hover:bg-surface-hover disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Próxima
-              </button>
-            </div>
-          </div>
-        )}
+        {/* Modal de Confirmação para Duplicação */}
+        <ModalConfirmacao
+          aberto={modalDuplicar.aberto}
+          onCancelar={() => setModalDuplicar({ aberto: false, id: 0 })}
+          onConfirmar={confirmarDuplicacao}
+          titulo="Duplicar Nota Fiscal"
+          mensagem="Tem certeza que deseja duplicar esta nota fiscal? Uma nova nota será criada com os mesmos dados."
+          textoBotaoConfirmar="Duplicar"
+          textoBotaoCancelar="Cancelar"
+          variante="warning"
+        />
       </div>
     </div>
   );
 }
+
+export default NotaFiscalListPage;

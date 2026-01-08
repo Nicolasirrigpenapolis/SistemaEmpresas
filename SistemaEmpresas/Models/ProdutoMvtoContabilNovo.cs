@@ -16,6 +16,7 @@ public partial class ProdutoMvtoContabilNovo
 
     [Key]
     [Column("Seqüência do Produto Mvto Novo")]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int SequenciaDoProdutoMvtoNovo { get; set; }
 
     [Column("Seqüência do Produto")]

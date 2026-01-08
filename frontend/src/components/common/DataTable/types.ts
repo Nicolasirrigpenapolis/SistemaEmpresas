@@ -107,10 +107,6 @@ export interface ColumnHeaderProps {
   column: ColumnConfig<any>;
   /** Se esta coluna está selecionada para filtro */
   isFilterColumn: boolean;
-  /** Se está ordenando por esta coluna */
-  isSortColumn: boolean;
-  /** Direção da ordenação */
-  sortDirection: SortDirection;
   /** Callback ao clicar na coluna */
   onClick: () => void;
 }

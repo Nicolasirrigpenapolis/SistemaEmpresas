@@ -6,6 +6,9 @@ import type {
   ProdutoFiltroDto,
   ProdutoComboDto,
   PagedResult,
+  ReceitaProdutoDto,
+  ReceitaProdutoListDto,
+  ReceitaProdutoCreateUpdateDto,
 } from '../../types/Produto/produto';
 
 // Interfaces para dados auxiliares
@@ -131,6 +134,117 @@ export const produtoService = {
    */
   async listarUnidades(): Promise<Unidade[]> {
     const response = await api.get<Unidade[]>(`${BASE_URL}/unidades`);
+    return response.data;
+  },
+
+  // ===== Foto do Produto =====
+
+  /**
+   * Retorna a URL da foto do produto (para uso com token)
+   */
+  getFotoUrl(id: number): string {
+    const baseUrl = api.defaults.baseURL || '/api';
+    return `${baseUrl}${BASE_URL}/${id}/foto`;
+  },
+
+  /**
+   * Busca a foto do produto como blob
+   */
+  async obterFoto(id: number): Promise<string | null> {
+    try {
+      const response = await api.get(`${BASE_URL}/${id}/foto`, {
+        responseType: 'blob'
+      });
+      // Converte o blob para uma URL de objeto
+      const blob = new Blob([response.data], { type: response.headers['content-type'] });
+      return URL.createObjectURL(blob);
+    } catch {
+      return null;
+    }
+  },
+
+  /**
+   * Verifica se o produto possui foto
+   */
+  async temFoto(id: number): Promise<boolean> {
+    try {
+      const response = await api.get<{ temFoto: boolean }>(`${BASE_URL}/${id}/tem-foto`);
+      return response.data.temFoto;
+    } catch {
+      return false;
+    }
+  },
+
+  /**
+   * Faz upload de uma foto para o produto
+   */
+  async uploadFoto(id: number, arquivo: File): Promise<{ mensagem: string }> {
+    const formData = new FormData();
+    formData.append('arquivo', arquivo);
+
+    const response = await api.post<{ mensagem: string }>(`${BASE_URL}/${id}/foto`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  /**
+   * Remove a foto do produto
+   */
+  async removerFoto(id: number): Promise<{ mensagem: string }> {
+    const response = await api.delete<{ mensagem: string }>(`${BASE_URL}/${id}/foto`);
+    return response.data;
+  },
+
+  // ===== Receita do Produto (Materia Prima) =====
+
+  /**
+   * Obtem a receita completa de um produto (materias primas)
+   */
+  async obterReceita(id: number): Promise<ReceitaProdutoDto> {
+    const response = await api.get<ReceitaProdutoDto>(`${BASE_URL}/${id}/receita`);
+    return response.data;
+  },
+
+  /**
+   * Lista os itens da receita de um produto
+   */
+  async listarItensReceita(id: number): Promise<ReceitaProdutoListDto[]> {
+    const response = await api.get<ReceitaProdutoListDto[]>(`${BASE_URL}/${id}/receita/itens`);
+    return response.data;
+  },
+
+  /**
+   * Adiciona um item a receita do produto
+   */
+  async adicionarItemReceita(id: number, item: ReceitaProdutoCreateUpdateDto): Promise<ReceitaProdutoListDto> {
+    const response = await api.post<ReceitaProdutoListDto>(`${BASE_URL}/${id}/receita`, item);
+    return response.data;
+  },
+
+  /**
+   * Atualiza a quantidade de um item da receita
+   */
+  async atualizarItemReceita(id: number, materiaPrimaId: number, item: ReceitaProdutoCreateUpdateDto): Promise<ReceitaProdutoListDto> {
+    const response = await api.put<ReceitaProdutoListDto>(`${BASE_URL}/${id}/receita/${materiaPrimaId}`, item);
+    return response.data;
+  },
+
+  /**
+   * Remove um item da receita
+   */
+  async removerItemReceita(id: number, materiaPrimaId: number): Promise<{ mensagem: string }> {
+    const response = await api.delete<{ mensagem: string }>(`${BASE_URL}/${id}/receita/${materiaPrimaId}`);
+    return response.data;
+  },
+
+  /**
+   * Limpa toda a receita de um produto
+   */
+  async limparReceita(id: number): Promise<{ mensagem: string }> {
+    const response = await api.delete<{ mensagem: string }>(`${BASE_URL}/${id}/receita`);
     return response.data;
   },
 };

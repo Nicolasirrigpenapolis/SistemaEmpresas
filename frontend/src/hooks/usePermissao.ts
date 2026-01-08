@@ -30,6 +30,11 @@ export const PERMISSAO_MAPPING: Record<string, string> = {
   '/emitentes': 'Emitentes',
   
   // ==========================================
+  // ESTOQUE
+  // ==========================================
+  '/estoque/movimento-contabil': 'MovimentoContabil',
+  
+  // ==========================================
   // FISCAL
   // ==========================================
   '/faturamento/notas-fiscais': 'NotaFiscal',

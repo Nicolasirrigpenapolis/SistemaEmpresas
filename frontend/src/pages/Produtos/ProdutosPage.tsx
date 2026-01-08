@@ -4,6 +4,7 @@ import {
   Plus,
   Edit2,
   Eye,
+  EyeOff,
   Package,
   AlertTriangle,
   Barcode,
@@ -11,7 +12,8 @@ import {
   TrendingUp,
   Trash2,
   Box,
-  Layers
+  Layers,
+  RefreshCw,
 } from 'lucide-react';
 import { produtoService } from '../../services/Produto/produtoService';
 import type { ProdutoListDto, PagedResult, ProdutoFiltroDto } from '../../types';
@@ -114,12 +116,14 @@ export default function ProdutosPage() {
     {
       key: 'sequenciaDoProduto',
       header: 'Código',
-      width: '80px',
+      width: '100px',
       sortable: true,
       filterable: true,
       searchPlaceholder: 'Buscar código...',
       render: (item) => (
-        <span className="font-mono text-[var(--text-muted)]">#{item.sequenciaDoProduto}</span>
+        <span className="font-mono font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg text-xs">
+          #{item.sequenciaDoProduto}
+        </span>
       )
     },
     {
@@ -129,18 +133,18 @@ export default function ProdutosPage() {
       filterable: true,
       searchPlaceholder: 'Buscar produto...',
       render: (item) => (
-        <div className="flex flex-col">
-          <span className="font-medium text-[var(--text)]">{item.descricao}</span>
-          <div className="flex items-center gap-3 mt-1">
+        <div className="flex flex-col gap-0.5">
+          <span className="font-bold text-foreground leading-tight">{item.descricao}</span>
+          <div className="flex items-center gap-3">
             {item.codigoDeBarras && (
-              <span className="text-xs text-[var(--text-muted)] flex items-center gap-1">
-                <Barcode className="h-3 w-3" />
+              <span className="text-[11px] text-muted-foreground flex items-center gap-1 font-medium">
+                <Barcode className="h-3 w-3 opacity-70" />
                 {item.codigoDeBarras}
               </span>
             )}
             {item.localizacao && (
-              <span className="text-xs text-[var(--text-muted)] flex items-center gap-1">
-                <MapPin className="h-3 w-3" />
+              <span className="text-[11px] text-muted-foreground flex items-center gap-1 font-medium">
+                <MapPin className="h-3 w-3 opacity-70" />
                 {item.localizacao}
               </span>
             )}
@@ -154,9 +158,9 @@ export default function ProdutosPage() {
       sortable: true,
       render: (item) => (
         <div className="flex flex-col">
-          <span className="text-sm text-[var(--text)]">{item.grupoProduto}</span>
+          <span className="text-sm font-semibold text-foreground">{item.grupoProduto}</span>
           {item.subGrupoProduto && (
-            <span className="text-xs text-[var(--text-muted)]">{item.subGrupoProduto}</span>
+            <span className="text-xs text-muted-foreground font-medium">{item.subGrupoProduto}</span>
           )}
         </div>
       )
@@ -167,7 +171,7 @@ export default function ProdutosPage() {
       align: 'right',
       sortable: true,
       render: (item) => (
-        <span className="text-sm text-[var(--text-muted)]">
+        <span className="text-sm font-medium text-muted-foreground">
           {item.quantidadeMinima > 0
             ? new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 0 }).format(item.quantidadeMinima)
             : '-'
@@ -181,19 +185,19 @@ export default function ProdutosPage() {
       align: 'right',
       sortable: true,
       render: (item) => (
-        <div className="flex flex-col items-end gap-0.5">
-          <span className={`font-medium ${item.estoqueCritico ? 'text-red-600' :
-            item.quantidadeContabil > item.quantidadeMinima * 2 ? 'text-emerald-600' : 'text-[var(--text)]'
+        <div className="flex flex-col items-end gap-1">
+          <span className={`text-sm font-bold ${item.estoqueCritico ? 'text-red-600' :
+            item.quantidadeContabil > item.quantidadeMinima * 2 ? 'text-emerald-600' : 'text-foreground'
             }`}>
             {new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(item.quantidadeContabil)}
           </span>
           {item.estoqueCritico && (
             <span
-              className="text-[10px] font-medium text-red-600 bg-red-50 px-1.5 py-0.5 rounded-full flex items-center gap-1"
+              className="text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full flex items-center gap-1 border border-red-100"
               title={`Estoque abaixo do mínimo (${new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(item.quantidadeMinima)})`}
             >
               <AlertTriangle className="w-3 h-3" />
-              Crítico
+              CRÍTICO
             </span>
           )}
         </div>
@@ -205,13 +209,13 @@ export default function ProdutosPage() {
       align: 'right',
       sortable: true,
       render: (item) => (
-        <div className="flex flex-col items-end">
-          <span className="font-medium text-[var(--text)]">
+        <div className="flex flex-col items-end gap-0.5">
+          <span className="font-bold text-foreground">
             {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.valorTotal)}
           </span>
           {item.margemDeLucro > 0 && (
-            <span className="text-xs text-emerald-600 flex items-center gap-0.5">
-              <TrendingUp className="h-3 w-3" />
+            <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-md flex items-center gap-0.5 border border-emerald-100">
+              <TrendingUp className="h-2.5 w-2.5" />
               {item.margemDeLucro.toFixed(1)}%
             </span>
           )}
@@ -222,17 +226,17 @@ export default function ProdutosPage() {
       key: 'ativo',
       header: 'Status',
       align: 'center',
-      width: '100px',
+      width: '120px',
       render: (item) => (
-        <div className="flex flex-col gap-1 items-center">
-          <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${!item.inativo
-            ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
-            : 'bg-gray-100 text-gray-600 border border-gray-200'
+        <div className="flex flex-col gap-1.5 items-center">
+          <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${!item.inativo
+            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+            : 'bg-gray-50 text-gray-500 border-gray-200'
             }`}>
             {!item.inativo ? 'Ativo' : 'Inativo'}
           </span>
           {item.eMateriaPrima && (
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-purple-100 text-purple-700 border border-purple-200">
+            <span className="px-2 py-0.5 rounded-md text-[9px] font-bold uppercase bg-purple-50 text-purple-600 border border-purple-100">
               Matéria Prima
             </span>
           )}
@@ -250,86 +254,13 @@ export default function ProdutosPage() {
         acoes={
           <button
             onClick={handleNew}
-            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl hover:bg-primary/90 transition-all font-medium shadow-lg shadow-primary/25 active:scale-95"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all font-medium shadow-lg shadow-blue-600/25 active:scale-95"
           >
             <Plus className="w-5 h-5" />
             <span>Novo Produto</span>
           </button>
         }
-      >
-        {/* Filtros Rápidos */}
-        <div className="flex flex-wrap gap-3">
-          <button
-            onClick={() => {
-              setFiltroEstoqueCritico(false);
-              setFiltroMateriaPrima(undefined);
-              setFiltroIncluirInativos(false);
-              setPageNumber(1);
-            }}
-            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all border ${!filtroEstoqueCritico && filtroMateriaPrima === undefined && !filtroIncluirInativos
-              ? 'bg-primary text-white border-primary shadow-md'
-              : 'bg-surface text-muted-foreground border-border hover:bg-surface-hover hover:text-primary'
-              }`}
-          >
-            Todos
-          </button>
-
-          <button
-            onClick={() => {
-              setFiltroMateriaPrima(false);
-              setPageNumber(1);
-            }}
-            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all border flex items-center gap-2 ${filtroMateriaPrima === false
-              ? 'bg-emerald-600 text-white border-emerald-600 shadow-md'
-              : 'bg-surface text-muted-foreground border-border hover:bg-surface-hover hover:text-emerald-600'
-              }`}
-          >
-            <Box className="w-4 h-4" />
-            Produtos Acabados
-          </button>
-
-          <button
-            onClick={() => {
-              setFiltroMateriaPrima(true);
-              setPageNumber(1);
-            }}
-            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all border flex items-center gap-2 ${filtroMateriaPrima === true
-              ? 'bg-purple-600 text-white border-purple-600 shadow-md'
-              : 'bg-surface text-muted-foreground border-border hover:bg-surface-hover hover:text-purple-600'
-              }`}
-          >
-            <Layers className="w-4 h-4" />
-            Matéria Prima
-          </button>
-
-          <button
-            onClick={() => {
-              setFiltroEstoqueCritico(!filtroEstoqueCritico);
-              setPageNumber(1);
-            }}
-            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all border flex items-center gap-2 ${filtroEstoqueCritico
-              ? 'bg-red-600 text-white border-red-600 shadow-md'
-              : 'bg-surface text-muted-foreground border-border hover:bg-surface-hover hover:text-red-600'
-              }`}
-          >
-            <AlertTriangle className="w-4 h-4" />
-            Estoque Crítico
-          </button>
-
-          <label className={`px-4 py-2 rounded-xl text-sm font-bold transition-all border flex items-center gap-2 cursor-pointer ${filtroIncluirInativos
-            ? 'bg-gray-600 text-white border-gray-600 shadow-md'
-            : 'bg-surface text-muted-foreground border-border hover:bg-surface-hover hover:text-gray-600'
-            }`}>
-            <input
-              type="checkbox"
-              className="hidden"
-              checked={filtroIncluirInativos}
-              onChange={(e) => setFiltroIncluirInativos(e.target.checked)}
-            />
-            <span>Incluir Inativos</span>
-          </label>
-        </div>
-      </CabecalhoPagina>
+      />
 
       <div className="px-6">
         {error && <AlertaErro mensagem={error} fechavel onFechar={() => setError(null)} />}
@@ -353,20 +284,108 @@ export default function ProdutosPage() {
             setFiltroIncluirInativos(false);
             setPageNumber(1);
           }}
+          headerExtra={
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center bg-surface border border-border p-1 rounded-xl shadow-sm">
+                <button
+                  onClick={() => {
+                    setFiltroEstoqueCritico(false);
+                    setFiltroMateriaPrima(undefined);
+                    setFiltroIncluirInativos(false);
+                    setPageNumber(1);
+                  }}
+                  className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${!filtroEstoqueCritico && filtroMateriaPrima === undefined && !filtroIncluirInativos
+                    ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-surface-hover'
+                    }`}
+                >
+                  Todos
+                </button>
+
+                <button
+                  onClick={() => {
+                    setFiltroMateriaPrima(false);
+                    setPageNumber(1);
+                  }}
+                  className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${filtroMateriaPrima === false
+                    ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
+                    : 'text-muted-foreground hover:text-emerald-600 hover:bg-emerald-50'
+                    }`}
+                >
+                  <Box className="w-3.5 h-3.5" />
+                  Acabados
+                </button>
+
+                <button
+                  onClick={() => {
+                    setFiltroMateriaPrima(true);
+                    setPageNumber(1);
+                  }}
+                  className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${filtroMateriaPrima === true
+                    ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20'
+                    : 'text-muted-foreground hover:text-purple-600 hover:bg-purple-50'
+                    }`}
+                >
+                  <Layers className="w-3.5 h-3.5" />
+                  M. Prima
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    setFiltroEstoqueCritico(!filtroEstoqueCritico);
+                    setPageNumber(1);
+                  }}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border flex items-center gap-2 ${filtroEstoqueCritico
+                    ? 'bg-red-600 text-white border-red-600 shadow-md shadow-red-600/20'
+                    : 'bg-surface text-muted-foreground border-border hover:border-red-600 hover:text-red-600 hover:bg-red-50'
+                    }`}
+                >
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                  Estoque Crítico
+                </button>
+
+                <button
+                  onClick={() => {
+                    setFiltroIncluirInativos(!filtroIncluirInativos);
+                    setPageNumber(1);
+                  }}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border flex items-center gap-2 ${filtroIncluirInativos
+                    ? 'bg-gray-700 text-white border-gray-700 shadow-md shadow-gray-700/20'
+                    : 'bg-surface text-muted-foreground border-border hover:border-gray-700 hover:text-gray-700 hover:bg-gray-50'
+                    }`}
+                >
+                  {filtroIncluirInativos ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                  Inativos
+                </button>
+
+                <div className="w-px h-6 bg-border mx-1" />
+
+                <button
+                  onClick={loadData}
+                  className="p-2 text-muted-foreground hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all border border-transparent hover:border-blue-100"
+                  title="Atualizar"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          }
 
           // Ações de Linha
           rowActions={(item) => (
-            <div className="flex items-center justify-end gap-1">
+            <div className="flex items-center justify-end gap-2">
               <button
                 onClick={() => handleView(item.sequenciaDoProduto)}
-                className="p-2 text-muted-foreground hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                className="p-2 text-blue-600 hover:bg-blue-50 rounded-xl transition-all border border-transparent hover:border-blue-100"
                 title="Visualizar"
               >
                 <Eye className="h-4 w-4" />
               </button>
               <button
                 onClick={() => handleEdit(item.sequenciaDoProduto)}
-                className="p-2 text-muted-foreground hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all border border-transparent hover:border-emerald-100"
                 title="Editar"
               >
                 <Edit2 className="h-4 w-4" />
@@ -374,7 +393,7 @@ export default function ProdutosPage() {
               {!item.inativo && (
                 <button
                   onClick={() => handleInativarClick(item.sequenciaDoProduto, item.descricao)}
-                  className="p-2 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  className="p-2 text-red-600 hover:bg-red-50 rounded-xl transition-all border border-transparent hover:border-red-100"
                   title="Inativar"
                 >
                   <Trash2 className="h-4 w-4" />

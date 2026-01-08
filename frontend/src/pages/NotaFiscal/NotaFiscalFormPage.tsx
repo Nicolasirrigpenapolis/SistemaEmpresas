@@ -27,6 +27,7 @@ import {
 
 import { notaFiscalService } from '../../services/NotaFiscal/notaFiscalService';
 import { emitenteService } from '../../services/Emitentes/emitenteService';
+import { ModalConfirmacao } from '../../components/common';
 import type {
   NotaFiscalDto,
   NotaFiscalCreateUpdateDto,
@@ -98,6 +99,23 @@ export default function NotaFiscalFormPage() {
   const [propriedades, setPropriedades] = useState<PropriedadeComboDto[]>([]);
   const [naturezas, setNaturezas] = useState<NaturezaOperacaoComboDto[]>([]);
   const [tiposCobranca, setTiposCobranca] = useState<TipoCobrancaComboDto[]>([]);
+
+  // Estado para modal de confirmação de exclusão
+  const [modalExclusao, setModalExclusao] = useState<{
+    aberto: boolean;
+    tipo: 'produto' | 'conjunto' | 'peca' | 'parcela' | null;
+    id: number | null;
+    titulo: string;
+    mensagem: string;
+    processando: boolean;
+  }>({
+    aberto: false,
+    tipo: null,
+    id: null,
+    titulo: '',
+    mensagem: '',
+    processando: false,
+  });
 
   // Autocompletes
   const [clienteSelecionado, setClienteSelecionado] = useState<ClienteComboDto | null>(null);
@@ -320,7 +338,7 @@ export default function NotaFiscalFormPage() {
 
   // Buscar clientes
   const buscarClientes = useCallback(async (termo: string) => {
-    if (!termo || termo.length < 2) {
+    if (!termo || termo.length < 1) {
       setClientesEncontrados([]);
       return;
     }
@@ -338,7 +356,7 @@ export default function NotaFiscalFormPage() {
 
   // Buscar transportadoras
   const buscarTransportadoras = useCallback(async (termo: string) => {
-    if (!termo || termo.length < 2) {
+    if (!termo || termo.length < 1) {
       setTransportadorasEncontradas([]);
       return;
     }
@@ -353,7 +371,7 @@ export default function NotaFiscalFormPage() {
 
   // Buscar vendedores
   const buscarVendedores = useCallback(async (termo: string) => {
-    if (!termo || termo.length < 2) {
+    if (!termo || termo.length < 1) {
       setVendedoresEncontrados([]);
       return;
     }
@@ -485,11 +503,91 @@ export default function NotaFiscalFormPage() {
     navigate('/faturamento/notas-fiscais');
   };
 
+  const handleRemoveProduto = (produtoId: number) => {
+    setModalExclusao({
+      aberto: true,
+      tipo: 'produto',
+      id: produtoId,
+      titulo: 'Remover Produto',
+      mensagem: 'Tem certeza que deseja remover este produto da nota fiscal?',
+      processando: false,
+    });
+  };
+
+  const handleRemoveConjunto = (conjuntoId: number) => {
+    setModalExclusao({
+      aberto: true,
+      tipo: 'conjunto',
+      id: conjuntoId,
+      titulo: 'Remover Conjunto',
+      mensagem: 'Tem certeza que deseja remover este conjunto da nota fiscal?',
+      processando: false,
+    });
+  };
+
+  const handleRemovePeca = (pecaId: number) => {
+    setModalExclusao({
+      aberto: true,
+      tipo: 'peca',
+      id: pecaId,
+      titulo: 'Remover Peça',
+      mensagem: 'Tem certeza que deseja remover esta peça da nota fiscal?',
+      processando: false,
+    });
+  };
+
+  const handleRemoveParcela = (parcelaId: number) => {
+    setModalExclusao({
+      aberto: true,
+      tipo: 'parcela',
+      id: parcelaId,
+      titulo: 'Remover Parcela',
+      mensagem: 'Tem certeza que deseja remover esta parcela da nota fiscal?',
+      processando: false,
+    });
+  };
+
+  const confirmarExclusao = async () => {
+    if (!modalExclusao.id || !modalExclusao.tipo || !id) return;
+
+    try {
+      setModalExclusao(prev => ({ ...prev, processando: true }));
+      const itemId = modalExclusao.id;
+      const tipo = modalExclusao.tipo;
+
+      if (tipo === 'produto') {
+        await notaFiscalService.removerProduto(Number(id), itemId);
+        setProdutosLista(prev => prev.filter(p => p.sequenciaDoProdutoDaNotaFiscal !== itemId));
+      } else if (tipo === 'conjunto') {
+        await notaFiscalService.removerConjunto(Number(id), itemId);
+        setConjuntosLista(prev => prev.filter(c => c.sequenciaDoConjuntoDaNotaFiscal !== itemId));
+      } else if (tipo === 'peca') {
+        await notaFiscalService.removerPeca(Number(id), itemId);
+        setPecasLista(prev => prev.filter(p => p.sequenciaDaPecaDaNotaFiscal !== itemId));
+      } else if (tipo === 'parcela') {
+        await notaFiscalService.removerParcela(Number(id), itemId);
+        setParcelasLista(prev => prev.filter(p => p.sequenciaDaParcela !== itemId));
+      }
+
+      // Recarregar nota para atualizar totais
+      const nota = await notaFiscalService.obterPorId(Number(id));
+      setNotaOriginal(nota);
+      
+      setModalExclusao({ aberto: false, tipo: null, id: null, titulo: '', mensagem: '', processando: false });
+    } catch (err: any) {
+      alert(err.response?.data?.mensagem || `Erro ao remover ${modalExclusao.tipo}`);
+      setModalExclusao(prev => ({ ...prev, processando: false }));
+    }
+  };
+
+  // Refs para inputs de busca
+  // Conjunto de funções para manipulação de dados e chamadas à API
+
   // ==========================================
   // FUNÇÕES PARA PRODUTOS
   // ==========================================
   const buscarProdutosCombo = useCallback(async (termo: string) => {
-    if (!termo || termo.length < 2) {
+    if (!termo || termo.length < 1) {
       setProdutosCombo([]);
       return;
     }
@@ -666,26 +764,11 @@ export default function NotaFiscalFormPage() {
     }
   };
 
-  const handleRemoveProduto = async (produtoId: number) => {
-    if (!id || !confirm('Confirma a exclusão do produto?')) return;
-
-    try {
-      await notaFiscalService.removerProduto(Number(id), produtoId);
-      setProdutosLista(prev => prev.filter(p => p.sequenciaDoProdutoDaNotaFiscal !== produtoId));
-
-      // Recarregar nota para atualizar totais
-      const nota = await notaFiscalService.obterPorId(Number(id));
-      setNotaOriginal(nota);
-    } catch (err: any) {
-      alert(err.response?.data?.mensagem || 'Erro ao remover produto');
-    }
-  };
-
   // ==========================================
   // FUNÇÕES PARA CONJUNTOS
   // ==========================================
   const buscarConjuntosCombo = useCallback(async (termo: string) => {
-    if (!termo || termo.length < 2) {
+    if (!termo || termo.length < 1) {
       setConjuntosCombo([]);
       return;
     }
@@ -831,25 +914,11 @@ export default function NotaFiscalFormPage() {
     }
   };
 
-  const handleRemoveConjunto = async (conjuntoId: number) => {
-    if (!id || !confirm('Confirma a exclusão do conjunto?')) return;
-
-    try {
-      await notaFiscalService.removerConjunto(Number(id), conjuntoId);
-      setConjuntosLista(prev => prev.filter(c => c.sequenciaDoConjuntoDaNotaFiscal !== conjuntoId));
-
-      const nota = await notaFiscalService.obterPorId(Number(id));
-      setNotaOriginal(nota);
-    } catch (err: any) {
-      alert(err.response?.data?.mensagem || 'Erro ao remover conjunto');
-    }
-  };
-
   // ==========================================
   // FUNÇÕES PARA PEÇAS
   // ==========================================
   const buscarPecasCombo = useCallback(async (termo: string) => {
-    if (!termo || termo.length < 2) {
+    if (!termo || termo.length < 1) {
       setPecasCombo([]);
       return;
     }
@@ -880,7 +949,7 @@ export default function NotaFiscalFormPage() {
     }
   };
 
-  // Auto-inicializa linha de inserção na aba de peças
+  // Auto-inicializa linha de inserção quando entra na aba de peças
   useEffect(() => {
     if (activeTab === 'pecas' && isEditing && !novaPeca && !temProdutos && !isReadOnly) {
       handleAddPecaRow();
@@ -979,7 +1048,7 @@ export default function NotaFiscalFormPage() {
       const nota = await notaFiscalService.obterPorId(Number(id));
       setNotaOriginal(nota);
 
-      // Automaticamente abre nova linha para continuar adicionando
+      // Automaticamente abre nova linha de inserção para continuar adicionando
       setNovaPeca({
         sequenciaDaPeca: 0,
         quantidade: 1,
@@ -992,20 +1061,6 @@ export default function NotaFiscalFormPage() {
       alert(err.response?.data?.mensagem || 'Erro ao adicionar peça');
     } finally {
       setSalvandoPeca(false);
-    }
-  };
-
-  const handleRemovePeca = async (pecaId: number) => {
-    if (!id || !confirm('Confirma a exclusão da peça?')) return;
-
-    try {
-      await notaFiscalService.removerPeca(Number(id), pecaId);
-      setPecasLista(prev => prev.filter(p => p.sequenciaDaPecaDaNotaFiscal !== pecaId));
-
-      const nota = await notaFiscalService.obterPorId(Number(id));
-      setNotaOriginal(nota);
-    } catch (err: any) {
-      alert(err.response?.data?.mensagem || 'Erro ao remover peça');
     }
   };
 
@@ -1043,17 +1098,6 @@ export default function NotaFiscalFormPage() {
       alert(err.response?.data?.mensagem || 'Erro ao adicionar parcela');
     } finally {
       setSalvandoParcela(false);
-    }
-  };
-
-  const handleRemoveParcela = async (parcelaId: number) => {
-    if (!id || !confirm('Confirma a exclusão da parcela?')) return;
-
-    try {
-      await notaFiscalService.removerParcela(Number(id), parcelaId);
-      setParcelasLista(prev => prev.filter(p => p.sequenciaDaParcela !== parcelaId));
-    } catch (err: any) {
-      alert(err.response?.data?.mensagem || 'Erro ao remover parcela');
     }
   };
 
@@ -1873,8 +1917,8 @@ export default function NotaFiscalFormPage() {
                           <td className="px-2 py-2 text-right text-xs text-slate-600 font-mono">{produto.aliquotaCofins || 0}</td>
                           <td className="px-2 py-2 text-right text-xs text-slate-700 font-mono border-r border-slate-200">{(produto.valorCofins || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
                           {/* IBS/CBS */}
-                          <td className="px-2 py-2 text-right text-xs text-slate-600 font-mono">{(produto.valorIbs || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                          <td className="px-2 py-2 text-right text-xs text-slate-600 font-mono border-r border-slate-200">{(produto.valorCbs || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                          <td className="px-2 py-2 text-right font-bold text-slate-700 font-mono">{produto.valorIbs.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                          <td className="px-2 py-2 text-right font-bold text-slate-700 border-r border-slate-300 font-mono">{produto.valorCbs.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
                           <td className="px-2 py-2 text-center">
                             {isEditing && (
                               <button
@@ -1977,7 +2021,7 @@ export default function NotaFiscalFormPage() {
                           <td className="px-2 py-2 text-center text-xs text-slate-400 border-r border-slate-200">-</td>
                           <td className="px-2 py-2">
                             <div className="flex items-center justify-center gap-1">
-                              <button type="button" onClick={handleSaveProduto} disabled={salvandoProduto || !novoProduto.sequenciaDoProduto} className="p-1 text-white bg-slate-700 rounded hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" title="Confirmar">
+                              <button type="button" onClick={handleSaveProduto} disabled={salvandoProduto || !novoProduto.sequenciaDoProduto} className="p-1 text-white bg-slate-700 rounded hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed" title="Confirmar">
                                 {salvandoProduto ? <div className="h-3 w-3 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Check className="h-3 w-3" />}
                               </button>
                               <button type="button" onClick={handleCancelProduto} className="p-1 text-slate-600 bg-slate-200 rounded hover:bg-slate-300 transition-colors" title="Cancelar">
@@ -2190,7 +2234,7 @@ export default function NotaFiscalFormPage() {
                               className="w-full px-1 py-1 text-xs text-right border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500"
                             />
                           </td>
-                          <td className="px-2 py-1.5 text-right text-xs font-medium text-gray-900">
+                          <td className="px-2 py-1.5 text-right text-xs text-gray-600">
                             {((novoConjunto.quantidade || 0) * (novoConjunto.valorUnitario || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                           </td>
                           <td className="px-2 py-1.5">
@@ -2266,7 +2310,7 @@ export default function NotaFiscalFormPage() {
                     </div>
                     <div>
                       <span className="text-gray-600">Total:</span>
-                      <span className="ml-2 font-semibold text-indigo-600">
+                      <span className="ml-2 font-semibold text-gray-900">
                         R$ {conjuntosLista.reduce((acc, c) => acc + c.valorTotal, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </span>
                     </div>
@@ -2437,8 +2481,8 @@ export default function NotaFiscalFormPage() {
                               className="w-full px-1 py-1 text-xs text-right border border-gray-300 rounded focus:ring-2 focus:ring-orange-500"
                             />
                           </td>
-                          <td className="px-2 py-1.5 text-right text-xs font-medium text-gray-900">
-                            {((novaPeca.quantidade || 0) * (novaPeca.valorUnitario || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          <td className="px-2 py-1.5 text-right text-xs text-gray-600">
+                            {(((novaPeca.quantidade || 0) * (novaPeca.valorUnitario || 0)) - (novaPeca.desconto || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                           </td>
                           <td className="px-2 py-1.5">
                             <input
@@ -2450,9 +2494,6 @@ export default function NotaFiscalFormPage() {
                               onChange={(e) => setNovaPeca(prev => ({ ...prev, aliquotaIpi: parseFloat(e.target.value) || 0 }))}
                               className="w-full px-1 py-1 text-xs text-right border border-gray-300 rounded focus:ring-2 focus:ring-orange-500"
                             />
-                          </td>
-                          <td className="px-2 py-1.5 text-right text-xs text-gray-600">
-                            {(((novaPeca.quantidade || 0) * (novaPeca.valorUnitario || 0)) * ((novaPeca.aliquotaIpi || 0) / 100)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                           </td>
                           <td className="px-2 py-1.5 text-center text-xs text-gray-400">-</td>
                           <td className="px-2 py-1.5 text-center text-xs text-gray-400">-</td>
@@ -2513,7 +2554,7 @@ export default function NotaFiscalFormPage() {
                     </div>
                     <div>
                       <span className="text-gray-600">Total:</span>
-                      <span className="ml-2 font-semibold text-orange-600">
+                      <span className="ml-2 font-semibold text-gray-900">
                         R$ {pecasLista.reduce((acc, p) => acc + p.valorTotal, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </span>
                     </div>
@@ -3026,6 +3067,18 @@ export default function NotaFiscalFormPage() {
           document.body
         )
       }
+
+      {/* Modal de Confirmação */}
+      {modalExclusao.aberto && (
+        <ModalConfirmacao
+          aberto={modalExclusao.aberto}
+          titulo={modalExclusao.titulo}
+          mensagem={modalExclusao.mensagem}
+          onConfirmar={confirmarExclusao}
+          onCancelar={() => setModalExclusao(prev => ({ ...prev, aberto: false }))}
+          processando={modalExclusao.processando}
+        />
+      )}
     </div >
   );
 }

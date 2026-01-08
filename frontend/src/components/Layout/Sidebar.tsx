@@ -119,6 +119,8 @@ export default function Sidebar({ collapsed = false, onCollapse, mobileOpen = fa
       icon: Warehouse,
       children: [
         { id: 'produtos', label: 'Produtos', path: '/produtos' },
+        { id: 'entrada-estoque', label: 'Entrada de Estoque', path: '/estoque/entrada' },
+        { id: 'movimento-contabil', label: 'Movimento Contábil', path: '/estoque/movimento-contabil' },
       ],
     },
     {
@@ -155,7 +157,7 @@ export default function Sidebar({ collapsed = false, onCollapse, mobileOpen = fa
       label: 'Sistema',
       icon: Settings,
       children: [
-        { id: 'emitente', label: 'Dados do Emitente', path: '/emitente' },
+        { id: 'emitente', label: 'Configurações do Sistema', path: '/emitente' },
         { id: 'usuarios', label: 'Usuários e Permissões', path: '/usuarios' },
         { id: 'logs', label: 'Logs de Auditoria', path: '/logs' },
       ],

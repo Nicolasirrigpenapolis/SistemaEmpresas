@@ -14,6 +14,7 @@ using SistemaEmpresas.Services.Seguranca;
 using SistemaEmpresas.Services.Logs;
 using SistemaEmpresas.Repositories.Fiscal;
 using SistemaEmpresas.Repositories.Produto;
+using SistemaEmpresas.Repositories.MovimentoContabil;
 using SistemaEmpresas.Repositories.NotaFiscal;
 using SistemaEmpresas.Repositories.Seguranca;
 using SistemaEmpresas.Repositories.Logs;
@@ -181,6 +182,10 @@ builder.Services.AddTransient<SistemaEmpresas.Services.Fiscal.CertificadoDinamic
 // Registro do HttpClient genérico para uso em controllers (ex: consulta CNPJ)
 builder.Services.AddHttpClient();
 
+// Registro do Repository e Service de Geral (Clientes, Fornecedores, Transportadoras, Vendedores)
+builder.Services.AddScoped<SistemaEmpresas.Repositories.Geral.IGeralRepository, SistemaEmpresas.Repositories.Geral.GeralRepository>();
+builder.Services.AddScoped<SistemaEmpresas.Services.Geral.IGeralService, SistemaEmpresas.Services.Geral.GeralService>();
+
 // Registro do Repository de Classificação Fiscal
 builder.Services.AddScoped<IClassificacaoFiscalRepository, ClassificacaoFiscalRepository>();
 
@@ -190,8 +195,23 @@ builder.Services.AddScoped<IClassTribRepository, ClassTribRepository>();
 // Registro do Repository de Produtos
 builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
 
+// Registro do Repository de Receita do Produto (Materia Prima)
+builder.Services.AddScoped<IReceitaProdutoRepository, ReceitaProdutoRepository>();
+
+// Registro do Repository de Inventário (Ajuste de Estoque)
+builder.Services.AddScoped<IMovimentoContabilRepository, MovimentoContabilRepository>();
+
 // Registro do Repository de Nota Fiscal
 builder.Services.AddScoped<INotaFiscalRepository, NotaFiscalRepository>();
+
+// Registro do SefazService com HttpClient configurado com certificado dinâmico
+builder.Services.AddHttpClient<ISefazService, SefazService>()
+    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+    {
+        ClientCertificateOptions = ClientCertificateOption.Manual,
+        ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+    })
+    .AddHttpMessageHandler<SistemaEmpresas.Services.Fiscal.CertificadoDinamicoHandler>();
 
 // Registro do Repository e Service de Gerenciamento de Usuários
 builder.Services.AddScoped<IUsuarioManagementRepository, UsuarioManagementRepository>();
@@ -217,6 +237,9 @@ builder.Services.AddScoped<ILogSegurancaService, LogSegurancaService>();
 
 // Registro do Serviço de Cálculo de Impostos
 builder.Services.AddScoped<ICalculoImpostoService, CalculoImpostoService>();
+
+// Registro do Serviço de Parsing de XML de NFe
+builder.Services.AddScoped<SistemaEmpresas.Services.Fiscal.INFeXmlParserService, SistemaEmpresas.Services.Fiscal.NFeXmlParserService>();
 
 // ===========================================
 // Módulo de Transporte - Services

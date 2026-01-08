@@ -41,7 +41,7 @@ public partial class BaixaDoEstoqueContabil
     [Column("Valor Total", TypeName = "decimal(11, 2)")]
     public decimal ValorTotal { get; set; }
 
-    [Column(TypeName = "text")]
+    [Column("Observação", TypeName = "text")]
     public string Observacao { get; set; } = null!;
 
     [Column("Valor do PIS", TypeName = "decimal(11, 4)")]

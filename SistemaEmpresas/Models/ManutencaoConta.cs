@@ -24,7 +24,7 @@ public partial class ManutencaoConta
     [Column("Data de Entrada", TypeName = "datetime")]
     public DateTime? DataDeEntrada { get; set; }
 
-    [Column(TypeName = "text")]
+    [Column("Histórico", TypeName = "text")]
     public string Historico { get; set; } = null!;
 
     [Column("Forma de Pagamento")]
@@ -109,6 +109,7 @@ public partial class ManutencaoConta
     [Unicode(false)]
     public string TpoDeRecebimento { get; set; } = null!;
 
+    [Column("Previsão")]
     public bool Previsao { get; set; }
 
     [StringLength(25)]

@@ -165,11 +165,48 @@ export interface ProdutoFiltroDto {
   pageSize?: number;
 }
 
-// ProdutoComboDto importado de NotaFiscal (versão mais completa)
+// ProdutoComboDto importado de NotaFiscal (versao mais completa)
 export type { ProdutoComboDto } from '../NotaFiscal/notaFiscal';
 
 // PagedResult importado de Common
 export type { PagedResult } from '../Common/common';
+
+// ============================================================================
+// RECEITA DO PRODUTO (MATERIA PRIMA)
+// ============================================================================
+
+// DTO para listagem de itens da receita do produto (materias primas)
+export interface ReceitaProdutoListDto {
+  sequenciaDoProduto: number;
+  sequenciaDaMateriaPrima: number;
+  descricaoDaMateriaPrima: string;
+  quantidade: number;
+  unidade: string;
+  peso: number;
+  valorDeCusto: number;
+  custoTotal: number;
+  pesoTotal: number;
+}
+
+// DTO para criacao/atualizacao de item da receita
+export interface ReceitaProdutoCreateUpdateDto {
+  sequenciaDaMateriaPrima: number;
+  quantidade: number;
+}
+
+// DTO para retorno completo da receita do produto
+export interface ReceitaProdutoDto {
+  sequenciaDoProduto: number;
+  descricaoDoProduto: string;
+  itens: ReceitaProdutoListDto[];
+  totalItens: number;
+  custoTotalReceita: number;
+  pesoTotalReceita: number;
+}
+
+// ============================================================================
+// TIPOS DE PRODUTO
+// ============================================================================
 
 // Tipos de Produto (conforme o campo TipoDoProduto)
 export const TIPO_PRODUTO = {

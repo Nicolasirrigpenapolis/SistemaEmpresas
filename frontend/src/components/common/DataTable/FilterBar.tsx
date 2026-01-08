@@ -27,19 +27,19 @@ export function FilterBar({
   const SortIcon = sortDirection === 'asc' ? ArrowUp : ArrowDown;
 
   return (
-    <div className="bg-surface/50 backdrop-blur-sm border border-border rounded-2xl p-5 shadow-sm transition-all hover:shadow-md">
+    <div className="bg-surface border border-border rounded-2xl p-4 shadow-sm transition-all">
       <div className="flex flex-col lg:flex-row gap-4">
         {/* Seletor de Coluna */}
         <div className="flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-secondary/10 rounded-xl text-secondary">
+            <div className="p-2.5 bg-blue-600/10 rounded-xl text-blue-600 border border-blue-600/10">
               <Filter className="w-5 h-5" />
             </div>
             <div className="relative">
               <select
                 value={selectedColumn}
                 onChange={(e) => onColumnSelect(e.target.value)}
-                className="appearance-none w-full pl-4 pr-10 py-2.5 text-sm font-medium border border-border rounded-xl bg-surface text-primary focus:ring-2 focus:ring-secondary/20 focus:border-secondary cursor-pointer min-w-[180px] transition-all hover:border-secondary/50"
+                className="appearance-none w-full pl-4 pr-10 py-2.5 text-sm font-semibold border border-border rounded-xl bg-surface text-foreground focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 cursor-pointer min-w-[180px] transition-all hover:border-blue-600/50"
               >
                 {columns.map((col) => (
                   <option key={col.key} value={col.key}>
@@ -56,19 +56,19 @@ export function FilterBar({
 
         {/* Campo de Busca */}
         <div className="flex-1 relative group">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-secondary transition-colors" />
+          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-blue-600 transition-colors" />
           <input
             type="text"
             placeholder={placeholder}
             value={filterValue}
             onChange={(e) => onFilterValueChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="w-full pl-12 pr-10 py-2.5 bg-surface border border-border rounded-xl text-sm font-medium text-primary placeholder:text-muted-foreground/70 focus:ring-2 focus:ring-secondary/20 focus:border-secondary transition-all shadow-sm"
+            className="w-full pl-12 pr-10 py-2.5 bg-surface border border-border rounded-xl text-sm font-medium text-foreground placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all shadow-sm"
           />
           {filterValue && (
             <button
               onClick={() => onFilterValueChange('')}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded-lg text-muted-foreground hover:bg-surface-hover hover:text-primary transition-colors"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded-lg text-muted-foreground hover:bg-surface-hover hover:text-foreground transition-colors"
               title="Limpar busca"
             >
               <X className="w-4 h-4" />
@@ -80,7 +80,7 @@ export function FilterBar({
         <div className="flex gap-2 flex-shrink-0">
           <button
             onClick={onSearch}
-            className="flex items-center gap-2 px-5 py-2.5 bg-secondary text-white rounded-xl hover:bg-secondary/90 transition-all font-bold shadow-lg shadow-secondary/20 active:scale-95"
+            className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all font-bold shadow-lg shadow-blue-600/20 active:scale-95"
           >
             <Search className="w-4 h-4" />
             <span className="hidden sm:inline">Buscar</span>
@@ -89,8 +89,8 @@ export function FilterBar({
           <button
             onClick={onToggleSort}
             className={`flex items-center gap-2 px-4 py-2.5 border rounded-xl transition-all font-bold ${sortDirection === 'desc'
-                ? 'border-secondary text-secondary bg-secondary/10'
-                : 'border-border text-muted-foreground hover:bg-surface-hover hover:text-primary bg-surface'
+                ? 'border-blue-600 text-blue-600 bg-blue-600/10'
+                : 'border-border text-muted-foreground hover:bg-surface-hover hover:text-foreground bg-surface'
               }`}
             title={`Ordenar ${sortDirection === 'asc' ? 'Z → A' : 'A → Z'}`}
           >
@@ -103,7 +103,7 @@ export function FilterBar({
             disabled={!hasActiveFilters}
             className={`flex items-center gap-2 px-4 py-2.5 border rounded-xl transition-all font-bold ${hasActiveFilters
                 ? 'border-red-200 text-red-600 bg-red-50 hover:bg-red-100 hover:border-red-300'
-                : 'border-border text-muted-foreground/50 bg-surface opacity-50 cursor-not-allowed'
+                : 'border-border text-muted-foreground/40 bg-surface opacity-50 cursor-not-allowed'
               }`}
             title="Limpar filtros"
           >
@@ -118,13 +118,13 @@ export function FilterBar({
         <div className="mt-4 pt-4 border-t border-border animate-fade-in">
           <div className="flex items-center gap-3 text-sm">
             <span className="text-muted-foreground font-medium">Filtro ativo:</span>
-            <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-secondary/10 text-secondary rounded-lg border border-secondary/20">
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600/10 text-blue-600 rounded-lg border border-blue-600/20">
               <span className="font-bold">{selectedColumnConfig?.header}</span>
-              <span className="text-secondary/70">contém</span>
+              <span className="text-blue-600/70">contém</span>
               <span className="font-bold">"{filterValue}"</span>
               <button
                 onClick={onClear}
-                className="ml-2 p-0.5 rounded-md hover:bg-secondary/20 transition-colors"
+                className="ml-2 p-0.5 rounded-md hover:bg-blue-600/20 transition-colors"
               >
                 <X className="w-3 h-3" />
               </button>

@@ -9,14 +9,16 @@ import {
   Phone,
   FileCheck,
   Loader2,
-
   CheckCircle,
   X,
+  FolderOpen,
+  Settings,
 } from 'lucide-react';
-import { emitenteService } from '../../services/Emitentes/emitenteService';
+import { emitenteService, parametrosService } from '../../services/Emitentes/emitenteService';
 import type {
   EmitenteDto,
   EmitenteCreateUpdateDto,
+  ParametrosDto,
 } from '../../types';
 import { REGIMES_TRIBUTARIOS, AMBIENTES_NFE, UFS } from '../../types';
 import { CabecalhoPagina, AlertaErro } from '../../components/common';
@@ -53,11 +55,20 @@ export default function EmitentePage() {
   // Estados
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [savingParametros, setSavingParametros] = useState(false);
   const [consultandoCnpj, setConsultandoCnpj] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [emitenteExistente, setEmitenteExistente] = useState<EmitenteDto | null>(null);
   const [touched, setTouched] = useState<Set<string>>(new Set()); // Campos tocados para validação
+
+  // Parâmetros do sistema
+  const [parametros, setParametros] = useState<ParametrosDto>({
+    diretorioFotosProdutos: '',
+    diretorioFotosConjuntos: '',
+    diretorioDasFotos: '',
+    diretorioDesenhoTec: '',
+  });
 
   // Form data
   const [formData, setFormData] = useState<EmitenteCreateUpdateDto>({
@@ -88,55 +99,89 @@ export default function EmitentePage() {
     ativo: true,
   });
 
-  // Carrega emitente existente ao montar
+  // Carrega emitente e parâmetros ao montar
   useEffect(() => {
-    carregarEmitente();
+    carregarDados();
   }, []);
 
-  const carregarEmitente = async () => {
+  const carregarDados = async () => {
     try {
       setLoading(true);
-      const emitente = await emitenteService.obterAtual();
-      setEmitenteExistente(emitente);
+      // Carrega emitente e parâmetros em paralelo
+      const [emitenteResult, parametrosResult] = await Promise.allSettled([
+        emitenteService.obterAtual(),
+        parametrosService.obter(),
+      ]);
 
-      // Preenche o formulário com dados existentes
-      setFormData({
-        cnpj: emitente.cnpj,
-        razaoSocial: emitente.razaoSocial,
-        nomeFantasia: emitente.nomeFantasia || '',
-        inscricaoEstadual: emitente.inscricaoEstadual,
-        inscricaoMunicipal: emitente.inscricaoMunicipal || '',
-        cnae: emitente.cnae || '',
-        codigoRegimeTributario: emitente.codigoRegimeTributario || 3,
-        endereco: emitente.endereco,
-        numero: emitente.numero,
-        complemento: emitente.complemento || '',
-        bairro: emitente.bairro,
-        codigoMunicipio: emitente.codigoMunicipio,
-        municipio: emitente.municipio,
-        uf: emitente.uf,
-        cep: emitente.cep,
-        codigoPais: emitente.codigoPais || '1058',
-        pais: emitente.pais || 'Brasil',
-        telefone: emitente.telefone || '',
-        email: emitente.email || '',
-        ambienteNfe: emitente.ambienteNfe,
-        serieNfe: emitente.serieNfe,
-        proximoNumeroNfe: emitente.proximoNumeroNfe,
-        caminhoCertificado: emitente.caminhoCertificado || '',
-        senhaCertificado: '',
-        ativo: emitente.ativo,
-      });
-    } catch (err: any) {
-      // Se não encontrou emitente, é um novo cadastro
-      if (err?.response?.status === 404) {
-        setEmitenteExistente(null);
-      } else {
-        console.error('Erro ao carregar emitente:', err);
+      // Processa resultado do emitente
+      if (emitenteResult.status === 'fulfilled') {
+        const emitente = emitenteResult.value;
+        setEmitenteExistente(emitente);
+
+        // Preenche o formulário com dados existentes
+        setFormData({
+          cnpj: emitente.cnpj,
+          razaoSocial: emitente.razaoSocial,
+          nomeFantasia: emitente.nomeFantasia || '',
+          inscricaoEstadual: emitente.inscricaoEstadual,
+          inscricaoMunicipal: emitente.inscricaoMunicipal || '',
+          cnae: emitente.cnae || '',
+          codigoRegimeTributario: emitente.codigoRegimeTributario || 3,
+          endereco: emitente.endereco,
+          numero: emitente.numero,
+          complemento: emitente.complemento || '',
+          bairro: emitente.bairro,
+          codigoMunicipio: emitente.codigoMunicipio,
+          municipio: emitente.municipio,
+          uf: emitente.uf,
+          cep: emitente.cep,
+          codigoPais: emitente.codigoPais || '1058',
+          pais: emitente.pais || 'Brasil',
+          telefone: emitente.telefone || '',
+          email: emitente.email || '',
+          ambienteNfe: emitente.ambienteNfe,
+          serieNfe: emitente.serieNfe,
+          proximoNumeroNfe: emitente.proximoNumeroNfe,
+          caminhoCertificado: emitente.caminhoCertificado || '',
+          senhaCertificado: '',
+          ativo: emitente.ativo,
+        });
+      } else if (emitenteResult.status === 'rejected') {
+        // Se não encontrou emitente, é um novo cadastro
+        const err = emitenteResult.reason as any;
+        if (err?.response?.status !== 404) {
+          console.error('Erro ao carregar emitente:', err);
+        }
       }
+
+      // Processa resultado dos parâmetros
+      if (parametrosResult.status === 'fulfilled') {
+        setParametros(parametrosResult.value);
+      }
+    } catch (err: any) {
+      console.error('Erro ao carregar dados:', err);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Salva os parâmetros do sistema
+  const handleSalvarParametros = async () => {
+    try {
+      setSavingParametros(true);
+      setError(null);
+      await parametrosService.atualizar(parametros);
+      setSuccess('Parâmetros salvos com sucesso!');
+      setTimeout(() => setSuccess(null), 5000);
+    } catch (err: any) {
+      setError(err?.response?.data?.message || 'Erro ao salvar parâmetros');
+    } finally {
+      setSavingParametros(false);
+    }
+  };
+
+  const handleParametrosChange = (field: keyof ParametrosDto, value: string) => {
+    setParametros(prev => ({ ...prev, [field]: value }));
   };
 
   const handleConsultarCnpj = async () => {
@@ -240,7 +285,7 @@ export default function EmitentePage() {
       <div className="flex items-center justify-center h-screen bg-background">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Carregando dados do emitente...</p>
+          <p className="text-muted-foreground">Carregando configurações do sistema...</p>
         </div>
       </div>
     );
@@ -249,8 +294,8 @@ export default function EmitentePage() {
   return (
     <div className="space-y-6 pb-8">
       <CabecalhoPagina
-        titulo="Dados do Emitente"
-        subtitulo="Empresa que emite as notas fiscais"
+        titulo="Configurações do Sistema"
+        subtitulo="Dados do emitente e parâmetros gerais"
         icone={Building2}
         acoes={
           <button
@@ -699,7 +744,7 @@ export default function EmitentePage() {
             </div>
           </div>
 
-          {/* Botões */}
+          {/* Botões do Emitente */}
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-border">
             <button
               type="button"
@@ -721,12 +766,109 @@ export default function EmitentePage() {
               ) : (
                 <>
                   <Save className="h-4 w-4" />
-                  {emitenteExistente ? 'Atualizar' : 'Cadastrar'}
+                  {emitenteExistente ? 'Atualizar Emitente' : 'Cadastrar Emitente'}
                 </>
               )}
             </button>
           </div>
         </form>
+
+        {/* Seção: Parâmetros do Sistema */}
+        <div className="bg-surface rounded-xl shadow-sm border border-border overflow-hidden mt-6">
+          <div className="bg-surface-muted px-6 py-4 border-b border-border">
+            <div className="flex items-center gap-2">
+              <Settings className="h-5 w-5 text-primary" />
+              <h2 className="text-lg font-bold text-primary">Parâmetros do Sistema</h2>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Configurações de diretórios para armazenamento de arquivos
+            </p>
+          </div>
+
+          <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {/* Diretório Fotos de Produtos */}
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">
+                <FolderOpen className="inline h-3 w-3 mr-1" />
+                Diretório de Fotos de Produtos
+              </label>
+              <input
+                type="text"
+                value={parametros.diretorioFotosProdutos || ''}
+                onChange={(e) => handleParametrosChange('diretorioFotosProdutos', e.target.value)}
+                className="w-full px-3 py-2 bg-surface-muted border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
+                placeholder="Ex: C:\Fotos\Produtos"
+              />
+            </div>
+
+            {/* Diretório Fotos de Conjuntos */}
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">
+                <FolderOpen className="inline h-3 w-3 mr-1" />
+                Diretório de Fotos de Conjuntos
+              </label>
+              <input
+                type="text"
+                value={parametros.diretorioFotosConjuntos || ''}
+                onChange={(e) => handleParametrosChange('diretorioFotosConjuntos', e.target.value)}
+                className="w-full px-3 py-2 bg-surface-muted border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
+                placeholder="Ex: C:\Fotos\Conjuntos"
+              />
+            </div>
+
+            {/* Diretório das Fotos (geral) */}
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">
+                <FolderOpen className="inline h-3 w-3 mr-1" />
+                Diretório de Fotos (Geral)
+              </label>
+              <input
+                type="text"
+                value={parametros.diretorioDasFotos || ''}
+                onChange={(e) => handleParametrosChange('diretorioDasFotos', e.target.value)}
+                className="w-full px-3 py-2 bg-surface-muted border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
+                placeholder="Ex: C:\Fotos"
+              />
+            </div>
+
+            {/* Diretório Desenho Técnico */}
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">
+                <FolderOpen className="inline h-3 w-3 mr-1" />
+                Diretório de Desenhos Técnicos
+              </label>
+              <input
+                type="text"
+                value={parametros.diretorioDesenhoTec || ''}
+                onChange={(e) => handleParametrosChange('diretorioDesenhoTec', e.target.value)}
+                className="w-full px-3 py-2 bg-surface-muted border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
+                placeholder="Ex: C:\Desenhos"
+              />
+            </div>
+          </div>
+
+          {/* Botão Salvar Parâmetros */}
+          <div className="px-6 py-4 border-t border-border flex justify-end">
+            <button
+              type="button"
+              onClick={handleSalvarParametros}
+              disabled={savingParametros}
+              className="px-6 py-2.5 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-all flex items-center justify-center gap-2 font-medium shadow-lg shadow-primary/20"
+            >
+              {savingParametros ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Salvando...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4" />
+                  Salvar Parâmetros
+                </>
+              )}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

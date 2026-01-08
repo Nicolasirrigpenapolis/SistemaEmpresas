@@ -112,6 +112,17 @@ export interface ConsultaCnpjDto {
   dataConsulta: string;
 }
 
+// Parâmetros do Sistema
+export interface ParametrosDto {
+  diretorioFotosProdutos?: string;
+  diretorioFotosConjuntos?: string;
+  diretorioDasFotos?: string;
+  diretorioDesenhoTec?: string;
+  caminhoAtualizacao?: string;
+  caminhoAtualizacao2?: string;
+  nomeDoServidor?: string;
+}
+
 // Opções de Regime Tributário
 export const REGIMES_TRIBUTARIOS = [
   { value: 1, label: 'Simples Nacional' },

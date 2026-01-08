@@ -187,7 +187,7 @@ export default function Navbar({ sidebarCollapsed = false, onMobileMenuToggle }:
       title: 'Sistema',
       items: [
         { title: 'Usuários e Permissões', path: '/usuarios', subtitle: 'Gestão de acesso' },
-        { title: 'Dados do Emitente', path: '/emitente', subtitle: 'Configuração fiscal' },
+        { title: 'Configurações do Sistema', path: '/emitente', subtitle: 'Configuração fiscal e parâmetros' },
         { title: 'Perfil', path: '/perfil', subtitle: 'Preferências do usuário' },
       ],
     },

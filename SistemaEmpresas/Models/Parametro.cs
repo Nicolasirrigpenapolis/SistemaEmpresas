@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace SistemaEmpresas.Models;
 
 [Keyless]
+[Table("Parâmetros")]
 public partial class Parametro
 {
     [Column("Caminho Atualização")]
