@@ -53,8 +53,8 @@ public class ViagemService : IViagemService
             {
                 var busca = filtros.Busca.ToUpper().Trim();
                 query = query.Where(v => 
-                    v.Origem.ToUpper().Contains(busca) || 
-                    v.Destino.ToUpper().Contains(busca) ||
+                    (v.Origem != null && v.Origem.ToUpper().Contains(busca)) || 
+                    (v.Destino != null && v.Destino.ToUpper().Contains(busca)) ||
                     (v.Veiculo != null && v.Veiculo.Placa.Contains(busca)) ||
                     (v.Motorista != null && v.Motorista.NomeDoMotorista.ToUpper().Contains(busca)));
             }
