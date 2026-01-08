@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using SistemaEmpresas.DTOs;
+using SistemaEmpresas.Core.Dtos;
 using SistemaEmpresas.Models;
-using SistemaEmpresas.Services;
-using SistemaEmpresas.Services.Logs;
+using SistemaEmpresas.Core.Services;
+using SistemaEmpresas.Features.Logs.Services;
+using SistemaEmpresas.Features.Logs.Dtos;
 using System.Diagnostics;
 using System.Security.Claims;
 using System.Text;

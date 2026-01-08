@@ -7,17 +7,17 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SistemaEmpresas.Data;
 using SistemaEmpresas.Middleware;
-using SistemaEmpresas.Services.Auth;
-using SistemaEmpresas.Services.Tenants;
-using SistemaEmpresas.Services.Fiscal;
-using SistemaEmpresas.Services.Seguranca;
-using SistemaEmpresas.Services.Logs;
-using SistemaEmpresas.Repositories.Fiscal;
-using SistemaEmpresas.Repositories.Produto;
-using SistemaEmpresas.Repositories.MovimentoContabil;
-using SistemaEmpresas.Repositories.NotaFiscal;
-using SistemaEmpresas.Repositories.Seguranca;
-using SistemaEmpresas.Repositories.Logs;
+using SistemaEmpresas.Features.Auth.Services;
+using SistemaEmpresas.Features.Tenants.Services;
+using SistemaEmpresas.Features.Fiscal.Services;
+using SistemaEmpresas.Features.Fiscal.Repositories;
+using SistemaEmpresas.Features.Seguranca.Services;
+using SistemaEmpresas.Features.Seguranca.Repositories;
+using SistemaEmpresas.Features.Logs.Services;
+using SistemaEmpresas.Features.Logs.Repositories;
+using SistemaEmpresas.Features.Produto.Repositories;
+using SistemaEmpresas.Features.MovimentoContabil.Repositories;
+using SistemaEmpresas.Features.NotaFiscal.Repositories;
 using Microsoft.Extensions.Hosting.WindowsServices;
 
 // Desabilitar avisos de TLS 1.0 e suportar múltiplas versões
@@ -127,10 +127,10 @@ builder.Services.AddScoped<ITenantService, TenantService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 // Registro do CertificadoService
-builder.Services.AddScoped<SistemaEmpresas.Services.Certificados.ICertificadoService, SistemaEmpresas.Services.Certificados.CertificadoService>();
+builder.Services.AddScoped<SistemaEmpresas.Core.Services.ICertificadoService, SistemaEmpresas.Core.Services.CertificadoService>();
 
 // Registro do CacheService (cache centralizado com suporte a multi-tenant)
-builder.Services.AddSingleton<SistemaEmpresas.Services.Common.ICacheService, SistemaEmpresas.Services.Common.CacheService>();
+builder.Services.AddSingleton<SistemaEmpresas.Core.Services.ICacheService, SistemaEmpresas.Core.Services.CacheService>();
 
 // Configuração de Cache Distribuído (para ClassTrib Sync)
 builder.Services.AddDistributedMemoryCache(); // Em produção, usar Redis
@@ -174,17 +174,17 @@ builder.Services.AddHttpClient<ClassTribApiClient>(client =>
     
     return handler;
 })
-.AddHttpMessageHandler<SistemaEmpresas.Services.Fiscal.CertificadoDinamicoHandler>();
+.AddHttpMessageHandler<SistemaEmpresas.Features.Fiscal.Services.CertificadoDinamicoHandler>();
 
 // Registro do handler de certificado dinâmico
-builder.Services.AddTransient<SistemaEmpresas.Services.Fiscal.CertificadoDinamicoHandler>();
+builder.Services.AddTransient<SistemaEmpresas.Features.Fiscal.Services.CertificadoDinamicoHandler>();
 
 // Registro do HttpClient genérico para uso em controllers (ex: consulta CNPJ)
 builder.Services.AddHttpClient();
 
 // Registro do Repository e Service de Geral (Clientes, Fornecedores, Transportadoras, Vendedores)
-builder.Services.AddScoped<SistemaEmpresas.Repositories.Geral.IGeralRepository, SistemaEmpresas.Repositories.Geral.GeralRepository>();
-builder.Services.AddScoped<SistemaEmpresas.Services.Geral.IGeralService, SistemaEmpresas.Services.Geral.GeralService>();
+builder.Services.AddScoped<SistemaEmpresas.Features.Geral.Repositories.IGeralRepository, SistemaEmpresas.Features.Geral.Repositories.GeralRepository>();
+builder.Services.AddScoped<SistemaEmpresas.Features.Geral.Services.IGeralService, SistemaEmpresas.Features.Geral.Services.GeralService>();
 
 // Registro do Repository de Classificação Fiscal
 builder.Services.AddScoped<IClassificacaoFiscalRepository, ClassificacaoFiscalRepository>();
@@ -211,7 +211,7 @@ builder.Services.AddHttpClient<ISefazService, SefazService>()
         ClientCertificateOptions = ClientCertificateOption.Manual,
         ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
     })
-    .AddHttpMessageHandler<SistemaEmpresas.Services.Fiscal.CertificadoDinamicoHandler>();
+    .AddHttpMessageHandler<SistemaEmpresas.Features.Fiscal.Services.CertificadoDinamicoHandler>();
 
 // Registro do Repository e Service de Gerenciamento de Usuários
 builder.Services.AddScoped<IUsuarioManagementRepository, UsuarioManagementRepository>();
@@ -239,7 +239,7 @@ builder.Services.AddScoped<ILogSegurancaService, LogSegurancaService>();
 builder.Services.AddScoped<ICalculoImpostoService, CalculoImpostoService>();
 
 // Registro do Serviço de Parsing de XML de NFe
-builder.Services.AddScoped<SistemaEmpresas.Services.Fiscal.INFeXmlParserService, SistemaEmpresas.Services.Fiscal.NFeXmlParserService>();
+builder.Services.AddScoped<SistemaEmpresas.Features.Fiscal.Services.INFeXmlParserService, SistemaEmpresas.Features.Fiscal.Services.NFeXmlParserService>();
 
 // ===========================================
 // Módulo de Transporte - Services

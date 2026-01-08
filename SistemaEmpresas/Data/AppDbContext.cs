@@ -1,4 +1,4 @@
-ï»¿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using SistemaEmpresas.Models;
@@ -224,7 +224,7 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Motorista> Motoristas { get; set; }
 
-    // MÃ³dulo de Transporte - ManutenÃ§Ã£o
+    // Módulo de Transporte - Manutenção
     public virtual DbSet<ManutencaoPeca> ManutencoesPeca { get; set; }
 
     public virtual DbSet<ManutencaoVeiculo> ManutencoesVeiculo { get; set; }
@@ -373,7 +373,7 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<ReceitaPrimarium> ReceitaPrimaria { get; set; }
 
-    // MÃ³dulo de Transporte - Reboque, Despesas e Receitas
+    // Módulo de Transporte - Reboque, Despesas e Receitas
     public virtual DbSet<Reboque> Reboques { get; set; }
 
     public virtual DbSet<DespesaViagem> DespesasViagem { get; set; }
@@ -452,7 +452,7 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<VeiculoDoMotoristum> VeiculosDoMotorista { get; set; }
 
-    // MÃ³dulo de Transporte - VeÃ­culos e Viagens
+    // Módulo de Transporte - Veículos e Viagens
     public virtual DbSet<Veiculo> Veiculos { get; set; }
 
     public virtual DbSet<Viagem> Viagens { get; set; }
@@ -465,17 +465,17 @@ public partial class AppDbContext : DbContext
     {
         modelBuilder.Entity<AdicaoDaDeclaracao>(entity =>
         {
-            entity.HasKey(e => e.SequenciaDaAdicao).HasName("SeqÃ¼Ãªncia da AdiÃ§Ã£o");
+            entity.HasKey(e => e.SequenciaDaAdicao).HasName("Seqüência da Adição");
 
-            entity.HasIndex(e => new { e.SequenciaDaDeclaracao, e.NumeroDaAdicao }, "Seq DeclaraÃ§Ã£o e NÃºmero AdiÃ§Ã£o")
+            entity.HasIndex(e => new { e.SequenciaDaDeclaracao, e.NumeroDaAdicao }, "Seq Declaração e Número Adição")
                 .IsUnique()
                 .HasFillFactor(90);
 
-            entity.HasOne(d => d.SequenciaDaDeclaracaoNavigation).WithMany(p => p.AdicoesDaDeclaracaos).HasConstraintName("TB_AdiÃ§Ãµes_da_DeclaraÃ§Ã£o_FK_SeqÃ¼Ãªncia_da_DeclaraÃ§Ã£o");
+            entity.HasOne(d => d.SequenciaDaDeclaracaoNavigation).WithMany(p => p.AdicoesDaDeclaracaos).HasConstraintName("TB_Adições_da_Declaração_FK_Seqüência_da_Declaração");
 
             entity.HasOne(d => d.SequenciaDoGeralNavigation).WithMany(p => p.AdicoesDaDeclaracaos)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_AdiÃ§Ãµes_da_DeclaraÃ§Ã£o_FK_SeqÃ¼Ãªncia_do_Geral");
+                .HasConstraintName("TB_Adições_da_Declaração_FK_Seqüência_do_Geral");
         });
 
         modelBuilder.Entity<Adutora>(entity =>
@@ -496,7 +496,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<AgendamentoDeBackup>(entity =>
         {
-            entity.HasKey(e => e.SequenciaDoBackup).HasName("SeqÃ¼Ãªncia do Backup");
+            entity.HasKey(e => e.SequenciaDoBackup).HasName("Seqüência do Backup");
 
             entity.HasIndex(e => e.Hora, "Hora")
                 .IsUnique()
@@ -508,7 +508,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Agencia>(entity =>
         {
-            entity.HasKey(e => e.SequenciaDaAgencia).HasName("SeqÃ¼Ãªncia da AgÃªncia");
+            entity.HasKey(e => e.SequenciaDaAgencia).HasName("Seqüência da Agência");
 
             entity.Property(e => e.Ativa).HasDefaultValue(true);
             entity.Property(e => e.Bairro).HasDefaultValue("");
@@ -559,7 +559,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<BaixaConta>(entity =>
         {
-            entity.HasKey(e => e.SequenciaDaBaixa).HasName("SeqÃ¼Ãªncia da Baixa");
+            entity.HasKey(e => e.SequenciaDaBaixa).HasName("Seqüência da Baixa");
 
             entity.Property(e => e.Carteira).HasDefaultValue("");
             entity.Property(e => e.ClienteCarteira).HasDefaultValue("");
@@ -570,47 +570,47 @@ public partial class AppDbContext : DbContext
 
             entity.HasOne(d => d.SequenciaDaManutencaoNavigation).WithMany(p => p.BaixaConta)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Baixa_Contas_FK_SeqÃ¼Ãªncia_da_ManutenÃ§Ã£o");
+                .HasConstraintName("TB_Baixa_Contas_FK_Seqüência_da_Manutenção");
 
             entity.HasOne(d => d.SequenciaDaMovimentacaoCcNavigation).WithMany(p => p.BaixaConta)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Baixa_Contas_FK_SeqÃ¼Ãªncia_da_MovimentaÃ§Ã£o_CC");
+                .HasConstraintName("TB_Baixa_Contas_FK_Seqüência_da_Movimentação_CC");
 
             entity.HasOne(d => d.ContaCorrenteDaAgencium).WithMany(p => p.BaixaConta)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Baixa_Contas_FK_SeqÃ¼Ãªncia_da_AgÃªncia_SeqÃ¼Ãªncia_da_CC_da_AgÃªncia");
+                .HasConstraintName("TB_Baixa_Contas_FK_Seqüência_da_Agência_Seqüência_da_CC_da_Agência");
         });
 
         modelBuilder.Entity<BaixaDoEstoqueContabil>(entity =>
         {
-            entity.HasKey(e => e.SequenciaDaBaixa).HasName("SeqÃ¼Ãªncia da Baixa Estoque");
+            entity.HasKey(e => e.SequenciaDaBaixa).HasName("Seqüência da Baixa Estoque");
 
-            entity.ToTable("Baixa do Estoque ContÃ¡bil", tb => tb.HasTrigger("trg_ImpedirExclusaoBaixasAntigas"));
+            entity.ToTable("Baixa do Estoque Contábil", tb => tb.HasTrigger("trg_ImpedirExclusaoBaixasAntigas"));
 
             entity.Property(e => e.Documento).HasDefaultValue("");
             entity.Property(e => e.Estoque).HasDefaultValue("");
-            entity.Property(e => e.Observacao).HasColumnName("ObservaÃ§Ã£o").HasDefaultValue("");
+            entity.Property(e => e.Observacao).HasColumnName("Observação").HasDefaultValue("");
 
             entity.HasOne(d => d.SequenciaDaDespesaNavigation).WithMany(p => p.BaixaDoEstoqueContabils)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Baixa_do_Estoque_ContÃ¡bil_FK_SeqÃ¼Ãªncia_da_Despesa");
+                .HasConstraintName("TB_Baixa_do_Estoque_Contábil_FK_Seqüência_da_Despesa");
 
             entity.HasOne(d => d.SequenciaDoConjuntoNavigation).WithMany(p => p.BaixaDoEstoqueContabils)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Baixa_do_Estoque_ContÃ¡bil_FK_SeqÃ¼Ãªncia_do_Conjunto");
+                .HasConstraintName("TB_Baixa_do_Estoque_Contábil_FK_Seqüência_do_Conjunto");
 
             entity.HasOne(d => d.SequenciaDoGeralNavigation).WithMany(p => p.BaixaDoEstoqueContabils)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Baixa_do_Estoque_ContÃ¡bil_FK_SeqÃ¼Ãªncia_do_Geral");
+                .HasConstraintName("TB_Baixa_do_Estoque_Contábil_FK_Seqüência_do_Geral");
 
             entity.HasOne(d => d.SequenciaDoProdutoNavigation).WithMany(p => p.BaixaDoEstoqueContabils)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Baixa_do_Estoque_ContÃ¡bil_FK_SeqÃ¼Ãªncia_do_Produto");
+                .HasConstraintName("TB_Baixa_do_Estoque_Contábil_FK_Seqüência_do_Produto");
         });
 
         modelBuilder.Entity<BaixaIndustrializacao>(entity =>
         {
-            entity.HasKey(e => e.SequenciaDaBaixa).HasName("SeqÃ¼Ãªncia da Bx");
+            entity.HasKey(e => e.SequenciaDaBaixa).HasName("Seqüência da Bx");
 
             entity.HasIndex(e => new { e.SequenciaDoMovimento, e.SequenciaDoItem, e.SequenciaDaBaixa }, "Seq Mvto Seq Bx e Seq Item")
                 .IsUnique()
@@ -618,7 +618,7 @@ public partial class AppDbContext : DbContext
 
             entity.HasOne(d => d.SequenciaDoProdutoNavigation).WithMany(p => p.BaixaIndustrializacaos)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Baixa_IndustrializaÃ§Ã£o_FK_SeqÃ¼Ãªncia_do_Produto");
+                .HasConstraintName("TB_Baixa_Industrialização_FK_Seqüência_do_Produto");
         });
 
         modelBuilder.Entity<BaixaMpConjunto>(entity =>
@@ -632,11 +632,11 @@ public partial class AppDbContext : DbContext
 
             entity.HasOne(d => d.SequenciaDaMateriaPrimaNavigation).WithMany(p => p.BaixaMpProdutoSequenciaDaMateriaPrimaNavigations)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Baixa_MP_Produto_FK_SeqÃ¼Ãªncia_da_MatÃ©ria_Prima");
+                .HasConstraintName("TB_Baixa_MP_Produto_FK_Seqüência_da_Matéria_Prima");
 
             entity.HasOne(d => d.SequenciaDoProdutoNavigation).WithMany(p => p.BaixaMpProdutoSequenciaDoProdutoNavigations)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Baixa_MP_Produto_FK_SeqÃ¼Ãªncia_do_Produto");
+                .HasConstraintName("TB_Baixa_MP_Produto_FK_Seqüência_do_Produto");
         });
 
         modelBuilder.Entity<BocalAspersorNelson>(entity =>
@@ -693,7 +693,7 @@ public partial class AppDbContext : DbContext
 
             entity.HasOne(d => d.SequenciaDaNotaFiscalNavigation).WithOne(p => p.CancelamentoNfe)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Cancelamento_NFe_FK_SeqÃ¼Ãªncia_da_Nota_Fiscal");
+                .HasConstraintName("TB_Cancelamento_NFe_FK_Seqüência_da_Nota_Fiscal");
         });
 
         modelBuilder.Entity<CartaDeCorrecaoNfe>(entity =>
@@ -709,7 +709,7 @@ public partial class AppDbContext : DbContext
 
             entity.HasOne(d => d.SequenciaDaNotaFiscalNavigation).WithMany(p => p.CartaDeCorrecaoNves)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Carta_de_CorreÃ§Ã£o_NFe_FK_SeqÃ¼Ãªncia_da_Nota_Fiscal");
+                .HasConstraintName("TB_Carta_de_Correção_NFe_FK_Seqüência_da_Nota_Fiscal");
         });
 
         modelBuilder.Entity<CheckListMaquina>(entity =>
@@ -730,7 +730,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<ClassificacaoFiscal>(entity =>
         {
-            entity.HasKey(e => e.SequenciaDaClassificacao).HasName("SeqÃ¼Ãªncia da ClassificaÃ§Ã£o");
+            entity.HasKey(e => e.SequenciaDaClassificacao).HasName("Seqüência da Classificação");
 
             entity.Property(e => e.Cest).HasDefaultValue("");
             entity.Property(e => e.DescricaoDoNcm).HasDefaultValue("");
@@ -746,7 +746,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<CobrarFornecedor>(entity =>
         {
-            entity.HasKey(e => e.CodigoDaCobranca).HasName("Codigo da CobranÃ§a");
+            entity.HasKey(e => e.CodigoDaCobranca).HasName("Codigo da Cobrança");
 
             entity.Property(e => e.Justificacao).HasDefaultValue("");
             entity.Property(e => e.UsuarioDaCobranca).HasDefaultValue("");
@@ -754,7 +754,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Comissao>(entity =>
         {
-            entity.HasKey(e => e.SequenciaDaComissao).HasName("SeqÃ¼Ãªncia da ComissÃ£o");
+            entity.HasKey(e => e.SequenciaDaComissao).HasName("Seqüência da Comissão");
 
             entity.HasIndex(e => e.SequenciaDaNotaFiscal, "Seq NF Comissao")
                 .IsUnique()
@@ -762,12 +762,12 @@ public partial class AppDbContext : DbContext
 
             entity.HasOne(d => d.SequenciaDaNotaFiscalNavigation).WithOne(p => p.Comissao)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_ComissÃ£o_FK_SeqÃ¼Ãªncia_da_Nota_Fiscal");
+                .HasConstraintName("TB_Comissão_FK_Seqüência_da_Nota_Fiscal");
         });
 
         modelBuilder.Entity<ComissaoDoMontador>(entity =>
         {
-            entity.HasKey(e => e.SequenciaDaComissao).HasName("Sequencia da comissÃ£o");
+            entity.HasKey(e => e.SequenciaDaComissao).HasName("Sequencia da comissão");
 
             entity.Property(e => e.Nfe).HasDefaultValue("");
         });
@@ -781,14 +781,14 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<ConciliaContaAntecipadum>(entity =>
         {
-            entity.HasKey(e => e.SequenciaDaConciliacao).HasName("Sequencia da ConciliaÃ§Ã£o");
+            entity.HasKey(e => e.SequenciaDaConciliacao).HasName("Sequencia da Conciliação");
 
             entity.Property(e => e.NotasDaCompra).HasDefaultValue("");
         });
 
         modelBuilder.Entity<ConciliacaoDeCheque>(entity =>
         {
-            entity.HasKey(e => e.SeqDaConciliacao).HasName("Seq da ConciliaÃ§Ã£o");
+            entity.HasKey(e => e.SeqDaConciliacao).HasName("Seq da Conciliação");
         });
 
         modelBuilder.Entity<ConfiguracaoIntegracao>(entity =>
@@ -798,7 +798,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Conjunto>(entity =>
         {
-            entity.HasKey(e => e.SequenciaDoConjunto).HasName("SeqÃ¼Ãªncia do Conjunto");
+            entity.HasKey(e => e.SequenciaDoConjunto).HasName("Seqüência do Conjunto");
 
             entity.Property(e => e.AlturaDoConjunto).HasDefaultValue("");
             entity.Property(e => e.Comprimento).HasDefaultValue("");
@@ -810,19 +810,19 @@ public partial class AppDbContext : DbContext
 
             entity.HasOne(d => d.SequenciaDaClassificacaoNavigation).WithMany(p => p.Conjuntos)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Conjuntos_FK_SeqÃ¼Ãªncia_da_ClassificaÃ§Ã£o");
+                .HasConstraintName("TB_Conjuntos_FK_Seqüência_da_Classificação");
 
             entity.HasOne(d => d.SequenciaDaUnidadeNavigation).WithMany(p => p.Conjuntos)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Conjuntos_FK_SeqÃ¼Ãªncia_da_Unidade");
+                .HasConstraintName("TB_Conjuntos_FK_Seqüência_da_Unidade");
 
             entity.HasOne(d => d.SequenciaDoGrupoProdutoNavigation).WithMany(p => p.Conjuntos)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Conjuntos_FK_SeqÃ¼Ãªncia_do_Grupo_Produto");
+                .HasConstraintName("TB_Conjuntos_FK_Seqüência_do_Grupo_Produto");
 
             entity.HasOne(d => d.SubGrupoDoProduto).WithMany(p => p.Conjuntos)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Conjuntos_FK_SeqÃ¼Ãªncia_do_SubGrupo_Produto_SeqÃ¼Ãªncia_do_Grupo_Despesa");
+                .HasConstraintName("TB_Conjuntos_FK_Seqüência_do_SubGrupo_Produto_Seqüência_do_Grupo_Despesa");
         });
 
         modelBuilder.Entity<ConjuntoDaNotaFiscal>(entity =>
@@ -831,11 +831,11 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.SequenciaConjuntoNotaFiscal).ValueGeneratedOnAdd();
 
-            entity.HasOne(d => d.SequenciaDaNotaFiscalNavigation).WithMany(p => p.ConjuntosDaNotaFiscals).HasConstraintName("TB_Conjuntos_da_Nota_Fiscal_FK_SeqÃ¼Ãªncia_da_Nota_Fiscal");
+            entity.HasOne(d => d.SequenciaDaNotaFiscalNavigation).WithMany(p => p.ConjuntosDaNotaFiscals).HasConstraintName("TB_Conjuntos_da_Nota_Fiscal_FK_Seqüência_da_Nota_Fiscal");
 
             entity.HasOne(d => d.SequenciaDoConjuntoNavigation).WithMany(p => p.ConjuntosDaNotaFiscals)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Conjuntos_da_Nota_Fiscal_FK_SeqÃ¼Ãªncia_do_Conjunto");
+                .HasConstraintName("TB_Conjuntos_da_Nota_Fiscal_FK_Seqüência_do_Conjunto");
         });
 
         modelBuilder.Entity<ConjuntoDaOrdemDeServico>(entity =>
@@ -844,11 +844,11 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.SequenciaConjuntoOs).ValueGeneratedOnAdd();
 
-            entity.HasOne(d => d.SequenciaDaOrdemDeServicoNavigation).WithMany(p => p.ConjuntosDaOrdemDeServicos).HasConstraintName("TB_Conjuntos_da_Ordem_de_ServiÃ§o_FK_SeqÃ¼Ãªncia_da_Ordem_de_ServiÃ§o");
+            entity.HasOne(d => d.SequenciaDaOrdemDeServicoNavigation).WithMany(p => p.ConjuntosDaOrdemDeServicos).HasConstraintName("TB_Conjuntos_da_Ordem_de_Serviço_FK_Seqüência_da_Ordem_de_Serviço");
 
             entity.HasOne(d => d.SequenciaDoConjuntoNavigation).WithMany(p => p.ConjuntosDaOrdemDeServicos)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Conjuntos_da_Ordem_de_ServiÃ§o_FK_SeqÃ¼Ãªncia_do_Conjunto");
+                .HasConstraintName("TB_Conjuntos_da_Ordem_de_Serviço_FK_Seqüência_do_Conjunto");
         });
 
         modelBuilder.Entity<ConjuntoDoMovimentoEstoque>(entity =>
@@ -859,14 +859,14 @@ public partial class AppDbContext : DbContext
 
             entity.HasOne(d => d.SequenciaDoConjuntoNavigation).WithMany(p => p.ConjuntosDoMovimentoEstoques)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Conjuntos_do_Movimento_Estoque_FK_SeqÃ¼Ãªncia_do_Conjunto");
+                .HasConstraintName("TB_Conjuntos_do_Movimento_Estoque_FK_Seqüência_do_Conjunto");
 
-            entity.HasOne(d => d.SequenciaDoMovimentoNavigation).WithMany(p => p.ConjuntosDoMovimentoEstoques).HasConstraintName("TB_Conjuntos_do_Movimento_Estoque_FK_SeqÃ¼Ãªncia_do_Movimento");
+            entity.HasOne(d => d.SequenciaDoMovimentoNavigation).WithMany(p => p.ConjuntosDoMovimentoEstoques).HasConstraintName("TB_Conjuntos_do_Movimento_Estoque_FK_Seqüência_do_Movimento");
         });
 
         modelBuilder.Entity<ConjuntoDoOrcamento>(entity =>
         {
-            entity.HasKey(e => new { e.SequenciaDoOrcamento, e.SequenciaConjuntoOrcamento }).HasName("Seq OrÃ§amento e Seq Conj");
+            entity.HasKey(e => new { e.SequenciaDoOrcamento, e.SequenciaConjuntoOrcamento }).HasName("Seq Orçamento e Seq Conj");
 
             entity.Property(e => e.SequenciaConjuntoOrcamento).ValueGeneratedOnAdd();
             entity.Property(e => e.ValorDoCbs).HasDefaultValue(0.0);
@@ -874,9 +874,9 @@ public partial class AppDbContext : DbContext
 
             entity.HasOne(d => d.SequenciaDoConjuntoNavigation).WithMany(p => p.ConjuntosDoOrcamentos)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Conjuntos_do_OrÃ§amento_FK_SeqÃ¼Ãªncia_do_Conjunto");
+                .HasConstraintName("TB_Conjuntos_do_Orçamento_FK_Seqüência_do_Conjunto");
 
-            entity.HasOne(d => d.SequenciaDoOrcamentoNavigation).WithMany(p => p.ConjuntosDoOrcamentos).HasConstraintName("TB_Conjuntos_do_OrÃ§amento_FK_SeqÃ¼Ãªncia_do_OrÃ§amento");
+            entity.HasOne(d => d.SequenciaDoOrcamentoNavigation).WithMany(p => p.ConjuntosDoOrcamentos).HasConstraintName("TB_Conjuntos_do_Orçamento_FK_Seqüência_do_Orçamento");
         });
 
         modelBuilder.Entity<ConjuntoDoPedido>(entity =>
@@ -887,9 +887,9 @@ public partial class AppDbContext : DbContext
 
             entity.HasOne(d => d.SequenciaDoConjuntoNavigation).WithMany(p => p.ConjuntosDoPedidos)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Conjuntos_do_Pedido_FK_SeqÃ¼Ãªncia_do_Conjunto");
+                .HasConstraintName("TB_Conjuntos_do_Pedido_FK_Seqüência_do_Conjunto");
 
-            entity.HasOne(d => d.SequenciaDoPedidoNavigation).WithMany(p => p.ConjuntosDoPedidos).HasConstraintName("TB_Conjuntos_do_Pedido_FK_SeqÃ¼Ãªncia_do_Pedido");
+            entity.HasOne(d => d.SequenciaDoPedidoNavigation).WithMany(p => p.ConjuntosDoPedidos).HasConstraintName("TB_Conjuntos_do_Pedido_FK_Seqüência_do_Pedido");
         });
 
         modelBuilder.Entity<ConjuntoDoProjeto>(entity =>
@@ -907,9 +907,9 @@ public partial class AppDbContext : DbContext
 
             entity.HasOne(d => d.SequenciaDoConjuntoNavigation).WithMany(p => p.ConjuntosMovimentoContabils)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Conjuntos_Movimento_ContÃ¡bil_FK_SeqÃ¼Ãªncia_do_Conjunto");
+                .HasConstraintName("TB_Conjuntos_Movimento_Contábil_FK_Seqüência_do_Conjunto");
 
-            entity.HasOne(d => d.SequenciaDoMovimentoNavigation).WithMany(p => p.ConjuntosMovimentoContabils).HasConstraintName("TB_Conjuntos_Movimento_ContÃ¡bil_FK_SeqÃ¼Ãªncia_do_Movimento");
+            entity.HasOne(d => d.SequenciaDoMovimentoNavigation).WithMany(p => p.ConjuntosMovimentoContabils).HasConstraintName("TB_Conjuntos_Movimento_Contábil_FK_Seqüência_do_Movimento");
         });
 
         modelBuilder.Entity<ConjuntoMvtoContabilNovo>(entity =>
@@ -920,12 +920,12 @@ public partial class AppDbContext : DbContext
 
             entity.HasOne(d => d.SequenciaDoConjuntoNavigation).WithMany(p => p.ConjuntosMvtoContabilNovos)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Conjuntos_Mvto_ContÃ¡bil_Novo_FK_SeqÃ¼Ãªncia_do_Conjunto");
+                .HasConstraintName("TB_Conjuntos_Mvto_Contábil_Novo_FK_Seqüência_do_Conjunto");
         });
 
         modelBuilder.Entity<ConsultaNotaDestinadum>(entity =>
         {
-            entity.HasKey(e => e.SequenciaDaConsulta).HasName("SeqÃ¼Ãªncia da Consulta");
+            entity.HasKey(e => e.SequenciaDaConsulta).HasName("Seqüência da Consulta");
 
             entity.Property(e => e.ChaveDeAcessoDaNfe).HasDefaultValue("");
             entity.Property(e => e.Cnpj).HasDefaultValue("");
@@ -958,7 +958,7 @@ public partial class AppDbContext : DbContext
         {
             entity.HasKey(e => new { e.SequenciaDaAgencia, e.SequenciaDaCcDaAgencia }).HasName("Seq Agencia e Seq da CC");
 
-            entity.HasIndex(e => new { e.NumeroDaContaCorrente, e.SequenciaDaAgencia }, "NÃºmero da Conta Corrente")
+            entity.HasIndex(e => new { e.NumeroDaContaCorrente, e.SequenciaDaAgencia }, "Número da Conta Corrente")
                 .IsUnique()
                 .HasFillFactor(90);
 
@@ -1016,19 +1016,19 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<CorrecaoBloko>(entity =>
         {
-            entity.HasKey(e => e.SequenciaDaCorrecao).HasName("Sequencia da CorreÃ§Ã£o");
+            entity.HasKey(e => e.SequenciaDaCorrecao).HasName("Sequencia da Correção");
         });
 
         modelBuilder.Entity<DadoAdicionai>(entity =>
         {
-            entity.HasKey(e => e.SequenciaDosDadosAdicionais).HasName("SeqÃ¼Ãªncia dos Dados Adicionais");
+            entity.HasKey(e => e.SequenciaDosDadosAdicionais).HasName("Seqüência dos Dados Adicionais");
 
             entity.Property(e => e.DadosAdicionais).HasDefaultValue("");
         });
 
         modelBuilder.Entity<DeclaracaoDeImportacao>(entity =>
         {
-            entity.HasKey(e => e.SequenciaDaDeclaracao).HasName("SeqÃ¼Ãªncia da DeclaraÃ§Ã£o");
+            entity.HasKey(e => e.SequenciaDaDeclaracao).HasName("Seqüência da Declaração");
 
             entity.HasIndex(e => new { e.SequenciaDaNotaFiscal, e.SequenciaProdutoNotaFiscal }, "Seq NF e Seq Prod NF")
                 .IsUnique()
@@ -1040,12 +1040,12 @@ public partial class AppDbContext : DbContext
 
             entity.HasOne(d => d.SequenciaDoGeralNavigation).WithMany(p => p.DeclaracoesDeImportacaos)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_DeclaraÃ§Ãµes_de_ImportaÃ§Ã£o_FK_SeqÃ¼Ãªncia_do_Geral");
+                .HasConstraintName("TB_Declarações_de_Importação_FK_Seqüência_do_Geral");
         });
 
         modelBuilder.Entity<Despesa>(entity =>
         {
-            entity.HasKey(e => e.SequenciaDaDespesa).HasName("SeqÃ¼Ãªncia da Despesa");
+            entity.HasKey(e => e.SequenciaDaDespesa).HasName("Seqüência da Despesa");
 
             entity.Property(e => e.CodigoDeBarras).HasDefaultValue("");
             entity.Property(e => e.Descricao).HasDefaultValue("");
@@ -1053,19 +1053,19 @@ public partial class AppDbContext : DbContext
 
             entity.HasOne(d => d.SequenciaDaClassificacaoNavigation).WithMany(p => p.Despesas)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Despesas_FK_SeqÃ¼Ãªncia_da_ClassificaÃ§Ã£o");
+                .HasConstraintName("TB_Despesas_FK_Seqüência_da_Classificação");
 
             entity.HasOne(d => d.SequenciaDaUnidadeNavigation).WithMany(p => p.Despesas)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Despesas_FK_SeqÃ¼Ãªncia_da_Unidade");
+                .HasConstraintName("TB_Despesas_FK_Seqüência_da_Unidade");
 
             entity.HasOne(d => d.SequenciaGrupoDespesaNavigation).WithMany(p => p.Despesas)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Despesas_FK_SeqÃ¼Ãªncia_Grupo_Despesa");
+                .HasConstraintName("TB_Despesas_FK_Seqüência_Grupo_Despesa");
 
             entity.HasOne(d => d.SubGrupoDespesa).WithMany(p => p.Despesas)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Despesas_FK_SeqÃ¼Ãªncia_SubGrupo_Despesa_SeqÃ¼Ãªncia_Grupo_Despesa");
+                .HasConstraintName("TB_Despesas_FK_Seqüência_SubGrupo_Despesa_Seqüência_Grupo_Despesa");
         });
 
         modelBuilder.Entity<DespesaDaLicitacao>(entity =>
@@ -1074,7 +1074,7 @@ public partial class AppDbContext : DbContext
 
             entity.HasOne(d => d.SequenciaDaDespesaNavigation).WithMany(p => p.DespesasDaLicitacaos)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Despesas_da_LicitaÃ§Ã£o_FK_Sequencia_da_Despesa");
+                .HasConstraintName("TB_Despesas_da_Licitação_FK_Sequencia_da_Despesa");
         });
 
         modelBuilder.Entity<DespesaDoMovimentoContabil>(entity =>
@@ -1085,7 +1085,7 @@ public partial class AppDbContext : DbContext
 
             entity.HasOne(d => d.SequenciaDaDespesaNavigation).WithMany(p => p.DespesasDoMovimentoContabils)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Despesas_do_Movimento_ContÃ¡bil_FK_SeqÃ¼Ãªncia_da_Despesa");
+                .HasConstraintName("TB_Despesas_do_Movimento_Contábil_FK_Seqüência_da_Despesa");
         });
 
         modelBuilder.Entity<DespesaDoMovimentoEstoque>(entity =>
@@ -1097,9 +1097,9 @@ public partial class AppDbContext : DbContext
 
             entity.HasOne(d => d.SequenciaDaDespesaNavigation).WithMany(p => p.DespesasDoMovimentoEstoques)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Despesas_do_Movimento_Estoque_FK_SeqÃ¼Ãªncia_da_Despesa");
+                .HasConstraintName("TB_Despesas_do_Movimento_Estoque_FK_Seqüência_da_Despesa");
 
-            entity.HasOne(d => d.SequenciaDoMovimentoNavigation).WithMany(p => p.DespesasDoMovimentoEstoques).HasConstraintName("TB_Despesas_do_Movimento_Estoque_FK_SeqÃ¼Ãªncia_do_Movimento");
+            entity.HasOne(d => d.SequenciaDoMovimentoNavigation).WithMany(p => p.DespesasDoMovimentoEstoques).HasConstraintName("TB_Despesas_do_Movimento_Estoque_FK_Seqüência_do_Movimento");
         });
 
         modelBuilder.Entity<DespesaDoNovoPedido>(entity =>
@@ -1135,7 +1135,7 @@ public partial class AppDbContext : DbContext
 
             entity.HasOne(d => d.SequenciaDaDespesaNavigation).WithMany(p => p.DespesasMvtoContabilNovos)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Despesas_Mvto_ContÃ¡bil_Novo_FK_SeqÃ¼Ãªncia_da_Despesa");
+                .HasConstraintName("TB_Despesas_Mvto_Contábil_Novo_FK_Seqüência_da_Despesa");
         });
 
         modelBuilder.Entity<DivirgenciaNfe>(entity =>
@@ -1155,7 +1155,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<EntradaConta>(entity =>
         {
-            entity.HasKey(e => e.SequenciaDaEntrada).HasName("SeqÃ¼Ãªncia da Entrada");
+            entity.HasKey(e => e.SequenciaDaEntrada).HasName("Seqüência da Entrada");
 
             entity.Property(e => e.Conta).HasDefaultValue("");
             entity.Property(e => e.Documento).HasDefaultValue("");
@@ -1167,15 +1167,15 @@ public partial class AppDbContext : DbContext
 
             entity.HasOne(d => d.SequenciaDoGeralNavigation).WithMany(p => p.EntradaConta)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Entrada_Contas_FK_SeqÃ¼Ãªncia_do_Geral");
+                .HasConstraintName("TB_Entrada_Contas_FK_Seqüência_do_Geral");
 
             entity.HasOne(d => d.SequenciaGrupoDespesaNavigation).WithMany(p => p.EntradaConta)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Entrada_Contas_FK_SeqÃ¼Ãªncia_Grupo_Despesa");
+                .HasConstraintName("TB_Entrada_Contas_FK_Seqüência_Grupo_Despesa");
 
             entity.HasOne(d => d.SubGrupoDespesa).WithMany(p => p.EntradaConta)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Entrada_Contas_FK_SeqÃ¼Ãªncia_SubGrupo_Despesa_SeqÃ¼Ãªncia_Grupo_Despesa");
+                .HasConstraintName("TB_Entrada_Contas_FK_Seqüência_SubGrupo_Despesa_Seqüência_Grupo_Despesa");
         });
 
         modelBuilder.Entity<FinalidadeNfe>(entity =>
@@ -1200,7 +1200,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Geral>(entity =>
         {
-            entity.HasKey(e => e.SequenciaDoGeral).HasName("SeqÃ¼Ãªncia do Geral");
+            entity.HasKey(e => e.SequenciaDoGeral).HasName("Seqüência do Geral");
 
             entity.Property(e => e.AgenciaDoBanco1).HasDefaultValue("");
             entity.Property(e => e.AgenciaDoBanco2).HasDefaultValue("");
@@ -1241,11 +1241,11 @@ public partial class AppDbContext : DbContext
 
             entity.HasOne(d => d.SequenciaDoMunicipioNavigation).WithMany(p => p.GeralSequenciaDoMunicipioNavigations)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Geral_FK_SeqÃ¼Ãªncia_do_MunicÃ­pio");
+                .HasConstraintName("TB_Geral_FK_Seqüência_do_Município");
 
             entity.HasOne(d => d.SequenciaDoPaisNavigation).WithMany(p => p.Gerals)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Geral_FK_SeqÃ¼Ãªncia_do_PaÃ­s");
+                .HasConstraintName("TB_Geral_FK_Seqüência_do_País");
 
             entity.HasOne(d => d.SequenciaDoVendedorNavigation).WithMany(p => p.InverseSequenciaDoVendedorNavigation)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -1253,19 +1253,19 @@ public partial class AppDbContext : DbContext
 
             entity.HasOne(d => d.SequenciaMunicipioCobrancaNavigation).WithMany(p => p.GeralSequenciaMunicipioCobrancaNavigations)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Geral_FK_SeqÃ¼Ãªncia_MunicÃ­pio_CobranÃ§a");
+                .HasConstraintName("TB_Geral_FK_Seqüência_Município_Cobrança");
         });
 
         modelBuilder.Entity<GrupoDaDespesa>(entity =>
         {
-            entity.HasKey(e => e.SequenciaGrupoDespesa).HasName("SeqÃ¼Ãªncia Grupo Despesa");
+            entity.HasKey(e => e.SequenciaGrupoDespesa).HasName("Seqüência Grupo Despesa");
 
             entity.Property(e => e.Descricao).HasDefaultValue("");
         });
 
         modelBuilder.Entity<GrupoDoProduto>(entity =>
         {
-            entity.HasKey(e => e.SequenciaDoGrupoProduto).HasName("SeqÃ¼Ãªncia do Grupo Produto");
+            entity.HasKey(e => e.SequenciaDoGrupoProduto).HasName("Seqüência do Grupo Produto");
 
             entity.Property(e => e.Descricao).HasDefaultValue("");
         });
@@ -1289,14 +1289,14 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<HistoricoDaContaCorrente>(entity =>
         {
-            entity.HasKey(e => e.SequenciaDoHistorico).HasName("SeqÃ¼Ãªncia do HistÃ³rico");
+            entity.HasKey(e => e.SequenciaDoHistorico).HasName("Seqüência do Histórico");
 
             entity.Property(e => e.Descricao).HasDefaultValue("");
         });
 
         modelBuilder.Entity<Icm>(entity =>
         {
-            entity.HasKey(e => e.SequenciaDoIcms).HasName("SeqÃ¼Ãªncia do ICMS");
+            entity.HasKey(e => e.SequenciaDoIcms).HasName("Seqüência do ICMS");
 
             entity.HasIndex(e => e.Uf, "UF do ICMS")
                 .IsUnique()
@@ -1308,32 +1308,32 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<ImportacaoConjuntoEstoque>(entity =>
         {
-            entity.HasKey(e => new { e.SequenciaImportacaoEstoque, e.SequenciaImportacaoItem }).HasName("Seq ImportaÃ§Ã£o Estoque Seq Con");
+            entity.HasKey(e => new { e.SequenciaImportacaoEstoque, e.SequenciaImportacaoItem }).HasName("Seq Importação Estoque Seq Con");
 
             entity.Property(e => e.SequenciaImportacaoItem).ValueGeneratedOnAdd();
         });
 
         modelBuilder.Entity<ImportacaoEstoque>(entity =>
         {
-            entity.HasKey(e => e.SequenciaImportacaoEstoque).HasName("SeqÃ¼Ãªncia ImportaÃ§Ã£o Estoque");
+            entity.HasKey(e => e.SequenciaImportacaoEstoque).HasName("Seqüência Importação Estoque");
 
             entity.Property(e => e.Descricao).HasDefaultValue("");
         });
 
         modelBuilder.Entity<ImportacaoProdutoEstoque>(entity =>
         {
-            entity.HasKey(e => new { e.SequenciaImportacaoEstoque, e.SequenciaImportacaoItem }).HasName("Sq ImportaÃ§Ã£o Estoque Seq Prod");
+            entity.HasKey(e => new { e.SequenciaImportacaoEstoque, e.SequenciaImportacaoItem }).HasName("Sq Importação Estoque Seq Prod");
 
             entity.Property(e => e.SequenciaImportacaoItem).ValueGeneratedOnAdd();
 
             entity.HasOne(d => d.SequenciaDoProdutoNavigation).WithMany(p => p.ImportacaoProdutosEstoques)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_ImportaÃ§Ã£o_Produtos_Estoque_FK_SeqÃ¼Ãªncia_do_Produto");
+                .HasConstraintName("TB_Importação_Produtos_Estoque_FK_Seqüência_do_Produto");
         });
 
         modelBuilder.Entity<InutilizacaoNfe>(entity =>
         {
-            entity.HasKey(e => e.SequenciaDaInutilizacao).HasName("SeqÃ¼Ãªncia da InutilizaÃ§Ã£o");
+            entity.HasKey(e => e.SequenciaDaInutilizacao).HasName("Seqüência da Inutilização");
 
             entity.Property(e => e.Justificativa).HasDefaultValue("");
         });
@@ -1384,13 +1384,13 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<ItenDaRequisicao>(entity =>
         {
-            entity.HasKey(e => new { e.SequenciaDaRequisicao, e.SequenciaProdutoRequisicao }).HasName("Seq Req e Seq Prod RequisiÃ§Ã£o");
+            entity.HasKey(e => new { e.SequenciaDaRequisicao, e.SequenciaProdutoRequisicao }).HasName("Seq Req e Seq Prod Requisição");
 
             entity.Property(e => e.SequenciaProdutoRequisicao).ValueGeneratedOnAdd();
             entity.Property(e => e.Descricao).HasDefaultValue("");
             entity.Property(e => e.Veiculo).HasDefaultValue("");
 
-            entity.HasOne(d => d.SequenciaDaRequisicaoNavigation).WithMany(p => p.ItensDaRequisicaos).HasConstraintName("TB_Itens_da_RequisiÃ§Ã£o_FK_SeqÃ¼Ãªncia_da_RequisiÃ§Ã£o");
+            entity.HasOne(d => d.SequenciaDaRequisicaoNavigation).WithMany(p => p.ItensDaRequisicaos).HasConstraintName("TB_Itens_da_Requisição_FK_Seqüência_da_Requisição");
         });
 
         modelBuilder.Entity<ItenDaViagem>(entity =>
@@ -1402,13 +1402,13 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<ItenDoConjunto>(entity =>
         {
-            entity.HasKey(e => new { e.SequenciaDoConjunto, e.SequenciaDoProduto }).HasName("SeqÃ¼Ãªncia do Item do Conjunto");
+            entity.HasKey(e => new { e.SequenciaDoConjunto, e.SequenciaDoProduto }).HasName("Seqüência do Item do Conjunto");
 
-            entity.HasOne(d => d.SequenciaDoConjuntoNavigation).WithMany(p => p.ItensDoConjuntos).HasConstraintName("TB_Itens_do_Conjunto_FK_SeqÃ¼Ãªncia_do_Conjunto");
+            entity.HasOne(d => d.SequenciaDoConjuntoNavigation).WithMany(p => p.ItensDoConjuntos).HasConstraintName("TB_Itens_do_Conjunto_FK_Seqüência_do_Conjunto");
 
             entity.HasOne(d => d.SequenciaDoProdutoNavigation).WithMany(p => p.ItensDoConjuntos)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Itens_do_Conjunto_FK_SeqÃ¼Ãªncia_do_Produto");
+                .HasConstraintName("TB_Itens_do_Conjunto_FK_Seqüência_do_Produto");
         });
 
         modelBuilder.Entity<ItenPendente>(entity =>
@@ -1447,7 +1447,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<LancamentoContabil>(entity =>
         {
-            entity.HasKey(e => e.IdDoLancamento).HasName("Id do LanÃ§amento");
+            entity.HasKey(e => e.IdDoLancamento).HasName("Id do Lançamento");
 
             entity.Property(e => e.ComplementoDoHist).HasDefaultValue("");
             entity.Property(e => e.DtDoLancamento).HasDefaultValue("");
@@ -1476,7 +1476,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<LinhaDeProducao>(entity =>
         {
-            entity.HasKey(e => e.SequenciaDaProducao).HasName("Sequencia da ProduÃ§Ã£o");
+            entity.HasKey(e => e.SequenciaDaProducao).HasName("Sequencia da Produção");
 
             entity.Property(e => e.SolicitacaoDe).HasDefaultValue("");
 
@@ -1484,7 +1484,7 @@ public partial class AppDbContext : DbContext
 
             entity.HasOne(d => d.CodigoDoSetorNavigation).WithMany(p => p.LinhaDeProducaos)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_Linha_de_ProduÃ§Ã£o_FK_Codigo_do_setor");
+                .HasConstraintName("TB_Linha_de_Produção_FK_Codigo_do_setor");
         });
 
         modelBuilder.Entity<LogProcessamentoIntegracao>(entity =>
@@ -1494,13 +1494,13 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<ManutencaoConta>(entity =>
         {
-            entity.HasKey(e => e.SequenciaDaManutencao).HasName("SeqÃ¼Ãªncia ManutenÃ§Ã£o");
+            entity.HasKey(e => e.SequenciaDaManutencao).HasName("Seqüência Manutenção");
 
-            entity.Property(e => e.SequenciaDaManutencao).HasColumnName("SeqÃ¼Ãªncia da ManutenÃ§Ã£o");
-            entity.Property(e => e.SequenciaDoGeral).HasColumnName("SeqÃ¼Ãªncia do Geral");
-            entity.Property(e => e.NumeroDaNotaFiscal).HasColumnName("NÃºmero da Nota Fiscal");
+            entity.Property(e => e.SequenciaDaManutencao).HasColumnName("Seqüência da Manutenção");
+            entity.Property(e => e.SequenciaDoGeral).HasColumnName("Seqüência do Geral");
+            entity.Property(e => e.NumeroDaNotaFiscal).HasColumnName("Número da Nota Fiscal");
             entity.Property(e => e.DataDeEntrada).HasColumnName("Data de Entrada");
-            entity.Property(e => e.Historico).HasColumnName("HistÃ³rico");
+            entity.Property(e => e.Historico).HasColumnName("Histórico");
             entity.Property(e => e.FormaDePagamento).HasColumnName("Forma de Pagamento");
             entity.Property(e => e.DataDeVencimento).HasColumnName("Data de Vencimento");
             entity.Property(e => e.ValorTotal).HasColumnName("Valor Total");
@@ -1511,26 +1511,26 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.ValorRestante).HasColumnName("Valor Restante");
             entity.Property(e => e.TipoDaConta).HasColumnName("Tipo da Conta");
             entity.Property(e => e.DataDaBaixa).HasColumnName("Data da Baixa");
-            entity.Property(e => e.SequenciaDaCobranca).HasColumnName("SeqÃ¼Ãªncia da CobranÃ§a");
-            entity.Property(e => e.NumeroDaDuplicata).HasColumnName("NÃºmero da Duplicata");
-            entity.Property(e => e.SequenciaDaOrigem).HasColumnName("SeqÃ¼Ãªncia da Origem");
-            entity.Property(e => e.SequenciaDaBaixa).HasColumnName("SeqÃ¼Ãªncia da Baixa");
-            entity.Property(e => e.SequenciaGrupoDespesa).HasColumnName("SeqÃ¼Ãªncia Grupo Despesa");
-            entity.Property(e => e.SequenciaSubGrupoDespesa).HasColumnName("SeqÃ¼Ãªncia SubGrupo Despesa");
+            entity.Property(e => e.SequenciaDaCobranca).HasColumnName("Seqüência da Cobrança");
+            entity.Property(e => e.NumeroDaDuplicata).HasColumnName("Número da Duplicata");
+            entity.Property(e => e.SequenciaDaOrigem).HasColumnName("Seqüência da Origem");
+            entity.Property(e => e.SequenciaDaBaixa).HasColumnName("Seqüência da Baixa");
+            entity.Property(e => e.SequenciaGrupoDespesa).HasColumnName("Seqüência Grupo Despesa");
+            entity.Property(e => e.SequenciaSubGrupoDespesa).HasColumnName("Seqüência SubGrupo Despesa");
             entity.Property(e => e.ChequeImpresso).HasColumnName("Cheque Impresso");
-            entity.Property(e => e.SequenciaDaNotaFiscal).HasColumnName("SeqÃ¼Ãªncia da Nota Fiscal");
-            entity.Property(e => e.SequenciaDoEstoque).HasColumnName("SeqÃ¼Ãªncia do Estoque");
-            entity.Property(e => e.SequenciaDoPedido).HasColumnName("SeqÃ¼Ãªncia do Pedido");
+            entity.Property(e => e.SequenciaDaNotaFiscal).HasColumnName("Seqüência da Nota Fiscal");
+            entity.Property(e => e.SequenciaDoEstoque).HasColumnName("Seqüência do Estoque");
+            entity.Property(e => e.SequenciaDoPedido).HasColumnName("Seqüência do Pedido");
             entity.Property(e => e.DuplicataImpressa).HasColumnName("Duplicata Impressa");
             entity.Property(e => e.TpoDeRecebimento).HasColumnName("Tpo de Recebimento");
-            entity.Property(e => e.Previsao).HasColumnName("PrevisÃ£o");
+            entity.Property(e => e.Previsao).HasColumnName("Previsão");
             entity.Property(e => e.SequenciaDaCompra).HasColumnName("Sequencia da Compra");
             entity.Property(e => e.NotasDaCompra).HasColumnName("Notas da Compra");
             entity.Property(e => e.VencimentoOriginal).HasColumnName("Vencimento Original");
             entity.Property(e => e.SequenciaLanCc).HasColumnName("Sequencia Lan CC");
-            entity.Property(e => e.VrDaPrevisao).HasColumnName("Vr da PrevisÃ£o");
+            entity.Property(e => e.VrDaPrevisao).HasColumnName("Vr da Previsão");
             entity.Property(e => e.ImpPrevisao).HasColumnName("Imp Previsao");
-            entity.Property(e => e.SequenciaDoMovimento).HasColumnName("SeqÃ¼Ãªncia do Movimento");
+            entity.Property(e => e.SequenciaDoMovimento).HasColumnName("Seqüência do Movimento");
             entity.Property(e => e.CodigoDoDebito).HasColumnName("Codigo do Debito");
             entity.Property(e => e.CodigoDoCredito).HasColumnName("Codigo do Credito");
 
@@ -1545,23 +1545,23 @@ public partial class AppDbContext : DbContext
 
             entity.HasOne(d => d.SequenciaDaCobrancaNavigation).WithMany(p => p.ManutencaoConta)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_ManutenÃ§Ã£o_Contas_FK_SeqÃ¼Ãªncia_da_CobranÃ§a");
+                .HasConstraintName("TB_Manutenção_Contas_FK_Seqüência_da_Cobrança");
 
             entity.HasOne(d => d.SequenciaDaNotaFiscalNavigation).WithMany(p => p.ManutencaoConta)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_ManutenÃ§Ã£o_Contas_FK_SeqÃ¼Ãªncia_da_Nota_Fiscal");
+                .HasConstraintName("TB_Manutenção_Contas_FK_Seqüência_da_Nota_Fiscal");
 
             entity.HasOne(d => d.SequenciaDoGeralNavigation).WithMany(p => p.ManutencaoConta)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_ManutenÃ§Ã£o_Contas_FK_SeqÃ¼Ãªncia_do_Geral");
+                .HasConstraintName("TB_Manutenção_Contas_FK_Seqüência_do_Geral");
 
             entity.HasOne(d => d.SequenciaGrupoDespesaNavigation).WithMany(p => p.ManutencaoConta)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_ManutenÃ§Ã£o_Contas_FK_SeqÃ¼Ãªncia_Grupo_Despesa");
+                .HasConstraintName("TB_Manutenção_Contas_FK_Seqüência_Grupo_Despesa");
 
             entity.HasOne(d => d.SubGrupoDespesa).WithMany(p => p.ManutencaoConta)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_ManutenÃ§Ã£o_Contas_FK_SeqÃ¼Ãªncia_SubGrupo_Despesa_SeqÃ¼Ãªncia_Grupo_Despesa");
+                .HasConstraintName("TB_Manutenção_Contas_FK_Seqüência_SubGrupo_Despesa_Seqüência_Grupo_Despesa");
         });
 
         modelBuilder.Entity<ManutencaoHidroturbo>(entity =>
@@ -1594,7 +1594,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<MaterialExpedicao>(entity =>
         {
-            entity.HasKey(e => e.SequenciaDaExpedicao).HasName("Sequencia da ExpediÃ§Ã£o");
+            entity.HasKey(e => e.SequenciaDaExpedicao).HasName("Sequencia da Expedição");
 
             entity.Property(e => e.Descricao).HasDefaultValue("");
             entity.Property(e => e.Localizacao).HasDefaultValue("");
@@ -1603,13 +1603,13 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<MateriaPrima>(entity =>
         {
-            entity.HasKey(e => new { e.SequenciaDaMateriaPrima, e.SequenciaDoProduto }).HasName("Seq MatÃ©ria Prima e Seq Prod");
+            entity.HasKey(e => new { e.SequenciaDaMateriaPrima, e.SequenciaDoProduto }).HasName("Seq Matéria Prima e Seq Prod");
 
             entity.HasOne(d => d.SequenciaDaMateriaPrimaNavigation).WithMany(p => p.MateriaPrimaSequenciaDaMateriaPrimaNavigations)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("TB_MatÃ©ria_Prima_FK_SeqÃ¼Ãªncia_da_MatÃ©ria_Prima");
+                .HasConstraintName("TB_Matéria_Prima_FK_Seqüência_da_Matéria_Prima");
 
-            entity.HasOne(d => d.SequenciaDoProdutoNavigation).WithMany(p => p.MateriaPrimaSequenciaDoProdutoNavigations).HasConstraintName("TB_MatÃ©ria_Prima_FK_SeqÃ¼Ãªncia_do_Produto");
+            entity.HasOne(d => d.SequenciaDoProdutoNavigation).WithMany(p => p.MateriaPrimaSequenciaDoProdutoNavigations).HasConstraintName("TB_Matéria_Prima_FK_Seqüência_do_Produto");
         });
 
         modelBuilder.Entity<Motorista>(entity =>
@@ -1628,7 +1628,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Uf).HasDefaultValue("");
         });
 
-        // MÃ³dulo de Transporte - ManutenÃ§Ã£o
+        // Módulo de Transporte - Manutenção
         modelBuilder.Entity<ManutencaoPeca>(entity =>
         {
             entity.HasKey(e => e.Id);
@@ -1647,34 +1647,34 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<MovimentoContabilNovo>(entity =>
         {
-            entity.HasKey(e => e.SequenciaDoMovimento).HasName("SeqÃ¼Ãªncia do Movimento");
-            entity.Property(e => e.SequenciaDoMovimento).HasColumnName("SeqÃ¼Ãªncia do Movimento");
-            entity.Property(e => e.SequenciaGrupoDespesa).HasColumnName("SeqÃ¼Ãªncia Grupo Despesa");
-            entity.Property(e => e.SequenciaSubGrupoDespesa).HasColumnName("SeqÃ¼Ãªncia SubGrupo Despesa");
+            entity.HasKey(e => e.SequenciaDoMovimento).HasName("Seqüência do Movimento");
+            entity.Property(e => e.SequenciaDoMovimento).HasColumnName("Seqüência do Movimento");
+            entity.Property(e => e.SequenciaGrupoDespesa).HasColumnName("Seqüência Grupo Despesa");
+            entity.Property(e => e.SequenciaSubGrupoDespesa).HasColumnName("Seqüência SubGrupo Despesa");
             entity.Property(e => e.DataDoMovimento).HasColumnName("Data do Movimento");
             entity.Property(e => e.TipoDoMovimento).HasColumnName("Tipo do Movimento");
-            entity.Property(e => e.SequenciaDoGeral).HasColumnName("SeqÃ¼Ãªncia do Geral");
-            entity.Property(e => e.Observacao).HasColumnName("ObservaÃ§Ã£o");
-            entity.Property(e => e.Devolucao).HasColumnName("DevoluÃ§Ã£o");
-            entity.Property(e => e.EProducaoPropria).HasColumnName("E ProduÃ§Ã£o Propria");
+            entity.Property(e => e.SequenciaDoGeral).HasColumnName("Seqüência do Geral");
+            entity.Property(e => e.Observacao).HasColumnName("Observação");
+            entity.Property(e => e.Devolucao).HasColumnName("Devolução");
+            entity.Property(e => e.EProducaoPropria).HasColumnName("E Produção Propria");
             entity.Property(e => e.FormaDePagamento).HasColumnName("Forma de Pagamento");
             entity.Property(e => e.ValorDoFrete).HasColumnName("Valor do Frete");
             entity.Property(e => e.ValorDoDesconto).HasColumnName("Valor do Desconto");
             entity.Property(e => e.ValorTotalDosProdutos).HasColumnName("Valor Total dos Produtos");
             entity.Property(e => e.ValorTotalIpiDosProdutos).HasColumnName("Valor Total IPI dos Produtos");
             entity.Property(e => e.ValorTotalDoMovimento).HasColumnName("Valor Total do Movimento");
-            entity.Property(e => e.DataDaAlteracao).HasColumnName("Data da AlteraÃ§Ã£o");
-            entity.Property(e => e.HoraDaAlteracao).HasColumnName("Hora da AlteraÃ§Ã£o");
-            entity.Property(e => e.UsuarioDaAlteracao).HasColumnName("UsuÃ¡rio da AlteraÃ§Ã£o");
+            entity.Property(e => e.DataDaAlteracao).HasColumnName("Data da Alteração");
+            entity.Property(e => e.HoraDaAlteracao).HasColumnName("Hora da Alteração");
+            entity.Property(e => e.UsuarioDaAlteracao).HasColumnName("Usuário da Alteração");
             entity.Property(e => e.ValorTotalDasDespesas).HasColumnName("Valor Total das Despesas");
             entity.Property(e => e.ValorTotalIpiDasDespesas).HasColumnName("Valor Total IPI das Despesas");
-            entity.Property(e => e.SequenciaDoOrcamento).HasColumnName("SeqÃ¼Ãªncia do OrÃ§amento");
+            entity.Property(e => e.SequenciaDoOrcamento).HasColumnName("Seqüência do Orçamento");
         });
 
-        // ConfiguraÃ§Ã£o da tabela ParÃ¢metros (nome com acento no banco legado)
+        // Configuração da tabela Parâmetros (nome com acento no banco legado)
         modelBuilder.Entity<Parametro>(entity =>
         {
-            entity.ToTable("ParÃ¢metros");
+            entity.ToTable("Parâmetros");
         });
     }
 }
